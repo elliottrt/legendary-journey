@@ -7,6 +7,10 @@
 *.obj
 *.elf
 
+# Intermediate Output
+*.bin
+bin/
+
 # Linker output
 *.ilk
 *.map
@@ -50,3 +54,6 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Other
+.DS_Store

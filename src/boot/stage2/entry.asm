@@ -17,7 +17,9 @@ _entry:
     mov sp, 0xFFF0
     mov bp, sp
 
+	; enable A20
 	call a20_enable
+
 	lgdt [GDT_desc]
 
 	mov eax, cr0
@@ -40,70 +42,64 @@ protected:
     ; mov dx, [boot_offset]
     ; push edx
 
-    xor edx, edx
-    mov dl, [boot_drive]
-    push edx
+    ; xor edx, edx
+    ; mov dl, [boot_drive]
+    ; push edx
+	
     call stage2main
 
 	hlt
 
 [bits 16]
+; https://wiki.osdev.org/A20#Testing_the_A20_line
 a20_enable:
 
 	call a20_wait_in
-	mov al, KEYBOARD_DISABLE
-	out KEYBOARD_CMD, al
+	mov al, 0xAD
+	out 0x64, al
 
 	call a20_wait_in
-	mov al, KEYBOARD_CMD_READOUT
-    out KEYBOARD_CMD, al
+	mov al, 0xD0
+    out 0x64, al
 
 	call a20_wait_out
-    in al, KEYBOARD_DATA
+    in al, 0x60
     push eax
 
 	call a20_wait_in
-    mov al, KEYBOARD_CMD_WRITEOUT
-    out KEYBOARD_CMD, al
+    mov al, 0xD1
+    out 0x64, al
 
 	call a20_wait_in
     pop eax
     or al, 2                                    ; bit 2 = A20 bit
-    out KEYBOARD_DATA, al
+    out 0x60, al
 
 	call a20_wait_in
-    mov al, KEYBOARD_ENABLE
-    out KEYBOARD_CMD, al
+    mov al, 0xAE
+    out 0x64, al
 
     call a20_wait_in
 	ret
 
 a20_wait_in:
-    in al, KEYBOARD_CMD
+    in al, 0x64
     test al, 2
     jnz a20_wait_in
     ret
 
 a20_wait_out:
-    ; wait until status bit 1 (output buffer) is 1 so it can be read
-    in al, KEYBOARD_CMD
+    in al, 0x64
     test al, 1
     jz a20_wait_out
     ret
 
 section .data
 
-KEYBOARD_DATA               equ 0x60
-KEYBOARD_CMD            	equ 0x64
-KEYBOARD_DISABLE        	equ 0xAD
-KEYBOARD_ENABLE         	equ 0xAE
-KEYBOARD_CMD_READOUT     	equ 0xD0
-KEYBOARD_CMD_WRITEOUT    	equ 0xD1
-
 CODE_SEG equ GDT_code - GDT_start
 DATA_SEG equ GDT_data - GDT_start
 
-boot_drive:     db 0x00
+boot_drive: db 0x00
 
 ; See https://wiki.osdev.org/GDT
 GDT_start:

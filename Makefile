@@ -26,7 +26,7 @@ STAGE2_SEGMENT=0
 # destination offset
 STAGE2_OFFSET=1280
 # size in sectors (512 bytes)
-STAGE2_SIZE=2
+STAGE2_SIZE=8
 
 all: run
 	

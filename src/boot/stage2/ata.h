@@ -7,7 +7,7 @@
 /* and  https://wiki.osdev.org/ATA_PIO_Mode */
 
 /* checks if ata is working properly and returns max sectors */
-uint32_t ata_init(void);
+void ata_init(void);
 /* flush hardware write cache, done after each write */
 void ata_cache_flush(void);
 /* perform software reset */
@@ -15,11 +15,16 @@ void ata_reset(void);
 /* read sectors to some address */
 void ata_read (uint32_t lba, uint8_t sectors, void *dst);
 /* write sectors to disk */
-void ata_write(uint32_t lba, uint8_t sectors, void *src);
+void ata_write(uint32_t lba, uint8_t sectors, const void *src);
 /* returns 1 if ata encountered an error, 0 otherwise */
 int ata_check_error(void);
 /* prints error encountered */
 void ata_error(void);
+
+/* get available sectors */
+uint32_t ata_sectors(void);
+/* get ata version */
+void ata_version(uint16_t *major, uint16_t *minor);
 
 /* https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ata/ns-ata-_identify_device_data */
 /* not sure how reliable this is */
@@ -90,7 +95,7 @@ struct __attribute__((__packed__)) ata_identify
 	uint16_t dsm_cap;
 	uint16_t physical_logical_sector_size;
 	uint16_t inter_seek_delay;
-	uint8_t  world_wide_name[8];
+	uint16_t world_wide_name[4];
 	uint16_t reserved_world_wide_name128[4];
 	uint16_t reserved_tlc_technical_report;
 	uint16_t words_per_logical_sector[2];

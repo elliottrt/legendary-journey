@@ -40,7 +40,7 @@ void putc(char chr)
 }
 
 /* while the next character isn't \0, putc(it) */
-void puts(char *s)
+void puts(const char *s)
 {
     char c = *s++;
     for (; c != 0; c=*s++)
@@ -49,14 +49,14 @@ void puts(char *s)
     }
 }
 
-void putsn(char *s, uint32_t len)
+void putsn(const char *s, uint32_t len)
 {
 	uint32_t current_char;
 	for (current_char = 0; current_char < len; current_char++)
 		putc(s[current_char]);
 }
 
-void puterr(char *s, int recoverable)
+void puterr(const char *s, int recoverable)
 {
 	/* black on blue */
 	_color = (15 | (1 << 4)) << 8;
@@ -136,7 +136,7 @@ void clrscr(void)
     cursor(0, 0);
 }
 
-void write(void *dst, void *src, uint32_t len)
+void write(void *dst, const void *src, uint32_t len)
 {
     uint8_t *dst_addr = (uint8_t *) dst;
     uint8_t *src_addr = (uint8_t *) src;

@@ -13,10 +13,11 @@ I am not at all qualified to do this. The [posted warnings](https://wiki.osdev.o
 ## todo/ideas
 in no particular order:
 - change STAGE2_x in Makefile to be dynamically calculated instead of manually
+- null & safety checks in std.h
+- better rand() in std.h
 - fat32 support in stage2
 - figure out how to create a fat32 disk on a file
 - find out how much ram I have
-- write some standard C library implementations
 - get memory map
 - load actual GDT
 - memory allocation?

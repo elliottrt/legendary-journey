@@ -4,11 +4,13 @@
 
 struct ata_identify _ata_identify;
 
-uint32_t ata_init(void)
+void ata_init(void)
 {
 	uint8_t status;
 	uint16_t reads;
-	uint16_t *data_addr = (uint16_t *) &_ata_identify;
+	/* avoid unaligned pointer warning */
+	void *tmp_addr = (void *) &_ata_identify;
+	uint16_t *ata_identify_addr = (uint16_t *) tmp_addr;
 
 	/* select master drive */
 	outb(0x01F6, 0xA0);
@@ -25,7 +27,7 @@ uint32_t ata_init(void)
 	if (status == 0)
 	{
 		puterr("\nATA: Error: Drive does not exist\n", 0);
-		return 0;
+		return;
 	}
 	/* wait for BSY (bit 7) to clear */
 	while (inb(0x01F7) & 0x80);
@@ -33,7 +35,7 @@ uint32_t ata_init(void)
 	if (inb(0x01F4) != 0 || inb(0x01F5) != 0)
 	{
 		puterr("\nATA: Error: Drive is not ATA", 0);
-		return 0;
+		return;
 	}
 	/* wait for error or ready for data */
 	status = 0x00;
@@ -43,12 +45,12 @@ uint32_t ata_init(void)
 	if (status & 1)
 	{
 		ata_error();
-		return 0;
+		return;
 	}
 	/* otherwise we are ready to read data */
 	for (reads = 0; reads < 256; reads++)
 	{
-		data_addr[reads] = inw(0x01F0);
+		ata_identify_addr[reads] = inw(0x01F0);
 	}
 
 	/* make sure our lba28 is supported */
@@ -56,8 +58,6 @@ uint32_t ata_init(void)
 	{
 		puterr("\nATA: Error: LBA28 not supported", 0);
 	}
-
-	return _ata_identify.user_addressable_sectors;
 
 }
 
@@ -93,7 +93,7 @@ void ata_read(uint32_t lba, uint8_t sectors, void *dst)
 
 	lba &= 0x0FFFFFFF;
 
-	if (lba + sectors >= _ata_identify.user_addressable_sectors)
+	if (lba + sectors > _ata_identify.user_addressable_sectors)
 		puterr("ATA: Error: Cannot read beyond end of disk\n", 1);
 
 	/* why do io if we aren't reading anything? */
@@ -127,17 +127,17 @@ void ata_read(uint32_t lba, uint8_t sectors, void *dst)
 
 }
 
-void ata_write(uint32_t lba, uint8_t sectors, void *src)
+void ata_write(uint32_t lba, uint8_t sectors, const void *src)
 {
 
 	uint8_t status = 0x00;
 	uint16_t writes;
-	uint16_t *data = (uint16_t *) src;
+	const uint16_t *data = (uint16_t *) src;
 
 	lba &= 0x0FFFFFFF;
 
 	/* we don't want to read past the end of the disk */
-	if (lba + sectors >= _ata_identify.user_addressable_sectors)
+	if (lba + sectors > _ata_identify.user_addressable_sectors)
 		puterr("ATA: Error: Cannot write beyond end of disk\n", 1);
 
 	/* why do io if we aren't writing anything? */
@@ -203,4 +203,15 @@ void ata_error(void)
 		puterr("\nATA: Error: Uncorrectable data error\n", 0);
 	if (error & BIT(7))
 		puterr("\nATA: Error: Bad block detected\n", 1);
+}
+
+uint32_t ata_sectors(void)
+{
+	return _ata_identify.user_addressable_sectors;
+}
+/* get ata version */
+void ata_version(uint16_t *major, uint16_t *minor)
+{
+	*major = _ata_identify.major_revision;
+	*minor = _ata_identify.minor_revision;
 }

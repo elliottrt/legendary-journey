@@ -5,7 +5,7 @@
 #include "ata.h"
 #include "std.h"
 #include "memory.h"
-#include "rsdp.h"
+#include "sdt/sdt.h"
 
 void stage2main(void)
 {
@@ -15,7 +15,7 @@ void stage2main(void)
 
 	mem_init();
 	ata_init();
-	rsdp_init();
+	sdt_init();
 
 	/*ata_read(0, 1, boot);*/
 

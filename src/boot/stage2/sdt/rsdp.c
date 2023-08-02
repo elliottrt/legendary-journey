@@ -1,17 +1,17 @@
 #include "rsdp.h"
-#include "write.h"
+#include "../write.h"
+#include "rsdt.h"
+#include "xsdt.h"
 
 #define EBDAPTR ((uint16_t *) 0x040E)
 #define EBDASIZ (1024/8)
 #define MBASTART 0x000E0000
 #define MBAEND 0x000FFFFF
 
-struct rsdp_desc_ext *rsdp;
-
 void rsdp_init(void)
 {
 	uint32_t checksum;
-	rsdp = rsdp_find_desc();
+	struct rsdp_desc_ext *rsdp = rsdp_find_desc();
 
 	if (rsdp == NULL)
 	{
@@ -19,23 +19,21 @@ void rsdp_init(void)
 		return;
 	}
 
-
-
 	if (rsdp->revision == 0)
 	{
 		checksum = bytesum(rsdp, sizeof(struct rsdp_desc));
 		if ((checksum & 0xFF) != 0)
 			puts("RSDP Invalid\n");
 		else
-			puts("RSDP Version 1\n");
+			rsdt_init((void *) rsdp->rsdt_addr);
 	}
 	else
 	{
 		checksum = bytesum(rsdp, sizeof(struct rsdp_desc_ext));
 		if ((checksum & 0xFF) != 0)
 			puts("RSDP Invalid\n");
-		else
-			puts("RSDP Version 2+\n");
+		else /* this is really bad but i'll fix it later */
+			xsdt_init((void *) (uint32_t) rsdp->xsdt_addr);
 	}
 }
 

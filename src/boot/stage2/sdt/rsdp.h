@@ -1,7 +1,7 @@
 #ifndef _STAGE2_RSDP
 #define _STAGE2_RSDP
 
-#include "std.h"
+#include "../std.h"
 
 /* https://wiki.osdev.org/RSDP */
 

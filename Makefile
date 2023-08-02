@@ -14,10 +14,11 @@ STAGE1BIN=$(BIN)/stage1.bin
 STAGE1SRC=$(wildcard src/boot/stage1/*.asm)
 
 STAGE2BIN=$(BIN)/stage2.bin
-STAGE2CSRC=$(wildcard src/boot/stage2/*.c)
+STAGE2CSRC=$(wildcard src/boot/stage2/*.c) $(wildcard src/boot/stage2/**/*.c)
 STAGE2ASMSRC=$(wildcard src/boot/stage2/*.asm)
 STAGE2TARGETS=$(STAGE2ASMSRC:.asm=.o) $(STAGE2CSRC:.c=.o)
 STAGE2TARGETS:=$(subst src/boot/stage2,$(BIN),$(STAGE2TARGETS))
+STAGE2TARGETS:=$(subst sdt/,,$(STAGE2TARGETS))
 
 # LBA disk location
 STAGE2_LOCATION=1
@@ -31,7 +32,6 @@ STAGE2_SIZE=31
 
 all: run
 	
-
 $(BIN): 
 	mkdir -p $(BIN)
 
@@ -43,6 +43,9 @@ $(BIN)/%.o: src/boot/stage2/%.asm
 	$(AS) -o $@ $^ $(ASFLAGS) -felf32
 
 $(BIN)/%.o: src/boot/stage2/%.c
+	$(CC) -o $@ $^ $(CFLAGS)
+
+$(BIN)/%.o: src/boot/stage2/sdt/%.c
 	$(CC) -o $@ $^ $(CFLAGS)
 
 $(STAGE2BIN): $(BIN) $(STAGE2TARGETS) src/boot/stage2/link.ld

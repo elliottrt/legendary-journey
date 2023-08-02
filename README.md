@@ -16,6 +16,7 @@ in no particular order:
 - null & safety checks in std.h
 - better rand() in std.h
 - fat32 support in stage2
+- look at [sdts](https://wiki.osdev.org/RSDT#Defined_by_ACPI) (MADT, FADT, SSDT)
 - figure out how to create a fat32 disk on a file
 - do what it suggests in notes [here](https://wiki.osdev.org/Detecting_Memory_(x86)#BIOS_Function:_INT_0x15.2C_EAX_.3D_0xE820)
 - load actual GDT

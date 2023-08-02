@@ -96,4 +96,7 @@ int32_t max(int32_t a, int32_t b);
 /* Tests if two strings are equal. */
 int streq(const char *str1, const char *str2);
 
+/* sum up n bytes starting at addr */
+uint32_t bytesum(void *addr, uint32_t n);
+
 #endif

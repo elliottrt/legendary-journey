@@ -6,9 +6,10 @@ section .entry
 
 _entry:
 
+	mov [boot_drive], dl
+
 	cli
 
-	mov [boot_drive], dl
 	; mov [boot_segment], si
     ; mov [boot_offset], di
 
@@ -16,6 +17,8 @@ _entry:
     mov ss, ax
     mov sp, 0xFFF0
     mov bp, sp
+
+	call memdetect
 
 	; enable A20
 	call a20_enable
@@ -72,7 +75,7 @@ a20_enable:
 
 	call a20_wait_in
     pop eax
-    or al, 2                                    ; bit 2 = A20 bit
+    or al, 2
     out 0x60, al
 
 	call a20_wait_in
@@ -93,6 +96,72 @@ a20_wait_out:
     test al, 1
     jz a20_wait_out
     ret
+
+; See https://wiki.osdev.org/Detecting_Memory_(x86)#Getting_an_E820_Memory_Map
+memdetect:
+	push eax
+	push ebx
+	push ecx
+	push edx
+	push ebp
+	push edi
+
+	mov di, _entry_memregions
+	xor ebx, ebx
+	xor bp, bp
+	mov edx, 0x534D4150
+	mov eax, 0xE820
+	mov [es:di + 20], dword 1
+	mov ecx, 24
+	int 0x15
+	jc .failed
+	mov edx, 0x0534D4150
+	cmp eax, edx
+	jne .failed
+	test ebx, ebx
+	je .failed
+	jmp .jmpin
+.setup:
+	mov eax, 0xE820
+	mov [es:di + 20], dword 1
+	mov ecx, 24
+	int 0x15
+	jc .finish
+	mov edx, 0x534D4150
+.jmpin:
+	jcxz .skipent
+	cmp cl, 20
+	jbe .notext
+	test byte [es:di + 20], 1
+	je .skipent
+.notext:
+	mov ecx, [es:di + 8]
+	or ecx, [es:di + 12]
+	jz .skipent
+	inc bp
+	add di, 24
+.skipent:
+	test ebx, ebx
+	jne .setup
+.finish
+	mov [_entry_memcount], bp
+	clc
+	pop edi
+	pop ebp
+	pop edx
+	pop ecx
+	pop ebx
+	pop eax
+	ret
+.failed:
+	stc
+	pop edi
+	pop ebp
+	pop edx
+	pop ecx
+	pop ebx
+	pop eax
+	ret
 
 section .data
 
@@ -122,24 +191,15 @@ GDT_data:
 	db 11001111b	; granularity
 	db 0x00			; base hi
 
-; 16 bit code
-	dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFFF
-	dw 0                        ; base (bits 0-15) = 0x0
-	db 0                        ; base (bits 16-23)
-	db 10011010b                ; access (present, ring 0, code segment, executable, direction 0, readable)
-	db 00001111b                ; granularity (1b pages, 16-bit pmode) + limit (bits 16-19)
-	db 0
-
-; 16 bit data
-	dw 0FFFFh                   ; limit (bits 0-15) = 0xFFFFF
-	dw 0                        ; base (bits 0-15) = 0x0
-	db 0                        ; base (bits 16-23)
-	db 10010010b                ; access (present, ring 0, data segment, executable, direction 0, writable)
-	db 00001111b                ; granularity (1b pages, 16-bit pmode) + limit (bits 16-19)
-	db 0                        ; base high
-
 GDT_end:
 
 GDT_desc:
 	dw GDT_desc - GDT_start - 1
 	dd GDT_start
+
+global _entry_memcount
+_entry_memcount:
+	dw 0 ; region count
+global _entry_memregions
+_entry_memregions:
+	times (8 * 24) db 0; region data (8 region spots)

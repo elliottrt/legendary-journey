@@ -17,6 +17,8 @@ void putu(uint32_t u);
 void puti(int32_t i);
 /* put 32 bit integer 'h' in hex at next position and update position */
 void puth(uint32_t h);
+/* put 64 bit integer 'h' in hex at next position and update position */
+void puth64(uint64_t h);
 /* move cursor to specific position */
 void cursor(uint8_t row, uint8_t col);
 /* clear the screen */

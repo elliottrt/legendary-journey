@@ -17,9 +17,9 @@ in no particular order:
 - better rand() in std.h
 - fat32 support in stage2
 - figure out how to create a fat32 disk on a file
-- find out how much ram I have
-- get memory map
+- do what it suggests in notes [here](https://wiki.osdev.org/Detecting_Memory_(x86)#BIOS_Function:_INT_0x15.2C_EAX_.3D_0xE820)
 - load actual GDT
+- multitasking/threading
 - memory allocation?
 - proper stack
 - IDT/PIC/PIT

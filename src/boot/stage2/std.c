@@ -243,3 +243,11 @@ int streq(const char *str1, const char *str2)
 	}
 	return (*str1 - *str2) == 0;
 }
+
+uint32_t bytesum(void *addr, uint32_t n)
+{
+	uint32_t sum;
+	uint8_t *bytes = (uint8_t *) addr;
+	for (sum = 0; n--; sum += *bytes, bytes++);
+	return sum;
+}

@@ -24,9 +24,10 @@ STAGE2_LOCATION=1
 # destination segment
 STAGE2_SEGMENT=0
 # destination offset
-STAGE2_OFFSET=1280
+STAGE2_OFFSET=0x7E00
 # size in sectors (512 bytes)
-STAGE2_SIZE=16
+# 2^x - 1 so stage1 + stage 2 is 2^x sectors
+STAGE2_SIZE=31
 
 all: run
 	
@@ -44,10 +45,10 @@ $(BIN)/%.o: src/boot/stage2/%.asm
 $(BIN)/%.o: src/boot/stage2/%.c
 	$(CC) -o $@ $^ $(CFLAGS)
 
-$(STAGE2BIN): $(BIN) $(STAGE2TARGETS)
+$(STAGE2BIN): $(BIN) $(STAGE2TARGETS) src/boot/stage2/link.ld
 	$(LD) -o $(STAGE2BIN) $(STAGE2TARGETS) $(LDFLAGS) -Tsrc/boot/stage2/link.ld
 
-$(OS): $(STAGE1BIN) $(STAGE2BIN)
+$(OS): $(STAGE1BIN) $(STAGE2BIN) Makefile
 	dd if=/dev/zero of=$(OS) bs=512 count=256
 	dd if=$(STAGE1BIN) of=$(OS) conv=notrunc bs=512 seek=0 count=1
 	dd if=$(STAGE2BIN) of=$(OS) conv=notrunc bs=512 seek=$(STAGE2_LOCATION) count=$(STAGE2_SIZE)

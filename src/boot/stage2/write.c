@@ -113,6 +113,20 @@ void puth(uint32_t h)
 
 }
 
+void puth64(uint64_t h)
+{
+	uint8_t nibble;
+	uint8_t i;
+
+	puts("0x");
+
+	for (i = 1; i <= 16; i++)
+	{
+		nibble = (h >> (64 - i * 4)) & 0x0F;
+		putc(_hex_table[nibble]);
+	}
+}
+
 void cursor(uint8_t row, uint8_t col)
 {
     _cur_row = row;
@@ -134,17 +148,4 @@ void clrscr(void)
     }
 
     cursor(0, 0);
-}
-
-void write(void *dst, const void *src, uint32_t len)
-{
-    uint8_t *dst_addr = (uint8_t *) dst;
-    uint8_t *src_addr = (uint8_t *) src;
-    uint32_t current_byte = 0;
-
-    for (; current_byte < len; current_byte++)
-    {
-        dst_addr[current_byte] = src_addr[current_byte];
-    }
-    
 }

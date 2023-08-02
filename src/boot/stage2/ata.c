@@ -59,6 +59,10 @@ void ata_init(void)
 		puterr("\nATA: Error: LBA28 not supported", 0);
 	}
 
+	puts("Available Sectors: ");
+	putu(_ata_identify.user_addressable_sectors);
+	putc('\n');
+
 }
 
 void ata_cache_flush(void)

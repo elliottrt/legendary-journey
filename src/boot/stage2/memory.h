@@ -5,6 +5,13 @@
 
 /* See https://wiki.osdev.org/Detecting_Memory_(x86) */
 
+/*  
+	for memory allocation, we should find a place in memory
+	and use a single function to request that memory, no
+	freeing allowed. that way we can do what we need to and
+	later overwrite all of that data with the kernel
+*/
+
 enum memregiontype
 {
 	FREE_MEM = 1,

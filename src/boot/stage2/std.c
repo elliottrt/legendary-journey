@@ -224,6 +224,11 @@ char *strstr(const char *str1, const char *str2)
 	return NULL;
 }
 
+char toupper(char c)
+{
+	return (c >= 'a' && c <= 'z') ? c - 0x20 : c;
+}
+
 int32_t min(int32_t a, int32_t b)
 {
 	return a > b ? b : a;
@@ -242,6 +247,17 @@ int streq(const char *str1, const char *str2)
 		str2++;
 	}
 	return (*str1 - *str2) == 0;
+}
+
+char *strnchr(const char *str, char c, uint32_t n)
+{
+	for (; *str && n--; str++)
+	{
+		if (*str == c)
+			return (char *) str;
+	}
+
+	return NULL;
 }
 
 uint32_t bytesum(void *addr, uint32_t n)

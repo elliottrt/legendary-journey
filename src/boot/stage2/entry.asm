@@ -8,6 +8,8 @@ _entry:
 
 	mov [boot_drive], dl
 
+	call memdetect
+
 	cli
 
 	; mov [boot_segment], si
@@ -17,8 +19,6 @@ _entry:
     mov ss, ax
     mov sp, 0xFFF0
     mov bp, sp
-
-	call memdetect
 
 	; enable A20
 	call a20_enable
@@ -51,7 +51,7 @@ protected:
 	
     call stage2main
 
-	hlt
+    hlt
 
 [bits 16]
 ; https://wiki.osdev.org/A20#Testing_the_A20_line
@@ -143,7 +143,7 @@ memdetect:
 .skipent:
 	test ebx, ebx
 	jne .setup
-.finish
+.finish:
 	mov [_entry_memcount], bp
 	clc
 	pop edi

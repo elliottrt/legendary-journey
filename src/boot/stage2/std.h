@@ -6,6 +6,8 @@
 #define true 1
 #define false 0
 
+#define STRINGIFY(S) #S
+
 #define NULL ((void *)0)
 
 #define RAND_MAX UINT16_MAX
@@ -85,6 +87,9 @@ char *strncpy(char *dst, const char *src, uint32_t n);
 /* Returns a pointer to the first occurrence of str2 in str1. */
 char *strstr(const char *str, const char *substr);
 
+/* if c is a lowercase letter, returns its uppercase version */ 
+char toupper(char c);
+
 /* non-standard but useful */
 
 /* Returns the lower of a and b. */
@@ -95,6 +100,9 @@ int32_t max(int32_t a, int32_t b);
 
 /* Tests if two strings are equal. */
 int streq(const char *str1, const char *str2);
+
+/* Locates the first occurrence of c in str within n characters. */
+char *strnchr(const char *str, char c, uint32_t n);
 
 /* sum up n bytes starting at addr */
 uint32_t bytesum(void *addr, uint32_t n);

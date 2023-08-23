@@ -18,7 +18,7 @@ sectors_per_cluster:    db 1
 reserved_sectors:       dw 1
 fat_count:              db 2
 root_entries:           dw 0x00E0
-total_sectors:          dw 2880
+total_sectors:          dw 0
 media_descriptor:       db 0xF0
 sectors_per_fat:        dw 0                ; fat12/16 only
 sectors_per_track:      dw 18

@@ -31,6 +31,9 @@ STAGE2_OFFSET=0x7E00
 # size in sectors (512 bytes)
 STAGE2_SIZE=24
 
+# memory address to load the kernel
+KERNEL_LOAD=0x10000
+
 all: run
 	
 $(BIN): Makefile

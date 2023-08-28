@@ -21,8 +21,8 @@ void _put_memregion(uint16_t idx)
 	}
 
 	puth64(region->begin);
-	putc(' ');
-	puth64(region->len);
+	putc('-');
+	puth64(region->begin + region->len);
 	putc(' ');
 	putu(region->type);
 	putc('\n');

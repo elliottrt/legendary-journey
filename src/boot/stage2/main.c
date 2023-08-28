@@ -8,7 +8,7 @@
 #include "std.h"
 #include "memory.h"
 
-#define READ 1024
+#define READ 512
 
 void stage2main(void)
 {
@@ -19,7 +19,7 @@ void stage2main(void)
     clrscr();
     puts("Operating System\n");
 
-	/* mem_init(); */
+	mem_init();
 	ata_init();
 	fat_init((void *) 0x7C00);
 	pfile_init();

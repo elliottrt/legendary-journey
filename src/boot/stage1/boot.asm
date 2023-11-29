@@ -12,42 +12,42 @@ fsheaders:
 
 ; general fat header
 
-oem_name:               db "01234567"       ; must be 8 bytes
-bytes_per_sector:       dw 512
-sectors_per_cluster:    db 1
-reserved_sectors:       dw 1
-fat_count:              db 2
-root_entries:           dw 0x00E0
-total_sectors:          dw 0
-media_descriptor:       db 0xF0
-sectors_per_fat:        dw 0                ; fat12/16 only
-sectors_per_track:      dw 18
-heads:                  dw 2
-hidden_sectors:         dd 0
-large_sector_count:     dd 0
+oemname:               	db "01234567"       ; must be 8 bytes
+bytespersector:	       	dw 512
+sectorspercluster:	   	db 1
+reservedsectors:       	dw 32
+fatcount:              	db 2
+rootentries:           	dw 0 				; fat12/16 only
+totalsectors:          	dw 0 				; we don't know right now
+mediadescriptor:      	db 0xF0
+sectorsperfat:        	dw 0                ; fat12/16 only
+sectorspertrack: 	    dw 0
+heads:                  dw 0
+hiddensectors:         	dd 0
+largesectorcount:    	dd 0
 
 ; fat32 specific header
 
-sectors_per_fat32:      dd 0
+sectorsperfat32:      	dd 0
 flags32:                dw 0
-fat_version32:          dw 0
-root_dir_cluster32:     dd 2
-fsinfo_sector32:        dw 0
-backup_boot_sector:     dw 0
+fatversion32:          	dw 0
+rootdircluster:     	dd 2
+fsinfosector:        	dw 0
+backupbootsector:     	dw 0
 reserved32:             dw 0, 0, 0, 0, 0, 0
 
-drive_num:              db 0
+drivenum:              	db 0
 reserved0:				db 0
 signature:				db 0x29 			; 0x28 or 0x29
 serial:					dd 0
-volume_label:			db "0123456789A"	; must be 11 bytes
-system_identifier:		db "FAT32   "		; must be 8 bytes
+volumelabel:			db "0123456789A"	; must be 11 bytes
+systemidentifier:		db "FAT32   "		; must be 8 bytes
 
 ; boot code
 
 start:
 
-	mov [drive_num], dl
+	mov [drivenum], dl
 
 	; data segment setup
 	xor ax, ax
@@ -70,11 +70,11 @@ after:
 	stc
 	int 0x13
 
-	jnc load_stage2
+	jnc loadstage2
 	cmp bx, 0x55AA
-	je load_stage2
+	je loadstage2
 
-ext_err:
+extensionerror:
 	mov ah, 0x0E
 	mov al, 'E'
 	int 0x10
@@ -84,7 +84,7 @@ ext_err:
 	int 0x10
 	jmp $
 
-load_stage2:
+loadstage2:
 
 	mov si, S2LOC
 	mov ax, S2SEG
@@ -101,7 +101,7 @@ load_stage2:
 	cmp eax, 0
 	je .finish
 
-	call disk_read
+	call diskread
 
 	xor ch, ch
 	shl cx, 5
@@ -109,13 +109,11 @@ load_stage2:
 	add di, cx
 	mov es, di
 
-	jmp load_stage2.loop
+	jmp loadstage2.loop
 
 .finish:
 
-	mov dl, [drive_num]
-	; mov si, [boot_segment]
-	; mov di, [boot_offset]
+	mov dl, [drivenum]
 
 	mov ax, S2SEG         ; set segment registers
     mov ds, ax
@@ -123,31 +121,19 @@ load_stage2:
 
 	jmp S2SEG:S2OFF
 
-	mov ah, 0x0E
-	mov al, 'D'
-	int 0x10
-	mov al, 'O'
-	int 0x10
-	mov al, 'N'
-	int 0x10
-	mov al, 'E'
-	int 0x10
-
-	jmp $
-
-disk_read:
+diskread:
 	push ax
 	push dx
 	push si
 
-	mov dword [disk_read_packet.lba], S2LOC
-	mov word [disk_read_packet.segment], S2SEG
-	mov word [disk_read_packet.offset], S2OFF
-	mov word [disk_read_packet.blocks], S2SIZ
+	mov dword [diskreadpacket.lba], S2LOC
+	mov word [diskreadpacket.segment], S2SEG
+	mov word [diskreadpacket.offset], S2OFF
+	mov word [diskreadpacket.blocks], S2SIZ
 
 	mov ah, 0x42
 	mov di, 3 								; retry count
-	mov si, disk_read_packet
+	mov si, diskreadpacket
 
 .retry:
 	stc
@@ -160,7 +146,7 @@ disk_read:
 	mov ah, 0
 	stc
 	int 0x13
-	jc ext_err
+	jc extensionerror
 	pop ax
 	
 	dec di
@@ -174,7 +160,7 @@ disk_read:
 	pop ax
 	ret
 
-disk_read_packet:
+diskreadpacket:
 .size:	 	db 0x10
 .resr:		db 0x00
 .blocks:	dw 0x0000

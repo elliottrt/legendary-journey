@@ -1,16 +1,14 @@
 #include "ata.h"
-#include "../asm_call.h"
-#include "../write.h"
+#include "x86.h"
+#include "write.h"
 
-struct ata_identify _ata_identify;
+struct ataidentify _ataidentify;
 
-void ata_init(void)
+void atainit(void)
 {
-	uint8_t status;
-	uint16_t reads;
 	/* avoid unaligned pointer warning */
-	void *tmp_addr = (void *) &_ata_identify;
-	uint16_t *ata_identify_addr = (uint16_t *) tmp_addr;
+	void *tempaddr = (void *) &_ataidentify;
+	ushort *ataidentifyaddress = (ushort *) tempaddr;
 
 	/* select master drive */
 	outb(0x01F6, 0xA0);
@@ -22,16 +20,16 @@ void ata_init(void)
 	/* send IDENTIFY command */
 	outb(0x01F7, 0xEC);
 	/* read status */
-	status = inb(0x1F7);
+	uchar status = inb(0x1F7);
 	/* if status is 0 there is no drive */
 	if (status == 0)
 	{
 		puterr("\nATA: Error: Drive does not exist\n", 0);
 		return;
 	}
-	/* wait for BSY (bit 7) to clear */
+	// wait for BSY (bit 7) to clear
 	while (inb(0x01F7) & 0x80);
-	/* ensure drive is ATA */
+	// ensure drive is ATA
 	if (inb(0x01F4) != 0 || inb(0x01F5) != 0)
 	{
 		puterr("\nATA: Error: Drive is not ATA", 0);
@@ -44,60 +42,53 @@ void ata_init(void)
 	/* if error, print and return failure */
 	if (status & 1)
 	{
-		ata_error();
+		ataerror();
 		return;
 	}
 	/* otherwise we are ready to read data */
-	for (reads = 0; reads < 256; reads++)
+	for (int reads = 0; reads < 256; reads++)
 	{
-		ata_identify_addr[reads] = inw(0x01F0);
+		ataidentifyaddress[reads] = inw(0x01F0);
 	}
 
 	/* make sure our lba28 is supported */
-	if (_ata_identify.user_addressable_sectors == 0)
-	{
+	if (_ataidentify.useraddressablesectors == 0)
 		puterr("\nATA: Error: LBA28 not supported", 0);
-	}
-
-	puts("Available Sectors: ");
-	putu(_ata_identify.user_addressable_sectors);
-	putc('\n');
 
 }
 
-void ata_cache_flush(void)
+void atacacheflush(void)
 {
 	/* send cache flush byte to command port */
 	outb(0x01F0, 0xE7);
 	/* wait for BSY (bit 7) to clear */
 	while (inb(0x01F7) & 0x80);
 
-	if (ata_check_error())
-		ata_error();
+	if (atacheckerror())
+		ataerror();
 }
 
-void ata_reset(void)
+void atareset(void)
 {
 	/* get current control values */
-	uint8_t control = inb(0x03F6);
+	uchar control = inb(0x03F6);
 	/* send it back with software reset bit set */
 	outb(0x03F6, control | 0x04);
 	/* set it back to off */
 	outb(0x03F6, control);
 
-	if (ata_check_error())
-		ata_error();
+	if (atacheckerror())
+		ataerror();
 }
 
-void ata_read(uint32_t lba, uint8_t sectors, void *dst)
+void ataread(uint lba, uchar sectors, void *dst)
 {
-	uint8_t status = 0x00;
-	uint16_t reads;
-	uint16_t *data = (uint16_t *) dst;
+	uchar status = 0x00;
+	ushort *data = (ushort *) dst;
 
 	lba &= 0x0FFFFFFF;
 
-	if (lba + sectors > _ata_identify.user_addressable_sectors)
+	if (lba + sectors > _ataidentify.useraddressablesectors)
 		puterr("ATA: Error: Cannot read beyond end of disk\n", 1);
 
 	/* why do io if we aren't reading anything? */
@@ -121,27 +112,26 @@ void ata_read(uint32_t lba, uint8_t sectors, void *dst)
 	while ((status & 8) == 0)
 		status = inb(0x01F7);
 
-	for (reads = 0; reads < sectors * 256; reads++)	
+	for (int reads = 0; reads < sectors * 256; reads++)	
 	{
 		data[reads] = inw(0x01F0);
 	}
 
-	if (ata_check_error())
-		ata_error();
+	if (atacheckerror())
+		ataerror();
 
 }
 
-void ata_write(uint32_t lba, uint8_t sectors, const void *src)
+void atawrite(uint lba, uchar sectors, const void *src)
 {
 
-	uint8_t status = 0x00;
-	uint16_t writes;
-	const uint16_t *data = (uint16_t *) src;
+	uchar status = 0x00;
+	const ushort *data = (ushort *) src;
 
 	lba &= 0x0FFFFFFF;
 
 	/* we don't want to read past the end of the disk */
-	if (lba + sectors > _ata_identify.user_addressable_sectors)
+	if (lba + sectors > _ataidentify.useraddressablesectors)
 		puterr("ATA: Error: Cannot write beyond end of disk\n", 1);
 
 	/* why do io if we aren't writing anything? */
@@ -165,32 +155,31 @@ void ata_write(uint32_t lba, uint8_t sectors, const void *src)
 	while ((status & 8) == 0)
 		status = inb(0x01F7);
 
-	for (writes = 0; writes < sectors * 256; writes++)	
+	for (int writes = 0; writes < sectors * 256; writes++)	
 	{
 		outw(0x01F0, data[writes]);
 	}
 
-	if (ata_check_error())
-		ata_error();
+	if (atacheckerror())
+		ataerror();
 
 	/* need to do this to prevent issues */
-	ata_cache_flush();
+	atacacheflush();
 
 }
 
-int ata_check_error(void)
+int atacheckerror(void)
 {
 	/* read status port */
-	uint8_t status = inb(0x01F7);
+	uchar status = inb(0x01F7);
 	/* return whether ERR bit is set */
 	return (status & 1) != 0;
 }
 
-#define BIT(n) (1 << (n))
-void ata_error(void)
+void ataerror(void)
 {
 	/* read error register */
-	uint8_t error = inb(0x01F1);
+	uchar error = inb(0x01F1);
 	if (error & BIT(0))
 		puterr("\nATA: Error: Address mark not found\n", 0);
 	if (error & BIT(1))
@@ -209,13 +198,7 @@ void ata_error(void)
 		puterr("\nATA: Error: Bad block detected\n", 1);
 }
 
-uint32_t ata_sectors(void)
+uint atasectors(void) 
 {
-	return _ata_identify.user_addressable_sectors;
-}
-/* get ata version */
-void ata_version(uint16_t *major, uint16_t *minor)
-{
-	*major = _ata_identify.major_revision;
-	*minor = _ata_identify.minor_revision;
+	return _ataidentify.useraddressablesectors;
 }

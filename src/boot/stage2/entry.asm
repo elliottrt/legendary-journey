@@ -21,7 +21,7 @@ _entry:
     mov bp, sp
 
 	; enable A20
-	call a20_enable
+	call a20enable
 
 	lgdt [GDT_desc]
 
@@ -29,25 +29,14 @@ _entry:
     or al, 1
     mov cr0, eax
 
-	; hlt
-
 	jmp dword CODE_SEG:protected
 
 [bits 32]
 protected:
 
-	mov ax, DATA_SEG
+	mov ax, DataSEG
     mov ds, ax
     mov ss, ax
-
-	; mov dx, [boot_segment]
-    ; shl edx, 16
-    ; mov dx, [boot_offset]
-    ; push edx
-
-    ; xor edx, edx
-    ; mov dl, [boot_drive]
-    ; push edx
 	
     call stage2main
 
@@ -55,46 +44,46 @@ protected:
 
 [bits 16]
 ; https://wiki.osdev.org/A20#Testing_the_A20_line
-a20_enable:
+a20enable:
 
-	call a20_wait_in
+	call a20waitin
 	mov al, 0xAD
 	out 0x64, al
 
-	call a20_wait_in
+	call a20waitin
 	mov al, 0xD0
     out 0x64, al
 
-	call a20_wait_out
+	call a20waitout
     in al, 0x60
     push eax
 
-	call a20_wait_in
+	call a20waitin
     mov al, 0xD1
     out 0x64, al
 
-	call a20_wait_in
+	call a20waitin
     pop eax
     or al, 2
     out 0x60, al
 
-	call a20_wait_in
+	call a20waitin
     mov al, 0xAE
     out 0x64, al
 
-    call a20_wait_in
+    call a20waitin
 	ret
 
-a20_wait_in:
+a20waitin:
     in al, 0x64
     test al, 2
-    jnz a20_wait_in
+    jnz a20waitin
     ret
 
-a20_wait_out:
+a20waitout:
     in al, 0x64
     test al, 1
-    jz a20_wait_out
+    jz a20waitout
     ret
 
 ; See https://wiki.osdev.org/Detecting_Memory_(x86)#Getting_an_E820_Memory_Map
@@ -106,7 +95,7 @@ memdetect:
 	push ebp
 	push edi
 
-	mov di, _entry_memregions
+	mov di, _entrymemregions
 	xor ebx, ebx
 	xor bp, bp
 	mov edx, 0x534D4150
@@ -144,7 +133,7 @@ memdetect:
 	test ebx, ebx
 	jne .setup
 .finish:
-	mov [_entry_memcount], bp
+	mov [_entrymemcount], bp
 	clc
 	pop edi
 	pop ebp
@@ -166,7 +155,7 @@ memdetect:
 section .data
 
 CODE_SEG equ GDT_code - GDT_start
-DATA_SEG equ GDT_data - GDT_start
+DataSEG equ GDT_data - GDT_start
 
 boot_drive: db 0x00
 
@@ -197,9 +186,9 @@ GDT_desc:
 	dw GDT_desc - GDT_start - 1
 	dd GDT_start
 
-global _entry_memcount
-_entry_memcount:
+global _entrymemcount
+_entrymemcount:
 	dw 0 ; region count
-global _entry_memregions
-_entry_memregions:
+global _entrymemregions
+_entrymemregions:
 	times (8 * 24) db 0; region data (8 region spots)

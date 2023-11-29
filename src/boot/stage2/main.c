@@ -1,41 +1,35 @@
-
-#include <stdint.h>
-
+#include "fat.h"
+#include "ata.h"
+#include "file.h"
+#include "elf.h"
 #include "write.h"
-#include "disk/fat.h"
-#include "disk/ata.h"
-#include "disk/pfile.h"
-#include "std.h"
-#include "memory.h"
-
-#define READ 512
 
 void stage2main(void)
 {
 
-	struct pfile file;
-	char buffer[READ];
+	clrscr();
+	puts("os\n");
 
-    clrscr();
-    puts("Operating System\n");
+	atainit();
+	fatinit((void *) 0x7C00);
+	fileinit();
 
-	mem_init();
-	ata_init();
-	fat_init((void *) 0x7C00);
-	pfile_init();
+#if defined (KERNEL_LOAD) && defined (KERNEL_NAME)
 
+	struct file kernel;
+	void (*kernelentry)(uint);
 
-	if (open(&file, "/test.txt") < 0)
-	{
-		puterr("couldn't open file", 1);
-		puth(errno);
-	}
-	else
-	{
-		read(&file, buffer, READ);
-		putsn(buffer, READ); 
-	}
+	if (fileopen(&kernel, KERNEL_NAME) < 0)
+		return;
 
-	return;
+	// read kernel header to scratch space
+	if (elfread(&kernel, (void *) 0x10000, &kernelentry) < 0)
+		return;
+
+	kernelentry(atasectors());
+
+#else
+	puterr("KERNEL_LOAD OR KERNEL_NAME NOT DEFINED\n", 0);
+#endif
 
 }

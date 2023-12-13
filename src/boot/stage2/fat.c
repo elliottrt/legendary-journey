@@ -97,8 +97,8 @@ int _fatformatchar(int c)
 	if (valid || c >= 128)
 		return c;
 
-	if (islower(c))
-		return toupper(c);
+	if (c >= 'a' && c <= 'z')
+		return c -= 0x20;
 
 	if (c == 0xE5)
 		return 0x05;

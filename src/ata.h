@@ -1,5 +1,5 @@
-#ifndef _STAGE2_ATA
-#define _STAGE2_ATA
+#ifndef _ATA
+#define _ATA
 
 #include "types.h"
 

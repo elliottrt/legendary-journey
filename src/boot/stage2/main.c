@@ -8,7 +8,6 @@ void stage2main(void)
 {
 
 	clrscr();
-	puts("os\n");
 
 	atainit();
 	fatinit((void *) 0x7C00);
@@ -25,7 +24,7 @@ void stage2main(void)
 	// read kernel header to scratch space
 	if (elfread(&kernel, (void *) 0x10000, &kernelentry) < 0)
 		return;
-
+    
 	kernelentry(atasectors());
 
 #else

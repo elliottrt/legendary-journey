@@ -7,7 +7,7 @@ section .entry
 _entry:
 
 	mov [boot_drive], dl
-
+    
 	call memdetect
 
 	cli
@@ -23,6 +23,9 @@ _entry:
 	; enable A20
 	call a20enable
 
+	; disable VGA cursor
+	call disablecursor
+
 	lgdt [GDT_desc]
 
 	mov eax, cr0
@@ -34,7 +37,7 @@ _entry:
 [bits 32]
 protected:
 
-	mov ax, DataSEG
+	mov ax, DATA_SEG
     mov ds, ax
     mov ss, ax
 	
@@ -43,6 +46,24 @@ protected:
     hlt
 
 [bits 16]
+
+; https://wiki.osdev.org/Text_Mode_Cursor
+disablecursor:
+	push ax
+	push dx
+
+	mov dx, 0x3D4
+	mov al, 0xA	; low cursor shape register
+	out dx, al
+ 
+ 	inc dx
+	mov al, 0x20	; bits 6-7 unused, bit 5 disables the cursor, bits 0-4 control the cursor shape
+	out dx, al
+
+	pop dx
+	pop ax
+	ret
+
 ; https://wiki.osdev.org/A20#Testing_the_A20_line
 a20enable:
 
@@ -155,7 +176,7 @@ memdetect:
 section .data
 
 CODE_SEG equ GDT_code - GDT_start
-DataSEG equ GDT_data - GDT_start
+DATA_SEG equ GDT_data - GDT_start
 
 boot_drive: db 0x00
 
@@ -168,16 +189,16 @@ GDT_code:
 	dw 0xFFFF 		; limit
 	dw 0x0000		; base lo
 	db 0x00			; base mid
-	db 10011010b	; access flags
-	db 11001111b	; granularity
+	db 0b10011010	; access flags
+	db 0b11001111	; granularity
 	db 0x00			; base hi
 
 GDT_data:
 	dw 0xFFFF 		; limit
 	dw 0x0000		; base lo
 	db 0x00			; base mid
-	db 10010010b	; access flags
-	db 11001111b	; granularity
+	db 0b10010010	; access flags
+	db 0b11001111	; granularity
 	db 0x00			; base hi
 
 GDT_end:

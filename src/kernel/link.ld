@@ -4,8 +4,8 @@ ENTRY(_start)
 SECTIONS
 {
 	. = 0x100000;
-    .text : { __text_start = .; *(.text) }
-    .data : { __data_start = .; *(.data) }
+	.text : { __text_start = .; *(.text) }
+	.data : { __data_start = .; *(.data) }
 	.bss : { __bss_start = .; *(.bss) }
-    PROVIDE(end = .);
+	PROVIDE(end = .);
 }

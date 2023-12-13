@@ -53,8 +53,7 @@ $(BIN): Makefile
 	mkdir -p $(BIN)/kernel
 
 $(STAGE1BIN): $(BIN) $(STAGE1SRC) Makefile
-	$(AS) -o $(STAGE1BIN) $(STAGE1SRC) $(ASFLAGS) -fbin -DS2LOC=$(STAGE2_LOCATION) \
-		  -DS2SEG=$(STAGE2_SEGMENT) -DS2OFF=$(STAGE2_OFFSET) -DS2SIZ=$(STAGE2_SIZE) 
+	$(AS) -o $(STAGE1BIN) $(STAGE1SRC) $(ASFLAGS) -fbin -DS2LOC=$(STAGE2_LOCATION) -DS2SEG=$(STAGE2_SEGMENT) -DS2OFF=$(STAGE2_OFFSET) -DS2SIZ=$(STAGE2_SIZE) 
 
 $(BIN)/stage2/%.o: src/boot/stage2/%.asm
 	$(AS) -o $@ $^ $(ASFLAGS) -felf32
@@ -72,11 +71,11 @@ $(BIN)/kernel/%.o: src/kernel/%.asm
 	$(AS) -o $@ $^ $(ASFLAGS) -felf32
 
 $(KERNEL): $(BIN) $(KERNELTARGETS) src/kernel/link.ld Makefile
-	$(LD) -o $(KERNEL) $(KERNELTARGETS) -Tsrc/kernel/link.ld
+	$(LD) -o $(KERNEL) $(KERNELTARGETS) $(KERNEL_FLAGS) -Tsrc/kernel/link.ld
 	cp $(KERNEL) root/$(KERNELNAME)
 
 run: $(OS) Makefile
-	$(EMU) -drive format=raw,file=$(OS) -monitor stdio -m 128M
+	$(EMU) -drive format=raw,file=$(OS) -m 128M -monitor stdio -full-screen
 
 clean:
 	rm -rf $(BIN)

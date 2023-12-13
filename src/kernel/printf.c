@@ -4,6 +4,8 @@
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
 
+#define EMPTY_CHAR '\0'
+
 ushort *screen_addr = (ushort *) 0xB8000;
 uint cursor = 0;
 uchar color = 15;
@@ -13,6 +15,18 @@ void putc(char c) {
 		case '\n':
 			cursor += SCREEN_WIDTH;
 			cursor -= cursor % SCREEN_WIDTH;
+			break;
+		case '\b':
+			// we need to go up a line
+			if (cursor % SCREEN_WIDTH == 0) {
+				// don't do anything if we are at the start
+				if (cursor == 0) return;
+
+				while ((screen_addr[--cursor] & 0xFF) == EMPTY_CHAR);
+				// fix the overshoot
+				cursor++;
+			}
+			screen_addr[--cursor] = EMPTY_CHAR | (color << 8);
 			break;
 		default:
 			screen_addr[cursor++] = c | (color << 8);

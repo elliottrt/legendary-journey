@@ -40,8 +40,12 @@ void ataread(uint lba, uchar sectors, void *dst)
 
 	lba &= 0x0FFFFFFF;
 
-	if (lba + sectors > disksectors)
+	if (lba + sectors > disksectors) 
+	{
+		printferr();
 		printf("ATA: Error: Cannot read beyond end of disk\n");
+		printfstd();
+	}
 
 	/* why do io if we aren't reading anything? */
 	/* this is also a special value that would read a lot of sectors */
@@ -83,7 +87,11 @@ void atawrite(uint lba, uchar sectors, const void *src)
 	lba &= 0x0FFFFFFF;
 
 	if (lba + sectors > disksectors)
+	{
+		printferr();
 		printf("ATA: Error: Cannot write beyond end of disk\n");
+		printfstd();
+	}
 
 	/* why do io if we aren't writing anything? */
 	/* this is also a special value that would write a lot of sectors */
@@ -131,6 +139,9 @@ void ataerror(void)
 {
 	/* read error register */
 	uchar error = inb(0x01F1);
+
+	printferr();
+
 	if (error & BIT(0))
 		printf("\nATA: Error: Address mark not found\n");
 	if (error & BIT(1))
@@ -147,6 +158,8 @@ void ataerror(void)
 		printf("\nATA: Error: Uncorrectable data error\n");
 	if (error & BIT(7))
 		printf("\nATA: Error: Bad block detected\n");
+
+	printfstd();
 }
 
 uint atasectors(void)

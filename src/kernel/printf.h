@@ -24,4 +24,7 @@ void printf(const char *format, ...);
 
 void printfcolor(enum color fg, enum color bg);
 
+#define printferr() printfcolor(CLR_LIGHT_RED, CLR_BLACK)
+#define printfstd() printfcolor(CLR_WHITE, CLR_BLACK);
+
 #endif

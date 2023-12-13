@@ -4,11 +4,13 @@
 #define SCR_HEIGHT 25
 #define SCR_MEM ((ushort *)0xB8000)
 
+#define EMPTY_CHAR '\0'
+
 static uchar _curcol = 0;
 static uchar _currow = 0;
 
 /* white with black background */
-static ushort _color = 15 << 8;
+static ushort _color = 0x0F << 8;
 
 void _checkcur(void)
 {
@@ -49,18 +51,18 @@ void puts(const char *s)
 void puterr(const char *s, int recoverable)
 {
 	/* black on blue */
-	_color = (15 | (1 << 4)) << 8;
+	_color = 0x1F << 8;
 	/* print error message */
 	puts(s);
 	/* hang if not recoverable */
 	if (!recoverable) while(1);
 	/* reset color */
-	_color = 15 << 8;
+	_color = 0x0F << 8;
 }
 
 void clrscr(void)
 {
-    ushort clearchar = ' ' | _color;
+    ushort clearchar = EMPTY_CHAR | _color;
 
     for (int position = 0; position < SCR_WIDTH * SCR_HEIGHT; position++)
         SCR_MEM[position] = clearchar;

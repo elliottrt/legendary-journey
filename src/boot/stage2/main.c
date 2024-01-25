@@ -3,6 +3,7 @@
 #include "file.h"
 #include "elf.h"
 #include "write.h"
+#include "mem.h"
 
 void stage2main(void)
 {
@@ -16,7 +17,7 @@ void stage2main(void)
 #if defined (KERNEL_LOAD) && defined (KERNEL_NAME)
 
 	struct file kernel;
-	void (*kernelentry)(uint);
+	void (*kernelentry)(); // we can ignore the args here
 
 	if (fileopen(&kernel, KERNEL_NAME) < 0)
 		return;
@@ -25,7 +26,7 @@ void stage2main(void)
 	if (elfread(&kernel, (void *) 0x10000, &kernelentry) < 0)
 		return;
     
-	kernelentry(atasectors());
+	kernelentry(atasectors(), membound());
 
 #else
 	puterr("KERNEL_LOAD OR KERNEL_NAME NOT DEFINED\n", 0);

@@ -14,18 +14,23 @@ I am not at all qualified to do this. The [posted warnings](https://wiki.osdev.o
 ## todo/ideas
 in no particular order:
 - change STAGE2_x in Makefile to be dynamically calculated instead of manually
+- change printf so that there is a specific format (%e maybe) that sets error color
+- allocation for large structures like kpgdir (virtmem.c), entries (idt.c), keyboard (kbd.c)
+- figure out the right value for PHYSTOP, KERNBASE in virtmem.h
 - don't have standard library function implementations duplicated in stage2 and kernel - maybe a #define for each function?
 - irq handlers should be as short as possible, try to make kbd::kbdhandler shorter
 - figure out what HIBIT, LOBIT, and BITSET in std do
 - optimize file.c::fileread, we always don't need to read into buffer then memory, we can go straight to memory sometimes
 - do what it suggests in notes [here](https://wiki.osdev.org/Detecting_Memory_(x86)#BIOS_Function:_INT_0x15.2C_EAX_.3D_0xE820)
 - memory allocation?
-- IDT/PIC/PIT
+- PIC/APIC
 - find CPU features
-- APIC
 - userspace
 - video mode
 - figure out what video modes are available
 - actually learn what I'm doing
+- change printf.c::scroll to only use one variable, and do math to get the second
+- printf %_ should clear the screen? maybe %e for error and %s for normal colors?
+- in(b|w)/out(b|w) might need the whole ebp/esp thing
 
 (list partly from [here](https://wiki.osdev.org/Rolling_Your_Own_Bootloader))

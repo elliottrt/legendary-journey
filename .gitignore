@@ -62,4 +62,6 @@ fs.img
 *.sublime-workspace
 *.sublime-project
 old
+*.old
 mkfat
+root

@@ -9,11 +9,11 @@ extern void idtload(struct idtptr *idtptr);
 
 void idtset(uchar index, void (*base)(struct registers), ushort selector, enum idt_flags flags) {
     entries[index] = (struct idtentry) {
-        .offset_low = ((uint) base) & 0xFFFF,
-        .offset_high = (((uint) base) >> 16) & 0xFFFF,
+        .offset_lo = ((uint) base) & 0xFFFF,
+        .offset_hi = (((uint) base) >> 16) & 0xFFFF,
         .selector = selector,
         .flags = flags,
-        ._ignored = 0
+        .args = 0
     };
 }
 

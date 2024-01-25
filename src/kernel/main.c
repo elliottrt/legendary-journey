@@ -6,26 +6,52 @@
 #include "irq.h"
 #include "timer.h"
 #include "kbd.h"
+#include "virtmem.h"
+#include "x86.h"
+#include "kalloc.h"
+#include "mmu.h"
 
-// end of kernel memory
-extern char end[];
+extern void kgdtinit(void);
 
-#define TIMER_HZ 10
-#define TIMER_MS (1000 / TIMER_HZ)
+// must be higher than 18
+#define TIMER_HZ 50
 
 void main(void)
 {
 
-	printf("Loaded %d bytes of Kernel!\n", end - 0x100000);
+	// PHYSTOP = 0xE000000;
 
-	atainit();
+	printf("loaded %d bytes of kernel!\n", V2P(end) - KERNEL_LOAD);
+	printf("memory bound: %d mb\n", ((PHYSTOP / 1024) + 1023)/1024);
+
+	kallocinit();
+
+	kpginit();
+
+	printf("paging finished\n");
+
+	kgdtinit();
+
+	printf("gdt set\n");
+
 	idtinit();
-	isrinit();
-	irqinit();
-	timerinit(TIMER_HZ);
-	kbdinit();
 
-//	asm("int $0x00");
+	printf("idt initialized\n");
+
+	isrinit();
+
+	printf("isr initialized\n");
+
+	irqinit();
+
+	printf("irq initialized\n");
+
+//	kbdinit();
+	timerinit(TIMER_HZ);
+
+	printf("timer initialized\n");
+
+	printf("initialization complete\n");
 
 	while(1);
 }

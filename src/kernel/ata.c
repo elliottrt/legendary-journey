@@ -6,7 +6,7 @@ extern uint disksectors;
 
 void atainit(void)
 {
-	printf("ATA: Initialized, %d sectors available\n", disksectors);
+	printf("ata: initialized, %d sectors available\n", disksectors);
 }
 
 void atacacheflush(void)
@@ -43,7 +43,7 @@ void ataread(uint lba, uchar sectors, void *dst)
 	if (lba + sectors > disksectors) 
 	{
 		printferr();
-		printf("ATA: Error: Cannot read beyond end of disk\n");
+		printf("ata: error: cannot read beyond end of disk\n");
 		printfstd();
 	}
 
@@ -89,7 +89,7 @@ void atawrite(uint lba, uchar sectors, const void *src)
 	if (lba + sectors > disksectors)
 	{
 		printferr();
-		printf("ATA: Error: Cannot write beyond end of disk\n");
+		printf("ata: error: cannot write beyond end of disk\n");
 		printfstd();
 	}
 
@@ -143,21 +143,21 @@ void ataerror(void)
 	printferr();
 
 	if (error & BIT(0))
-		printf("\nATA: Error: Address mark not found\n");
+		printf("\nata: error: address mark not found\n");
 	if (error & BIT(1))
-		printf("\nATA: Error: Track zero not found\n");
+		printf("\nata: error: track zero not found\n");
 	if (error & BIT(2))
-		printf("\nATA: Error: Aborted command\n");
+		printf("\nata: error: aborted command\n");
 	if (error & BIT(3))
-		printf("\nATA: Error: Media change request\n");
+		printf("\nata: error: media change request\n");
 	if (error & BIT(4))
-		printf("\nATA: Error: ID not found\n");
+		printf("\nata: error: id not found\n");
 	if (error & BIT(5))
-		printf("\nATA: Error: Media changed\n");
+		printf("\nata: error: media changed\n");
 	if (error & BIT(6))
-		printf("\nATA: Error: Uncorrectable data error\n");
+		printf("\nata: error: uncorrectable data error\n");
 	if (error & BIT(7))
-		printf("\nATA: Error: Bad block detected\n");
+		printf("\nata: error: bad block detected\n");
 
 	printfstd();
 }

@@ -4,7 +4,7 @@
 #include "types.h"
 
 void timerinit(uint hz);
-ullong timerget(void);
+ulong timerget(void);
 void timersethz(uint hz);
 
 #endif

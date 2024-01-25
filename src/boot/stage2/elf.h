@@ -62,6 +62,6 @@ enum elfprogtype
     ELF_PTYPE_HIPROC = 0x7FFFFFFF
 };
 
-int elfread(struct file *file, void *scratch, void (**entry)(uint));
+int elfread(struct file *file, void *scratch, void (**entry)());
 
 #endif

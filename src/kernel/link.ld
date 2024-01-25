@@ -3,9 +3,24 @@ ENTRY(_start)
 
 SECTIONS
 {
-	. = 0x100000;
-	.text : { __text_start = .; *(.text) }
-	.data : { __data_start = .; *(.data) }
-	.bss : { __bss_start = .; *(.bss) }
+	. = 0x80100000;
+	
+	.text : AT (0x100000) { *(.text .text.*) }
+
+	PROVIDE(etext = .);
+
+	.rodata : { *(.rodata .rodata.*) }
+
+	. = ALIGN(0x1000);
+
+	PROVIDE(data = .);
+	
+	.data : { *(.data) }
+	
+	PROVIDE(edata = .);
+
+	.bss : { *(.bss) }
+	
 	PROVIDE(end = .);
+
 }

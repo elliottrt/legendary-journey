@@ -2,7 +2,7 @@
 #include "write.h"
 #include "std.h"
 
-int elfread(struct file *file, void *scratch, void (**entry)(uint))
+int elfread(struct file *file, void *scratch, void (**entry)())
 {
 
 	struct elfheader *elfhdr = (struct elfheader *) scratch;

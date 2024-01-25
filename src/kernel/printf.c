@@ -1,14 +1,31 @@
 #include "printf.h"
 #include "types.h"
+#include "std.h"
+#include "mmu.h"
 
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
 
 #define EMPTY_CHAR '\0'
 
-ushort *screen_addr = (ushort *) 0xB8000;
+ushort *screen_addr = (ushort *) V2P_WO(0xB8000);
 uint cursor = 0;
 uchar color = 15;
+
+void scroll(void) {
+
+	ushort *src = screen_addr + SCREEN_WIDTH;
+	ushort *dst = screen_addr;
+
+	for (uint row = 0; row < SCREEN_HEIGHT - 1; row++) {
+		memcpy(dst, src, SCREEN_WIDTH * sizeof(ushort));
+		dst += SCREEN_WIDTH;
+		src += SCREEN_WIDTH;
+	}
+
+	for (uint col = 0; col < SCREEN_WIDTH; col++)
+		dst[col] = EMPTY_CHAR | (color << 8);
+}
 
 void putc(char c) {
 	switch (c) {
@@ -32,14 +49,22 @@ void putc(char c) {
 			screen_addr[cursor++] = c | (color << 8);
 			break;
 	}
+
+	// when we reach end of screen, scroll
+	if (cursor >= SCREEN_HEIGHT * SCREEN_WIDTH) {
+		scroll();
+		cursor = SCREEN_WIDTH * (SCREEN_HEIGHT - 1);
+	}
+
 }
 
-void printint(int x, int base, int sign) {
+void printint(uint x, int base, int sign) {
+	
 	const char digits[] = "0123456789ABCDEF";
 	char buffer[16];
 	int negative = 0;
 
-	if (sign && x < 0) {
+	if (sign && (* (int *) &x) < 0) {
 		negative = 1;
 		x = -x;
 	}
@@ -48,6 +73,7 @@ void printint(int x, int base, int sign) {
 	do {
 		buffer[i++] = digits[x % base];
 	} while ((x /= base) != 0);
+
 	if (negative) buffer[i++] = '-';
 
 	while(--i >= 0)
@@ -55,7 +81,7 @@ void printint(int x, int base, int sign) {
 
 }
 
-#define VAR_NEXT(T) (*((T*)varargs++))
+#define ASU(X) (* (uint *) &(X))
 
 void printf(const char *format, ...) {
 
@@ -71,25 +97,26 @@ void printf(const char *format, ...) {
 					putc('%');
 				} break;
 				case 'd': {
-					int x = VAR_NEXT(int);
-					printint(x, 10, 1);
+					printint(*varargs, 10, 1);
+					varargs++;
 				} break;
 				case 'u': {
-					uint x = VAR_NEXT(uint);
-					printint(x, 10, 0);
+					printint(*(uint *)varargs, 10, 0);
+					varargs++;
 				} break;
 				case 'p':
 				case 'x': {
-					uint x = VAR_NEXT(uint);
-					printint(x, 16, 0);
+					printint(*(uint *)varargs, 16, 0);
+					varargs++;
 				} break;
 				case 'c': {
-					char c = VAR_NEXT(char);
-					putc(c);
+					putc(*varargs);
+					varargs++;
 				} break;
 				case 's': {
-					char *s = VAR_NEXT(char *);
+					char *s = (char *) *varargs;
 					while (*s) putc(*s++);
+					varargs++;
 				} break;
 				default: {
 					putc('%');

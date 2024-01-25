@@ -18,6 +18,8 @@ uchar ASMCALL inb(ushort port);
 void ASMCALL outw(ushort port, ushort value);
 ushort ASMCALL inw(ushort port);
 
+void ASMCALL lcr3(uint val);
+
 #define UNUSED_PORT 0x80
 #define iowait() outb(UNUSED_PORT, 0x00)
 

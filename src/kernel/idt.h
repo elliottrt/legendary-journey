@@ -20,11 +20,11 @@ enum idt_flags
 };
 
 struct idtentry {
-    ushort offset_low;
+    ushort offset_lo;
     ushort selector;
-    uchar _ignored;
+    uchar args; // lower 5 bits
     uchar flags;
-    ushort offset_high;
+    ushort offset_hi;
 } __attribute__ ((packed));
 
 struct idtptr {

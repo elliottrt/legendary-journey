@@ -11,15 +11,11 @@
 #include "kalloc.h"
 #include "mmu.h"
 
-extern void kgdtinit(void);
-
 // must be higher than 18
-#define TIMER_HZ 50
+#define TIMER_HZ 100
 
 void main(void)
 {
-
-	// PHYSTOP = 0xE000000;
 
 	printf("loaded %d bytes of kernel!\n", V2P(end) - KERNEL_LOAD);
 	printf("memory bound: %d mb\n", ((PHYSTOP / 1024) + 1023)/1024);
@@ -28,30 +24,24 @@ void main(void)
 
 	kpginit();
 
-	printf("paging finished\n");
-
 	kgdtinit();
 
-	printf("gdt set\n");
+	kallocexpand();
 
 	idtinit();
-
-	printf("idt initialized\n");
-
 	isrinit();
-
-	printf("isr initialized\n");
-
 	irqinit();
-
-	printf("irq initialized\n");
 
 //	kbdinit();
 	timerinit(TIMER_HZ);
 
-	printf("timer initialized\n");
-
 	printf("initialization complete\n");
+
+	for (uint i = 0; i < 100; i++) {
+		printf("%d\n", i);
+		ulong next = timerget() + 25;
+		while (timerget() < next);
+	}
 
 	while(1);
 }

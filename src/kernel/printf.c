@@ -14,17 +14,14 @@ uchar color = 15;
 
 void scroll(void) {
 
-	ushort *src = screen_addr + SCREEN_WIDTH;
-	ushort *dst = screen_addr;
+	ushort *line = screen_addr;
 
-	for (uint row = 0; row < SCREEN_HEIGHT - 1; row++) {
-		memcpy(dst, src, SCREEN_WIDTH * sizeof(ushort));
-		dst += SCREEN_WIDTH;
-		src += SCREEN_WIDTH;
+	for (uint row = 0; row < SCREEN_HEIGHT - 1; row++, line += SCREEN_WIDTH) {
+		memcpy(line, line + SCREEN_WIDTH, SCREEN_WIDTH * sizeof(ushort));
 	}
 
 	for (uint col = 0; col < SCREEN_WIDTH; col++)
-		dst[col] = EMPTY_CHAR | (color << 8);
+		line[col] = EMPTY_CHAR | (color << 8);
 }
 
 void putc(char c) {

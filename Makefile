@@ -42,7 +42,7 @@ CFLAGS=-m32 -c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-ar
 CFLAGS:=$(CFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
 CFLAGS:=$(CFLAGS) -DKERNEL_LOAD=$(KERNELLOAD) -DKERNEL_NAME='"/$(KERNELNAME)"'
 CFLAGS:=$(CFLAGS) -Isrc/ -fno-pic -static -fno-strict-aliasing -MD -no-pie
-CFLAGS:=$(CFLAGS) -fno-omit-frame-pointer -O0
+CFLAGS:=$(CFLAGS) -fno-omit-frame-pointer -O2
 LDFLAGS=-nostdlib -static -Isrc/ -m elf_i386
 ASFLAGS=--32
 KERNELFLAGS=-c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
@@ -53,25 +53,22 @@ BOOTFLAGS=-defsym S2LOC=$(STAGE2_LOCATION) -defsym S2SEG=$(STAGE2_SEGMENT) -defs
 
 all: OS
 	
-$(BIN): Makefile
+$(BIN):
 	mkdir -p $(BIN)
 	mkdir -p $(BIN)/stage2
 	mkdir -p $(BIN)/kernel
 
-$(STAGE1BIN): $(BIN) $(STAGE1SRC) Makefile
+$(STAGE1BIN): $(BIN) $(STAGE1SRC)
 	$(AS) -o $(STAGE1BIN).o $(STAGE1SRC) $(ASFLAGS) $(BOOTFLAGS)
 	$(LD) -o $(STAGE1BIN) $(STAGE1BIN).o -Ttext 0x7C00 --oformat binary -e _start
-	# nasm -o $(STAGE1BIN) $(STAGE1SRC) -fbin -DS2LOC=$(STAGE2_LOCATION) -DS2SEG=$(STAGE2_SEGMENT) -DS2OFF=$(STAGE2_OFFSET) -DS2SIZ=$(STAGE2_SIZE)
 
 $(BIN)/stage2/%.o: src/boot/stage2/%.S
 	$(AS) -o $@ $^ $(ASFLAGS)
-	# nasm -o $@ $^ -felf32
-	# $(CC) -o $@ $^ $(CFLAGS)
 
 $(BIN)/stage2/%.o: src/boot/stage2/%.c
 	$(CC) -o $@ $^ $(CFLAGS)
 
-$(STAGE2BIN): $(BIN) $(STAGE2TARGETS) src/boot/stage2/link.ld Makefile
+$(STAGE2BIN): $(BIN) $(STAGE2TARGETS) src/boot/stage2/link.ld
 	$(LD) -o $(STAGE2BIN) $(STAGE2TARGETS) $(LDFLAGS) -Tsrc/boot/stage2/link.ld
 
 $(BIN)/kernel/%.o: src/kernel/%.c
@@ -81,14 +78,14 @@ $(BIN)/kernel/%.o: src/kernel/%.S
 	$(CC) -o $@ $^ $(KERNELFLAGS)
 	# nasm -o $@ $^ -felf32
 
-$(KERNEL): $(BIN) $(KERNELTARGETS) src/kernel/link.ld Makefile
+$(KERNEL): $(BIN) $(KERNELTARGETS) src/kernel/link.ld
 	$(LD) -o $(KERNEL) $(KERNELTARGETS) -Tsrc/kernel/link.ld
 	
 $(ROOT):
 	mkdir -p $(ROOT)
 
 run: OS Makefile
-	$(EMU) -drive format=raw,file=$(OS) -m 256 -monitor stdio -full-screen -D trace.log -d int -action reboot=shutdown -action shutdown=pause
+	$(EMU) -drive format=raw,file=$(OS) -m 64 -monitor stdio -full-screen -D trace.log -d int -action reboot=shutdown #-action shutdown=pause
 
 clean:
 	rm -rf $(BIN)

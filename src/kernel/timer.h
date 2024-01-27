@@ -4,7 +4,9 @@
 #include "types.h"
 
 void timerinit(uint hz);
-ulong timerget(void);
 void timersethz(uint hz);
+
+extern ulong _timer_ticks;
+#define timerget() (_timer_ticks)
 
 #endif

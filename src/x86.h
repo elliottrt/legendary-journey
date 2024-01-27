@@ -12,15 +12,25 @@
 #define cli() asm("cli");
 #define sti() asm("sti");
 
+#define UNUSED_PORT 0x80
+#define iowait() outb(UNUSED_PORT, 0x00)
+
 void ASMCALL outb(ushort port, uchar value);
 uchar ASMCALL inb(ushort port);
 
 void ASMCALL outw(ushort port, ushort value);
 ushort ASMCALL inw(ushort port);
 
+// for kernel::main.c
+
+void ASMCALL kgdtinit(void);
+
+// for kernel::virtmem.c
+
 void ASMCALL lcr3(uint val);
 
-#define UNUSED_PORT 0x80
-#define iowait() outb(UNUSED_PORT, 0x00)
+// for kernel::idt.c
+
+void ASMCALL idtload(void *idtptr);
 
 #endif

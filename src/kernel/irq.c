@@ -111,15 +111,10 @@ void irqdisable(uint i) {
 
 void irqinstall(uint i, irqhandler_t handler) {
     cli();
-    printf("cleared interrupts\n");
     handlers[i] = handler;
-    printf("set handler\n");
     irqenable(i);
-    printf("enabled irq\n");
     idtenable(i + PIC_REMAP_OFFSET);
-    printf("enabled idt\n");
     sti();
-    printf("reenabled interrupts\n");
 }
 
 void irqinit() {

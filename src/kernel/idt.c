@@ -1,11 +1,9 @@
 #include "idt.h"
 #include "std.h"
+#include "x86.h"
 
 struct idtentry entries[256];
 struct idtptr pointer;
-
-// in x86.S
-extern void idtload(struct idtptr *idtptr);
 
 void idtset(uchar index, void (*base)(struct registers), ushort selector, enum idt_flags flags) {
     entries[index] = (struct idtentry) {
@@ -13,7 +11,7 @@ void idtset(uchar index, void (*base)(struct registers), ushort selector, enum i
         .offset_hi = (((uint) base) >> 16) & 0xFFFF,
         .selector = selector,
         .flags = flags,
-        .args = 0
+        .reserved = 0
     };
 }
 

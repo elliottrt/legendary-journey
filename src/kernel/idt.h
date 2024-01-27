@@ -22,7 +22,7 @@ enum idt_flags
 struct idtentry {
     ushort offset_lo;
     ushort selector;
-    uchar args; // lower 5 bits
+    uchar reserved;
     uchar flags;
     ushort offset_hi;
 } __attribute__ ((packed));

@@ -16,4 +16,6 @@ struct registers {
     uint eip, cs, eflags, useresp, ss;
 };
 
+#define BIT(n) (1 << (n))
+
 #endif

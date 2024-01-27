@@ -3,10 +3,15 @@
 
 #include "types.h"
 
-void timerinit(uint hz);
-void timersethz(uint hz);
+// must be higher than 18
+#define TIMER_HZ 100
+
+void timerinit(void);
 
 extern ulong _timer_ticks;
 #define timerget() (_timer_ticks)
+
+#define timeruntil(t)   while (_timer_ticks < t) {}
+#define timerwait(t)    do { ulong finish = _timer_ticks + t; timeruntil(finish); } while (0)
 
 #endif

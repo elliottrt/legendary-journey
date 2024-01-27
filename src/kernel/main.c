@@ -11,8 +11,12 @@
 #include "kalloc.h"
 #include "mmu.h"
 
-// must be higher than 18
-#define TIMER_HZ 100
+/*
+NEXT
+
+FILE I/O
+
+*/
 
 void main(void)
 {
@@ -26,22 +30,18 @@ void main(void)
 
 	kgdtinit();
 
-	kallocexpand();
+	atainit();
 
 	idtinit();
 	isrinit();
 	irqinit();
 
 //	kbdinit();
-	timerinit(TIMER_HZ);
+	timerinit();
+
+	kallocexpand();
 
 	printf("initialization complete\n");
-
-	for (uint i = 0; i < 100; i++) {
-		printf("%d\n", i);
-		ulong next = timerget() + 25;
-		while (timerget() < next);
-	}
 
 	while(1);
 }

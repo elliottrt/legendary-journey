@@ -3,6 +3,13 @@
 
 #include "types.h"
 
+struct memregion {
+    ullong address;
+    ullong length;
+    uint type;
+    uint attributes;
+};
+
 char *membound(void);
 
 #endif

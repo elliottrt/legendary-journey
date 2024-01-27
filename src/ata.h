@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-#define BIT(n) (1 << (n))
+struct ataidentify;
 
 /* from https://wiki.osdev.org/ataread/write_sectors */
 /* and  https://wiki.osdev.org/atapio_mode */
@@ -15,19 +15,21 @@ void atacacheflush(void);
 /* perform software reset */
 void atareset(void);
 /* read sectors to some address */
-void ataread(uint lba, uchar sectors, void *dst);
+int ataread(uint lba, uchar sectors, void *dst);
 /* write sectors to disk */
-void atawrite(uint lba, uchar sectors, const void *src);
+int atawrite(uint lba, uchar sectors, const void *src);
 /* returns 1 if ata encountered an error, 0 otherwise */
 int atacheckerror(void);
 /* prints error encountered */
 void ataerror(void);
 /* returns writable/readable sectors */
 uint atasectors(void);
+/* returns the address of the ATAIDENTIFY block */
+struct ataidentify *atagetidentify(void);
 
 /* https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ata/ns-ata-_identify_device_data */
 /* not sure how reliable this is */
-struct __attribute__((__packed__)) ataidentify
+struct ataidentify
 {
 	ushort configurationflags;
 	ushort cylinders;
@@ -135,6 +137,6 @@ struct __attribute__((__packed__)) ataidentify
 	ushort reserved12[19];
 	uchar  signature;
 	uchar  checksum;
-};
+} __attribute__((__packed__));
 
 #endif

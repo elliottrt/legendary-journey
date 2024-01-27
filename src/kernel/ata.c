@@ -1,12 +1,13 @@
 #include "ata.h"
 #include "x86.h"
 #include "printf.h"
+#include "mmu.h"
 
-extern uint disksectors;
+extern struct ataidentify *_ataidentify;
 
 void atainit(void)
 {
-	printf("ata: initialized, %d sectors available\n", disksectors);
+	_ataidentify = P2V(_ataidentify);
 }
 
 void atacacheflush(void)
@@ -33,23 +34,24 @@ void atareset(void)
 		ataerror();
 }
 
-void ataread(uint lba, uchar sectors, void *dst)
+int ataread(uint lba, uchar sectors, void *dst)
 {
 	uchar status = 0x00;
 	ushort *data = (ushort *) dst;
 
 	lba &= 0x0FFFFFFF;
 
-	if (lba + sectors > disksectors) 
+	if (lba + sectors > _ataidentify->useraddressablesectors) 
 	{
 		printferr();
 		printf("ata: error: cannot read beyond end of disk\n");
 		printfstd();
+		return -1;
 	}
 
 	/* why do io if we aren't reading anything? */
 	/* this is also a special value that would read a lot of sectors */
-	if (sectors == 0) return;
+	if (sectors == 0) return 0;
 
 	/* drive and lba bits 24-27 */
 	outb(0x01F6, (lba >> 24) | 0xE0);
@@ -69,16 +71,18 @@ void ataread(uint lba, uchar sectors, void *dst)
 		status = inb(0x01F7);
 
 	for (int reads = 0; reads < sectors * 256; reads++)	
-	{
 		data[reads] = inw(0x01F0);
+
+	if (atacheckerror()) {
+		ataerror();
+		return -1;
 	}
 
-	if (atacheckerror())
-		ataerror();
+	return 0;
 
 }
 
-void atawrite(uint lba, uchar sectors, const void *src)
+int atawrite(uint lba, uchar sectors, const void *src)
 {
 
 	uchar status = 0x00;
@@ -86,16 +90,17 @@ void atawrite(uint lba, uchar sectors, const void *src)
 
 	lba &= 0x0FFFFFFF;
 
-	if (lba + sectors > disksectors)
+	if (lba + sectors > _ataidentify->useraddressablesectors)
 	{
 		printferr();
 		printf("ata: error: cannot write beyond end of disk\n");
 		printfstd();
+		return -1;
 	}
 
 	/* why do io if we aren't writing anything? */
 	/* this is also a special value that would write a lot of sectors */
-	if (sectors == 0) return;
+	if (sectors == 0) return 0;
 
 	/* drive and lba bits 24-27 */
 	outb(0x01F6, (lba >> 24) | 0xE0);
@@ -119,11 +124,15 @@ void atawrite(uint lba, uchar sectors, const void *src)
 		outw(0x01F0, data[writes]);
 	}
 
-	if (atacheckerror())
+	if (atacheckerror()) {
 		ataerror();
+		return -1;
+	}
 
 	/* need to do this to prevent issues */
 	atacacheflush();
+
+	return 0;
 
 }
 
@@ -164,5 +173,8 @@ void ataerror(void)
 
 uint atasectors(void)
 {
-	return disksectors;
+	return _ataidentify->useraddressablesectors;
 }
+
+// We don't want to implement this
+struct ataidentify *atagetidentify(void);

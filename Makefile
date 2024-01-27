@@ -42,12 +42,12 @@ CFLAGS=-m32 -c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-ar
 CFLAGS:=$(CFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
 CFLAGS:=$(CFLAGS) -DKERNEL_LOAD=$(KERNELLOAD) -DKERNEL_NAME='"/$(KERNELNAME)"'
 CFLAGS:=$(CFLAGS) -Isrc/ -fno-pic -static -fno-strict-aliasing -MD -no-pie
-CFLAGS:=$(CFLAGS) -fno-omit-frame-pointer -O2
+CFLAGS:=$(CFLAGS) -fno-omit-frame-pointer -Wunused -Os
 LDFLAGS=-nostdlib -static -Isrc/ -m elf_i386
 ASFLAGS=--32
 KERNELFLAGS=-c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
 KERNELFLAGS:=$(KERNELFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
-KERNELFLAGS:=$(KERNELFLAGS) -Isrc/ -fno-pic -DKERNEL_LOAD=$(KERNELLOAD)
+KERNELFLAGS:=$(KERNELFLAGS) -Isrc/ -fno-pic -DKERNEL_LOAD=$(KERNELLOAD) -Wunused -O2
 
 BOOTFLAGS=-defsym S2LOC=$(STAGE2_LOCATION) -defsym S2SEG=$(STAGE2_SEGMENT) -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=$(STAGE2_SIZE)
 
@@ -85,11 +85,10 @@ $(ROOT):
 	mkdir -p $(ROOT)
 
 run: OS Makefile
-	$(EMU) -drive format=raw,file=$(OS) -m 64 -monitor stdio -full-screen -D trace.log -d int -action reboot=shutdown #-action shutdown=pause
+	$(EMU) -drive format=raw,file=$(OS) -m 64 -monitor stdio -full-screen -action reboot=shutdown #-action shutdown=pause -D trace.log -d int
 
 clean:
-	rm -rf $(BIN)
-	rm -rf $(ROOT)
+	rm -rf $(BIN) $(ROOT)
 
 OS: ./mkfat $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) Makefile
 	cp $(KERNEL) $(ROOT)/$(KERNELNAME)

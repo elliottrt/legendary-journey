@@ -28,7 +28,7 @@ _start_virt:
 
 	// get first argument
 	movl 4(%esp), %eax
-	movl %eax, (disksectors)
+	movl %eax, (_ataidentify)
 
 	// get second argument
 	movl 8(%esp), %eax
@@ -46,8 +46,8 @@ _start_virt:
 
 .section .bss
 
-.globl disksectors
-disksectors:
+.globl _ataidentify
+_ataidentify:
 	.space 4
 .globl PHYSTOP
 PHYSTOP:

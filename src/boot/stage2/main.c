@@ -26,7 +26,7 @@ void stage2main(void)
 	if (elfread(&kernel, (void *) 0x10000, &kernelentry) < 0)
 		return;
     
-	kernelentry(atasectors(), membound());
+	kernelentry(atagetidentify(), membound());
 
 #else
 	puterr("KERNEL_LOAD OR KERNEL_NAME NOT DEFINED\n", 0);

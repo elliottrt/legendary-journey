@@ -4,11 +4,11 @@
 int errno;
 const char *strerror[] =
 {
-	"NO SUCH FILE OR DIRECTORY",
-	"BAD FILE DESCRIPTOR",
-	"TRIED TO READ SOMETHING NOT A DIRECTORY AS A DIRECTORY",
-	"INVALID ARGUMENT",
-	"BAD FILE PATH"
+	"no such file or directory",
+	"bad file descriptor",
+	"tried to read something not a directory as a directory",
+	"invalid argument",
+	"bad file path"
 };
 
 struct file root;

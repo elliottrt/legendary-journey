@@ -1,5 +1,5 @@
-#ifndef _STAGE2_FILE
-#define _STAGE2_FILE
+#ifndef _FILE
+#define _FILE
 
 #include "fat.h"
 #include "types.h"
@@ -17,8 +17,8 @@ enum fileerror
 
 struct file
 {
-	short isdirectory;
-	short opened;
+	uchar isdirectory;
+	uchar opened;
 	uint position;
 	uint size;
 	uint totalclusters;
@@ -30,7 +30,6 @@ struct file
 };
 
 extern int errno;
-extern const char *strerror[5];
 
 void fileinit(void);
 

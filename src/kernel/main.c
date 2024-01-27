@@ -7,9 +7,10 @@
 #include "timer.h"
 #include "kbd.h"
 #include "virtmem.h"
-#include "x86.h"
 #include "kalloc.h"
 #include "mmu.h"
+#include "fat.h"
+#include "x86.h"
 
 /*
 NEXT

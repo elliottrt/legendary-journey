@@ -6,15 +6,12 @@
 char FAT_VALID_FILENAME_CHARS[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&'()-@^_`{}~";
 
 uint _fatsector[FAT_COUNT];
-struct fatbootsector *_bootsector;
 
 uint _cachefirstentry;
-ENTRY_TYPE _fatcache[ENTRIES_PER_SECTOR];
+ENTRY_TYPE _fatcache[ENTRIES_PER_SECTOR * FAT_CACHE_SIZE];
 
-void fatinit(void *bootsectoraddress)
+void fatinit(void)
 {
-
-	_bootsector = (struct fatbootsector *) bootsectoraddress;
 
 	if (_bootsector->fatcount > FAT_COUNT)
 		puterr("Too many fats, only handling 2\n", 1);
@@ -26,9 +23,7 @@ void fatinit(void *bootsectoraddress)
 	_fatsector[0] = _bootsector->reservedsectors;
 
 	for (int i = 1; i < FAT_COUNT; i++)
-	{
 		_fatsector[i] = _fatsector[i - 1] + _bootsector->ex.fat32.fatsize32;
-	}
 
 	fatcache(0, 0);
 
@@ -59,7 +54,7 @@ int fatcache(uint fat, uint offsetsector)
 	if (offsetsector >= _bootsector->ex.fat32.fatsize32)
 		return -1;
 
-	ataread(_fatsector[fat] + offsetsector, 1, _fatcache);
+	ataread(_fatsector[fat] + offsetsector, FAT_CACHE_SIZE, _fatcache);
 	_cachefirstentry = offsetsector * ENTRIES_PER_SECTOR;
 
 	return 0;
@@ -81,7 +76,7 @@ uint fattotalclusters(uint entryposition)
 
 ENTRY_TYPE fatclustervalue(uint entryposition)
 {
-	if (entryposition < _cachefirstentry || entryposition >= _cachefirstentry + ENTRIES_PER_SECTOR)
+	if (entryposition < _cachefirstentry || entryposition >= _cachefirstentry + (ENTRIES_PER_SECTOR * FAT_CACHE_SIZE))
 	{
 		fatcache(0, entryposition / ENTRIES_PER_SECTOR);
 	}

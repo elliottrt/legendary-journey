@@ -1,5 +1,5 @@
-#ifndef _STAGE2_FATDEFS
-#define _STAGE2_FATDEFS
+#ifndef _FATDEFS
+#define _FATDEFS
 
 #include "types.h"
 

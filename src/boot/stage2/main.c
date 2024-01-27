@@ -11,7 +11,7 @@ void stage2main(void)
 	clrscr();
 
 	atainit();
-	fatinit((void *) 0x7C00);
+	fatinit();
 	fileinit();
 
 #if defined (KERNEL_LOAD) && defined (KERNEL_NAME)

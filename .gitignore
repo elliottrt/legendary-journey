@@ -65,3 +65,4 @@ old
 *.old
 mkfat
 root
+*.log

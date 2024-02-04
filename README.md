@@ -28,7 +28,5 @@ in no particular order:
 - actually learn what I'm doing
 - printf %_ should clear the screen? maybe %e for error and %s for normal colors?
 - in(b|w)/out(b|w) might need the whole ebp/esp thing
-- kernel::file.c::fileopen should create a new file if one doesn't exist - flags? (O_CREAT)
-- fat.c should have function to update all FATs
 
 (list partly from [here](https://wiki.osdev.org/Rolling_Your_Own_Bootloader))

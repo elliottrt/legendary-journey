@@ -1,6 +1,8 @@
 OUTPUT_FORMAT("elf32-i386")
 ENTRY(_start)
 
+/* TODO: discard debug info */
+
 SECTIONS
 {
 	. = 0x80100000;

@@ -2,10 +2,13 @@
 #include "printf.h"
 #include "x86.h"
 #include "irq.h"
+#include "std.h"
 
 ulong _timer_ticks = 0;
 
 void timerinterrupt(struct registers *regs) {
+    UNUSED(regs);
+
 	_timer_ticks++;
 }
 

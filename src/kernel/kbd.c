@@ -34,6 +34,7 @@ char getkeychar(ushort scancode)
 }
 
 static void kbdhandler(struct registers *regs) {
+    UNUSED(regs);
 
     ushort scancode = (ushort) inb(0x60);
 

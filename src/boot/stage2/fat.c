@@ -3,90 +3,78 @@
 #include "ata.h"
 #include "std.h"
 
+// UNUSED
+int fatwritesector(fat_entry_t cluster, uint sector, const void *data);
+
 char FAT_VALID_FILENAME_CHARS[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&'()-@^_`{}~";
 
-uint _fatsector[FAT_COUNT];
+uint _first_fat;
 
 uint _cachefirstentry;
-ENTRY_TYPE _fatcache[ENTRIES_PER_SECTOR * FAT_CACHE_SIZE];
+fat_entry_t _fatcache[ENTRIES_PER_SECTOR * FAT_CACHE_SIZE];
 
-void fatinit(void)
-{
-
-	if (_bootsector->fatcount > FAT_COUNT)
-		puterr("Too many fats, only handling 2\n", 1);
+void fatinit(void) {
 
 	if (_bootsector->fatsize16 != 0)
 		puterr("Only fat32 supported, found fat12/fat16\n", 0);
 
 	/* this is the start of the first fat */
-	_fatsector[0] = _bootsector->reservedsectors;
-
-	for (int i = 1; i < FAT_COUNT; i++)
-		_fatsector[i] = _fatsector[i - 1] + _bootsector->ex.fat32.fatsize32;
+	_first_fat = _bootsector->reservedsectors;
 
 	fatcache(0, 0);
 
 }
 
-uint fatclustertolba(ENTRY_TYPE cluster)
-{
-	uint dataregionstart = _bootsector->reservedsectors + (_bootsector->fatcount * _bootsector->ex.fat32.fatsize32);
-	return ((cluster - _bootsector->ex.fat32.rootcluster) * _bootsector->sectorspercluster) + dataregionstart;
+uint fatclustertolba(fat_entry_t cluster) {
+	uint dataregionstart = _bootsector->reservedsectors + (_bootsector->fatcount * _bootsector->fatsize32);
+	return ((cluster - _bootsector->rootcluster) * _bootsector->sectorspercluster) + dataregionstart;
 }
 
-int fatnomoredirentry(struct fatdirentry *direntry)
-{
-	return direntry->filename[0] == 0x00;
+int fatnomoredirentry(struct fatdirentry *direntry) {
+	return direntry == NULL || direntry->filename[0] == 0x00;
 }
 
-void fatreadsector(ENTRY_TYPE cluster, uint sector, void *out)
-{
+int fatreadsector(fat_entry_t cluster, uint sector, void *out) {
 	uint clusterlba = fatclustertolba(cluster);
-	ataread(clusterlba + sector, 1, out);
+	return ataread(clusterlba + sector, 1, out);
 }
 
-int fatcache(uint fat, uint offsetsector)
-{
-	if (fat >= FAT_COUNT)
+int fatcache(uint fat, uint offsetsector) {
+	UNUSED(fat);
+
+	if (offsetsector >= _bootsector->fatsize32)
 		return -1;
 
-	if (offsetsector >= _bootsector->ex.fat32.fatsize32)
-		return -1;
-
-	ataread(_fatsector[fat] + offsetsector, FAT_CACHE_SIZE, _fatcache);
+	ataread(_first_fat + offsetsector, FAT_CACHE_SIZE, _fatcache);
 	_cachefirstentry = offsetsector * ENTRIES_PER_SECTOR;
 
 	return 0;
 }
 
-uint fattotalclusters(uint entryposition)
-{
+uint fattotalclusters(fat_entry_t cluster, uint *lastcluster) {
+
 	uint count = 0;
-	ENTRY_TYPE value = entryposition;
-	do
-	{
+
+	fat_entry_t value = cluster;
+	do {
+		if (lastcluster) *lastcluster = value;
 		value = fatclustervalue(value);
 		count++;
-	}
-	while (value != FEEND32);
+	} while (value < FEEND32L);
 	
 	return count;
 }
 
-ENTRY_TYPE fatclustervalue(uint entryposition)
-{
+fat_entry_t fatclustervalue(uint entryposition) {
 	if (entryposition < _cachefirstentry || entryposition >= _cachefirstentry + (ENTRIES_PER_SECTOR * FAT_CACHE_SIZE))
-	{
 		fatcache(0, entryposition / ENTRIES_PER_SECTOR);
-	}
+
 	return _fatcache[entryposition % ENTRIES_PER_SECTOR];
 }
 
 /* See https://en.wikipedia.org/wiki/8.3_filename */
 
-int _fatformatchar(int c)
-{
+int _fatformatchar(int c) {
 	char *valid = strchr(FAT_VALID_FILENAME_CHARS, c);
 
 	if (valid || c >= 128)
@@ -101,8 +89,7 @@ int _fatformatchar(int c)
 	return FAT_DEFAULT_FILENAME_CHAR;
 }
 
-int _fatformatfilename(const char *name, char *dest, uint max)
-{
+int _fatformatfilename(const char *name, char *dest, uint max) {
 
 	if (dest == 0)
 		return -1;
@@ -126,22 +113,22 @@ int _fatformatfilename(const char *name, char *dest, uint max)
 	return 0;
 }
 
-void fatformatfilename(const char *input, uint inputlength, char *output)
-{
+void fatformatfilename(const char *input, uint inputlength, char *output) {
 
-	const char *dotlocation = strnchr(input, '.', inputlength);
 	memset(output, FAT_DEFAULT_FILENAME_PADDING, FAT_FILETOTAL_LEN);
 
-	if (strncmp(input, ".", 1) == 0)
+	if (memcmp(input, FAT_DOT, FAT_FILETOTAL_LEN) == 0)
 	{
-		strncpy(output, ".          ", 11);
+		memcpy(output, FAT_DOT, FAT_FILETOTAL_LEN);
 		return;
 	}
-	if (strncmp(input, "..", 2) == 0)
+	if (memcmp(input, FAT_DOTDOT, FAT_FILETOTAL_LEN) == 0)
 	{
-		strncpy(output, "..         ", 11);
+		memcpy(output, FAT_DOTDOT, FAT_FILETOTAL_LEN);
 		return;
 	}
+
+	const char *dotlocation = strnchr(input, '.', inputlength);
 
 	if (dotlocation)
 	{

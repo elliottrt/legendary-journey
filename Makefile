@@ -83,9 +83,11 @@ $(KERNEL): $(BIN) $(KERNELTARGETS) src/kernel/link.ld
 	
 $(ROOT):
 	mkdir -p $(ROOT)
+	mkdir -p $(ROOT)/folder
+	mkdir -p $(ROOT)/folder/folder
 
 run: OS Makefile
-	$(EMU) -drive format=raw,file=$(OS) -m 64 -monitor stdio -full-screen -action reboot=shutdown #-action shutdown=pause -D trace.log -d int
+	$(EMU) -drive format=raw,file=$(OS) -m 64 -monitor stdio -full-screen -action reboot=shutdown -action shutdown=pause -D trace.log -d int
 
 clean:
 	rm -rf $(BIN) $(ROOT)

@@ -73,9 +73,20 @@ char *strncpy(char *str1, const char *str2, uint n)
 	return str1_start;
 }
 
-int min(int a, int b)
-{
+int min(int a, int b) {
 	return a > b ? b : a;
+}
+
+uint umin(uint a, uint b) {
+	return a > b ? b : a;
+}
+
+int max(int a, int b) {
+	return a > b ? a : b;
+}
+
+uint umax(uint a, uint b) {
+	return a > b ? a : b;
 }
 
 char *strnchr(const char *str, char c, uint n)

@@ -19,7 +19,7 @@ void stage2main(void)
 	struct file kernel;
 	void (*kernelentry)(); // we can ignore the args here
 
-	if (fileopen(&kernel, KERNEL_NAME) < 0)
+	if (fileopen(&kernel, KERNEL_NAME, 0) < 0)
 		return;
 
 	// read kernel header to scratch space

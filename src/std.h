@@ -6,6 +6,8 @@
 
 #define NULL 0
 
+#define UNUSED(X) (void)(X)
+
 /* See https://www.ibm.com/docs/en/i/7.3?topic=extensions-standard-c-library-functions-table-by-name */
 /* descriptions copied from there */
 
@@ -34,6 +36,11 @@ char *strncpy(char *dst, const char *src, uint n);
 
 /* Returns the lower of a and b. */
 int min(int a, int b);
+uint umin(uint a, uint b);
+
+/* Returns the higher of a and b */
+int max(int a, int b);
+uint umax(uint a, uint b);
 
 /* Locates the first occurrence of c in str within n characters. */
 char *strnchr(const char *str, char c, uint n);

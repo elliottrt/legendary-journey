@@ -3,6 +3,7 @@
 
 #include "fatdefs.h"
 #include "types.h"
+#include "kernel/mmu.h"
 
 #define FAT_DEFAULT_FILENAME_CHAR '_'
 #define FAT_DEFAULT_FILENAME_PADDING ' '
@@ -15,12 +16,21 @@
 
 void fatinit(void);
 
+uint fatclustertolba(fat_entry_t cluster);
 int fatnomoredirentry(struct fatdirentry *direntry);
-void fatreadsector(ENTRY_TYPE cluster, uint sector, void *out);
+int fatreadsector(fat_entry_t cluster, uint sector, void *data);
+int fatwritesector(fat_entry_t cluster, uint sector, const void *data);
 
 int fatcache(uint fat, uint offsetsector);
-uint fattotalclusters(ENTRY_TYPE cluster);
-ENTRY_TYPE fatclustervalue(uint entryposition);
+void fatcommit(void);
+uint fattotalclusters(fat_entry_t cluster, uint *lastcluster);
+fat_entry_t fatclustervalue(uint entryposition);
+
+uint fatfindfreecluster(void);
+void fatsetcluster(uint cluster, fat_entry_t value);
+
+// returns the new end cluster
+fat_entry_t fatallocclusters(fat_entry_t start, uint count);
 
 void fatformatfilename(const char *input, uint inputlength, char *output);
 

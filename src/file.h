@@ -6,26 +6,32 @@
 
 #define PATH_SEP '/'
 
+// TODO: strerror(int errno)
 enum ferror {
 	ENOENT = 0, /* no such file or directory */
 	EBADF = 1, /* bad file descriptor */
 	ENOTDIR = 2, /* tried to read something not a directory as a directory */
-	EINVAL = 3, /* invalid argument */
-	EPATH = 4, /* bad file path */
-	EEXIST = 5, /* file already exists */
+	EISDIR = 3, /* is a directory */
+	EINVAL = 4, /* invalid argument */
+	EPATH = 5, /* bad file path */
+	EEXIST = 6, /* file already exists */
+	EACCES = 7, /* permission denied */
+	EIO = 8, /* general io error */
+	ENAMETOOLONG = 9, /* filename too long */
+	ENOMEM = 10, /* not enough space / can't allocate memory */
+	ENOSYS = 11, /* function not implemented */
+	ENOTEMPTY = 12, /* directory not empty */
+	EPERM = 13, /* operation not permitted */
 };
 
-// TODO: store fatdirentry inside of file struct
 struct file {
-	uchar filename[FAT_FILETOTAL_LEN + 1];
+	
+	struct fatdirentry fsentry;
 
-	uchar isdirectory;
 	uchar opened;
 	uchar dirty;
-	uchar attributes;
 
 	uint position;
-	uint size;
 	uchar buffer[SECTOR_SIZE];
 
 	uint totalclusters;

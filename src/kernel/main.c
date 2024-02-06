@@ -40,18 +40,16 @@ void main(void)
 
 	printf("initialization complete\n");
 
-	struct file text;
+	struct file file;
 
-	char contents[] = "Created folder/text.txt successfully!";
+	if (fileopen(&file, "/test.txt", FCREATE) < 0)
+		printf("fopen: %d\n", errno);
 
-	if (fileopen(&text, "/folder/folder/../text.txt", FCREATE) < 0)
-		printf("failed to open file: %d\n", errno);
+	if (filewrite(&file, "file created successfully!", 26) < 0)
+		printf("fwrite: %d\n", errno);
 
-	if (filewrite(&text, contents, sizeof(contents) - 1) < 0)
-		printf("failed to write to file: %d\n", errno);
-
-	if (fileclose(&text) < 0)
-		printf("failed to close file: %d\n", errno);
+	if (fileclose(&file) < 0)
+		printf("fclose: %d\n", errno);
 
 	while(1);
 }

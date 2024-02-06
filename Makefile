@@ -79,12 +79,10 @@ $(BIN)/kernel/%.o: src/kernel/%.S
 	# nasm -o $@ $^ -felf32
 
 $(KERNEL): $(BIN) $(KERNELTARGETS) src/kernel/link.ld
-	$(LD) -o $(KERNEL) $(KERNELTARGETS) -Tsrc/kernel/link.ld
+	$(LD) -o $(KERNEL) $(KERNELTARGETS) -Tsrc/kernel/link.ld --gc-sections
 	
 $(ROOT):
 	mkdir -p $(ROOT)
-	mkdir -p $(ROOT)/folder
-	mkdir -p $(ROOT)/folder/folder
 
 run: OS Makefile
 	$(EMU) -drive format=raw,file=$(OS) -m 64 -monitor stdio -full-screen -action reboot=shutdown -action shutdown=pause -D trace.log -d int

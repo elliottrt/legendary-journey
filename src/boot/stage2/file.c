@@ -6,26 +6,23 @@ struct file root;
 
 int _fileread(struct file *file, void *buffer, uint size);
 
-void filenew(uint cluster, uint size, uchar attributes, struct file *fileout) {
+void filenew(struct fatdirentry *entry, struct file *fileout) {
+	memcpy(&fileout->fsentry, entry, sizeof(struct fatdirentry));
 	fileout->opened = 1;
-	fileout->isdirectory = attributes & DIRECTORY;
-	fileout->attributes = attributes;
 	fileout->position = 0;
-	fileout->size = size;
-	fileout->totalclusters = fattotalclusters(cluster, &fileout->lastcluster);
-	fileout->firstcluster = cluster;
-	fileout->currentcluster = cluster;
+	fileout->firstcluster = entry->firstclusterlo | (uint) entry->firstclusterhi << 16;
+	fileout->totalclusters = fattotalclusters(fileout->firstcluster, &fileout->lastcluster);
+	fileout->currentcluster = fileout->firstcluster;
     fileout->sectorincluster = 0;
-	fatreadsector(cluster, 0, fileout->buffer);
+	fatreadsector(fileout->firstcluster, 0, fileout->buffer);
 }
 
 int findentry(struct file *directory, const char *name, struct file *fileout) {
 	struct fatdirentry entry;
-	uint cluster = 0;
 	int possibleentries = (directory->totalclusters * _bootsector->sectorspercluster * _bootsector->bytespersector) 
 								/ sizeof(struct fatdirentry);
 
-	if (directory->isdirectory == 0)
+	if ((directory->fsentry.attributes & DIRECTORY) == 0)
 		return -1;
 
 	/* make sure we start from the beginning when reading a directory */
@@ -36,10 +33,8 @@ int findentry(struct file *directory, const char *name, struct file *fileout) {
 		int readresult = _fileread(directory, &entry, sizeof(struct fatdirentry));
 		if (readresult < 0)
 			return readresult;
-		if (strncmp((char *) entry.filename, name, FAT_FILETOTAL_LEN) == 0)
-		{
-			cluster = entry.firstclusterlo | ((uint)entry.firstclusterhi << 16);
-			filenew(cluster, entry.filesize, entry.attributes, fileout);
+		if (strncmp((char *) entry.filename, name, FAT_FILETOTAL_LEN) == 0) {
+			filenew(&entry, fileout);
 			return 0;
 		}
 	}
@@ -74,7 +69,8 @@ uint pathnext(char **start) {
 }
 
 void fileinit(void) {
-	filenew(_bootsector->rootcluster, 0, SYSTEM | DIRECTORY, &root);
+	struct fatdirentry rootentry = FAT_PHYS_ROOT_ENTRY;
+	filenew(&rootentry, &root);
 }
 
 int fileopen(struct file *file, const char *pathname, int flags) {
@@ -112,8 +108,8 @@ int _fileread(struct file *file, void *buffer, uint size) {
 	uchar *bytebuffer = (uchar *) buffer;
 	uint filetotalbytes = file->totalclusters * _bootsector->sectorspercluster * _bootsector->bytespersector;
 
-	if (!file->isdirectory)
-		filetotalbytes = min(filetotalbytes, file->size);
+	if (!(file->fsentry.attributes & DIRECTORY))
+		filetotalbytes = min(filetotalbytes, file->fsentry.filesize);
 
 	size = min(size, filetotalbytes - file->position);
 
@@ -135,7 +131,7 @@ int _fileread(struct file *file, void *buffer, uint size) {
 			if (file->currentcluster >= FEEND32L)
 			{
 				/* reached eof */
-				file->position = file->size;
+				file->position = file->fsentry.filesize;
 				return 0;
 			}
 		}
@@ -200,7 +196,7 @@ void printint(uint x, int base, int sign) {
 
 int fileseek(struct file *file, uint seek) {
 
-	if (file == NULL || file->opened == 0 || seek >= file->size)
+	if (file == NULL || file->opened == 0 || seek >= file->fsentry.filesize)
 		return -1;
 
 	uint clustersin = seek / (_bootsector->sectorspercluster * _bootsector->bytespersector);

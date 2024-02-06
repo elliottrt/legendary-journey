@@ -44,6 +44,9 @@ struct fatdirentry {
     uint filesize;
 } __attribute__ ((packed));
 
+#define FAT_PHYS_ROOT_ENTRY ((struct fatdirentry){ .attributes = SYSTEM | DIRECTORY, .firstclusterlo = _bootsector->rootcluster })
+#define FAT_VIRT_ROOT_ENTRY ((struct fatdirentry){ .attributes = SYSTEM | DIRECTORY, .firstclusterlo = _vbootsector->rootcluster })
+
 struct fatbootsector {
 	uchar bootjmp[3];
 	unsigned char oemname[8];

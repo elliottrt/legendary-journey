@@ -2,37 +2,36 @@
 #include "ata.h"
 #include "std.h"
 #include "printf.h"
+#include "kalloc.h"
 
 char FAT_VALID_FILENAME_CHARS[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&'()-@^_`{}~";
-
-uint _fatsector[FAT_COUNT];
 
 static struct fatsearch {
 	uint start;
 } _fatsearch;
 
-// TODO: dynamically allocate _fatcache.buffer and increase its size
 static struct fatcache {
 	uchar dirty;
 	uint firstentry;
 	uint startingsector;
 	uchar sectorsbuffered;
-	fat_entry_t buffer[ENTRIES_PER_SECTOR * FAT_CACHE_SIZE];
+	// of size ENTRIES_PER_SECTOR * FAT_CACHE_SIZE
+	fat_entry_t *buffer;
 } _fatcache;
 
 void fatinit(void) {
 
-	if (_vbootsector->fatcount > FAT_COUNT) {
+	if (_vbootsector->bytespersector * FAT_CACHE_SIZE > PGSIZE) {
 		printferr();
-		printf("too many fats (%d), only handling %d\n", _vbootsector->fatcount, FAT_COUNT);
-		printfstd();
+		printf("error: fatcache too large (%u bytes), must be <= to %u bytes\n", _vbootsector->bytespersector * FAT_CACHE_SIZE, PGSIZE);
+		while(1);
 	}
 
-	// this is the start of the first fat
-	_fatsector[0] = _vbootsector->reservedsectors;
-
-	for (int i = 1; i < FAT_COUNT; i++)
-		_fatsector[i] = _fatsector[i - 1] + _vbootsector->fatsize32;
+	if ((_fatcache.buffer = (fat_entry_t *) kalloc()) == NULL) {
+		printferr();
+		printf("error: failed to allocate memory for fat cache\n");
+		while(1);
+	}
 
 	// start searching after reserved clusters
 	_fatsearch.start = 2;
@@ -61,15 +60,18 @@ int fatwritesector(fat_entry_t cluster, uint sector, const void *data) {
 }
 
 int fatcache(uint fat, uint offsetsector) {
-	if (fat >= FAT_COUNT || offsetsector >= _vbootsector->fatsize32)
+	if (fat >= _vbootsector->fatcount || offsetsector >= _vbootsector->fatsize32)
 		return -1;
 
 	// write back to all fats if dirty
 	fatcommit();
 
+	// sectors buffered is either the CACHE_SIZE or the number of sectors until the end of the fat
 	_fatcache.sectorsbuffered = min(FAT_CACHE_SIZE, _vbootsector->fatsize32 - offsetsector);
 
-	ataread(_fatsector[fat] + offsetsector, _fatcache.sectorsbuffered, _fatcache.buffer);
+	uint lba = _vbootsector->reservedsectors + (fat * _vbootsector->fatsize32) + offsetsector;
+
+	ataread(lba, _fatcache.sectorsbuffered, _fatcache.buffer);
 
 	_fatcache.dirty = 0;
 	_fatcache.firstentry = offsetsector * ENTRIES_PER_SECTOR;
@@ -80,8 +82,13 @@ int fatcache(uint fat, uint offsetsector) {
 
 void fatcommit(void) {
 	if (_fatcache.dirty) {
-		for (uint fatidx = 0; fatidx < FAT_COUNT; ++fatidx)
-			atawrite(_fatsector[fatidx] + _fatcache.startingsector, _fatcache.sectorsbuffered, _fatcache.buffer);
+		// position of cached area in fat 0
+		uint lba = _vbootsector->reservedsectors + _fatcache.startingsector;
+		for (uint fatidx = 0; fatidx < _vbootsector->fatcount; ++fatidx) {
+			atawrite(lba, _fatcache.sectorsbuffered, _fatcache.buffer);
+			lba += _vbootsector->fatsize32;
+		}
+		_fatcache.dirty = 0;
 	}
 }
 
@@ -121,10 +128,6 @@ uint fatfindfreecluster(void) {
 	uint current = _fatsearch.start;
 
 	uint possible_entries_left = (_vbootsector->fatsize32 * _vbootsector->bytespersector / sizeof(fat_entry_t)) - current * sizeof(fat_entry_t);
-	
-	// TODO: set a cap value on possible_entries_left
-	// because it will search the whole fat for a free
-	// spot if it needs to
 
 	while (possible_entries_left--) {
 		fat_entry_t value = fatclustervalue(current);
@@ -144,8 +147,22 @@ uint fatfindfreecluster(void) {
 	return 0;
 }
 
+fat_entry_t fattraverse(fat_entry_t start, uint count) {
+	if (count == 0) return start;
+
+	fat_entry_t nextcluster = start;
+	while (count--) {
+		uint value = fatclustervalue(nextcluster);
+		if (value >= FEEND32L)
+			return nextcluster;
+		nextcluster = value;
+	}
+
+	return nextcluster;
+}
+
 fat_entry_t fatallocclusters(fat_entry_t start, uint count) {
-	if (count == 0) return 0;
+	if (count == 0) return start;
 
 	uint clustersleft = count;
 	fat_entry_t top = start;
@@ -158,6 +175,21 @@ fat_entry_t fatallocclusters(fat_entry_t start, uint count) {
 	fatsetcluster(top, FEEND32L);
 
 	return top;
+}
+
+fat_entry_t fatdeallocclusters(fat_entry_t start) {
+
+	fat_entry_t nextcluster = fatclustervalue(start);
+
+	while (nextcluster < FEEND32L) {
+		fat_entry_t value = fatclustervalue(nextcluster);
+		fatsetcluster(nextcluster, FEFREE);
+		nextcluster = value;
+	}
+
+	fatsetcluster(start, FEEND32L);
+	return start;
+
 }
 
 /* See https://en.wikipedia.org/wiki/8.3_filename */

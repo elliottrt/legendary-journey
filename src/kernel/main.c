@@ -40,6 +40,7 @@ void main(void)
 
 	printf("initialization complete\n");
 
+	/*
 	struct file file;
 
 	if (fileopen(&file, "/test.txt", FCREATE) < 0)
@@ -50,6 +51,7 @@ void main(void)
 
 	if (fileclose(&file) < 0)
 		printf("fclose: %d\n", errno);
+	*/
 
 	while(1);
 }

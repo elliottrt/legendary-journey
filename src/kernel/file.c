@@ -9,10 +9,9 @@ int filewrite(struct file *file, const void *buffer, uint size);
 int errno = -1;
 
 enum staticfileid {
-	STATIC_FCLOSE = 0,
-	STATIC_FCREAT0 = 1,
-	STATIC_FCREAT1 = 2,
-	STATIC_SIZE = 3
+	STATIC_FCREAT0 = 0,
+	STATIC_FCREAT1 = 1,
+	STATIC_SIZE = 2
 };
 
 // TODO: dynamically allocate this in fileinit
@@ -32,13 +31,13 @@ void filenew(uint parentcluster, struct fatdirentry *entry, struct file *fileout
     fileout->sectorincluster = 0;
 	fileout->parentdircluster = parentcluster;
 
-	if (entry->attributes & DIRECTORY)
+	if (entryisdir(entry))
 		fileout->fsentry.filesize = fileout->totalclusters * _vbootsector->sectorspercluster * _vbootsector->bytespersector;
 
 	fatreadsector(fileout->firstcluster, 0, fileout->buffer);
 }
 
-int fileexpand(struct file *file, uint size) {
+int fileresize(struct file *file, uint size) {
 
 	if (file == NULL) {
 		errno = EINVAL;
@@ -51,7 +50,6 @@ int fileexpand(struct file *file, uint size) {
 	}
 
 	uint bytespercluster = _vbootsector->sectorspercluster * _vbootsector->bytespersector;
-
 	uint currentcapacity = file->totalclusters * bytespercluster;
 
 	if (size > currentcapacity) {
@@ -62,7 +60,18 @@ int fileexpand(struct file *file, uint size) {
 		file->totalclusters += clusterstoalloc;
 		file->lastcluster = fatallocclusters(file->lastcluster, clusterstoalloc);
 
+	} else if (size < currentcapacity) {
+
+		// clusters to remove (rounded down)
+		uint clusterstoremove = (currentcapacity - size) / bytespercluster;
+
+		file->totalclusters -= clusterstoremove;
+		// removes clusters starting from the new last cluster
+		file->lastcluster = fatdeallocclusters(fattraverse(file->firstcluster, file->totalclusters));
 	}
+
+	file->fsentry.filesize = size;
+	file->dirty = 1;
 
 	fatcommit();
 
@@ -73,8 +82,7 @@ int fileexpand(struct file *file, uint size) {
 // returns entry index on success
 int dirfindentry(struct file *dir, const char *name, struct fatdirentry *entry) {
 
-	// TODO: is directory macro
-	if (!(dir->fsentry.attributes & DIRECTORY)) {
+	if (!fileisdir(dir)) {
 		errno = ENOTDIR;
 		return -1;
 	}
@@ -85,17 +93,18 @@ int dirfindentry(struct file *dir, const char *name, struct fatdirentry *entry) 
 
 	uint entryindex = 0;
 
+	// if user provided a null pointer, 
+	// we use a dummy entry as storage
+	struct fatdirentry dummyentry;
+	if (entry == NULL) entry = &dummyentry;
+
 	if (dir->position != 0)
 		filereset(dir);
-
-	printf("debug looking for %s\n", name);
 
 	do {
 
 		if (_fileread(dir, entry, sizeof(struct fatdirentry)) < 0) 
 			return -1;
-
-		printf("debug %u: %s\n", entryindex, entry->filename);
 
 		if (strncmp((char *) entry->filename, name, FAT_FILETOTAL_LEN) == 0)
 			return entryindex;
@@ -109,22 +118,36 @@ int dirfindentry(struct file *dir, const char *name, struct fatdirentry *entry) 
 
 }
 
-int fromentry(struct file *directory, const char *name, struct file *fileout) {
+int dirsetentry(struct file *dir, uint index, struct fatdirentry *entry) {
 
-	struct fatdirentry entry;
+	uint maxpossibleentries = (dir->totalclusters * _vbootsector->sectorspercluster * _vbootsector->bytespersector) / sizeof(struct fatdirentry);
 
-	if (!(directory->fsentry.attributes & DIRECTORY)) {
+	if (dir == NULL || entry == NULL || index >= maxpossibleentries) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (dir->opened == 0) {
+		errno = EBADF;
+		return -1;
+	}
+
+	if (!fileisdir(dir)) {
 		errno = ENOTDIR;
 		return -1;
 	}
 
-	// find entry
-	if (dirfindentry(directory, name, &entry) < 0)
+	// go to entry position
+	if (fileseek(dir, index * sizeof(struct fatdirentry)) < 0)
 		return -1;
 
-	filenew(directory->firstcluster, &entry, fileout);
+	// write entry there
+	if (_filewrite(dir, entry, sizeof(struct fatdirentry)) < 0)
+		return -1;
 
-	return 0;
+	// update if needed
+	return fileflush(dir);
+
 }
 
 int diraddentry(struct file *dir, struct fatdirentry *entry) {
@@ -134,20 +157,17 @@ int diraddentry(struct file *dir, struct fatdirentry *entry) {
 		return -1;
 	}
 
-	printf("debug stop 1.5?\n");
-
 	if (dir->opened == 0) {
 		errno = EBADF;
 		return -1;
 	}
 
-	if (!(dir->fsentry.attributes & DIRECTORY)) {
+	if (!fileisdir(dir)) {
 		errno = ENOTDIR;
 		return -1;
 	}
 
-	struct fatdirentry unused = {0};
-	int entryindex = dirfindentry(dir, (char *) entry->filename, &unused);
+	int entryindex = dirfindentry(dir, (char *) entry->filename, NULL);
 
 	// if entry already exists
 	if (entryindex >= 0) {
@@ -164,9 +184,37 @@ int diraddentry(struct file *dir, struct fatdirentry *entry) {
 	// where we want to write
 	// TODO: update this when we implement deleting files
 
-	dir->dirty = 1;
-	printf("debug stop 1.75, size = %d, seek = %d\n", dir->fsentry.filesize, dir->position - sizeof(struct fatdirentry));
-	return fileseek(dir, dir->position - sizeof(struct fatdirentry)) + _filewrite(dir, entry, sizeof(struct fatdirentry));
+	if (fileseek(dir, dir->position - sizeof(struct fatdirentry)) < 0)
+		return -1;
+
+	return _filewrite(dir, entry, sizeof(struct fatdirentry));
+
+}
+
+int dirupdateentry(struct file *dir, struct fatdirentry *entry) {
+
+	if (dir == NULL || entry == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (dir->opened == 0) {
+		errno = EBADF;
+		return -1;
+	}
+
+	if (!fileisdir(dir)) {
+		errno = ENOTDIR;
+		return -1;
+	}
+
+	int index;
+
+	// if it doesn't exist return that errorcode
+	if ((index = dirfindentry(dir, (char *) entry->filename, NULL)) < 0)
+		return -1;
+
+	return dirsetentry(dir, index, entry);
 
 }
 
@@ -177,22 +225,19 @@ int dircreatefile(struct file *dir, struct file *fileout, const char *filename, 
 		return -1;
 	}
 
-	printf("debug zero stop?\n");
-
 	if (dir->opened == 0) {
 		errno = EBADF;
 		return -1;
 	}
 
-	if (!(dir->fsentry.attributes & DIRECTORY)) {
+	if (!fileisdir(dir)) {
 		errno = ENOTDIR;
 		return -1;
 	}
 
 	struct fatdirentry newentry = {0};
 
-	if (isdirectory)
-		newentry.attributes |= DIRECTORY;
+	if (isdirectory) newentry.attributes |= DIRECTORY;
 	fatformatfilename(filename, strlen(filename), (char *) newentry.filename);
 
 	uint filefirstcluster = fatfindfreecluster();
@@ -205,8 +250,6 @@ int dircreatefile(struct file *dir, struct file *fileout, const char *filename, 
 	// write direntry to dir
 	if (diraddentry(dir, &newentry) < 0)
 		return -1;
-
-	printf("debug first stop?\n");
 
 	// write . and .. entries
 	if (isdirectory) {
@@ -229,9 +272,7 @@ int dircreatefile(struct file *dir, struct file *fileout, const char *filename, 
 			diraddentry(&_staticfiles[STATIC_FCREAT1], &dotdot) < 0)
 			return -1;
 
-		// since we have exactly two entries we are guaranteed to be
-		// in the first cluster
-		fatwritesector(_staticfiles[STATIC_FCREAT1].firstcluster, 0, _staticfiles[STATIC_FCREAT1].buffer);
+		fileflush(&_staticfiles[STATIC_FCREAT1]);
 	}
 
 	if (fileout) {
@@ -244,6 +285,24 @@ int dircreatefile(struct file *dir, struct file *fileout, const char *filename, 
 	dir->dirty = 1;
 	return 0;
 
+}
+
+int filefromentry(struct file *directory, const char *name, struct file *fileout) {
+
+	struct fatdirentry entry;
+
+	if (!fileisdir(directory)) {
+		errno = ENOTDIR;
+		return -1;
+	}
+
+	// find entry
+	if (dirfindentry(directory, name, &entry) < 0)
+		return -1;
+
+	filenew(directory->firstcluster, &entry, fileout);
+
+	return 0;
 }
 
 uint pathnext(char **start) {
@@ -297,12 +356,9 @@ int fileopen(struct file *file, const char *pathname, int flags) {
 
 		fatformatfilename(start, pathnextsize, fatformattedname);
 
-		printf("debug path left: %s (%u bytes)\n", start, pathnextsize);
-		printf("debug path next: %s\n", fatformattedname);
-
 		char *tempstart = start;
 
-		if (fromentry(file, fatformattedname, file) < 0) {
+		if (filefromentry(file, fatformattedname, file) < 0) {
 
 			// if we don't find the next step and this is the last
 			// part of the filepath, create a new file (if that's)
@@ -311,8 +367,8 @@ int fileopen(struct file *file, const char *pathname, int flags) {
 
 			// create file
 			if ((flags & FCREATE) && pathnext(&tempstart) == 0) {
+				// TODO: try to not open a new file here
 				memcpy(&_staticfiles[STATIC_FCREAT0], file, sizeof(struct file));
-				printf("debug creating file\n");
 				int res = dircreatefile(&_staticfiles[STATIC_FCREAT0], file, filename, flags & FDIRECTORY);
 				fileclose(&_staticfiles[STATIC_FCREAT0]);
 				if (res < 0) memset(file, 0, sizeof(struct file));
@@ -348,7 +404,7 @@ int _fileread(struct file *file, void *buffer, uint size)
 	uchar *bytebuffer = (uchar *) buffer;
 	uint filetotalbytes = file->totalclusters * _vbootsector->sectorspercluster * _vbootsector->bytespersector;
 
-	if (!(file->fsentry.attributes & DIRECTORY))
+	if (!fileisdir(file))
 		filetotalbytes = min(filetotalbytes, file->fsentry.filesize);
 
 	size = min(size, filetotalbytes - file->position);
@@ -405,16 +461,14 @@ int fileread(struct file *file, void *buffer, uint size) {
 	return _fileread(file, buffer, size);
 }
 
-// TODO: fileexpand(file *file, uint newbytes) function from the code in here
 int _filewrite(struct file *file, const void *buffer, uint size) {
 	const uchar *bytebuffer = (const uchar *) buffer;
 
 	uint maxpossiblebytes = file->position + size;
 
-	file->dirty = 1;
-
 	// increase allocated file disk space if necessary
-	fileexpand(file, maxpossiblebytes);
+	uint currentcapacity = file->totalclusters * _vbootsector->sectorspercluster * _vbootsector->bytespersector;
+	if (maxpossiblebytes > currentcapacity) fileresize(file, maxpossiblebytes);
 
 	uint bytesleft = size;
 	uint sectorpos = file->position % SECTOR_SIZE;
@@ -425,31 +479,21 @@ int _filewrite(struct file *file, const void *buffer, uint size) {
 		uint bytestowrite = min(bytesleft, SECTOR_SIZE - sectorpos);
 
 		memcpy(file->buffer + sectorpos, bytebuffer, bytestowrite);
+		file->dirty = 1;
 		file->position += bytestowrite;
 		bytebuffer += bytestowrite;
 		bytesleft  -= bytestowrite;
 		sectorpos = 0;
 
-		if (bytesleft > 0) {
-			fatwritesector(file->currentcluster, file->sectorincluster, file->buffer);
+		if (bytesleft > 0)
+			fileflush(file);
 
-			file->sectorincluster++;
-			if (file->sectorincluster >= _vbootsector->sectorspercluster) {
-				file->sectorincluster = 0;
-				file->currentcluster = fatclustervalue(file->currentcluster);
-				if (file->currentcluster >= FEEND32L) {
-					printferr();
-					printf("reached eof while writing to file, this should never happen\n");
-					printfstd();
-				}
-			}
-		}
 	} while ((newsectorstowrite--) > 0);
 
 	// update file size
 	// if directory, size == clusters * bytes/cluster
 	// else file size == sizeof contents
-	file->fsentry.filesize = (file->fsentry.attributes & DIRECTORY) ? file->totalclusters * _vbootsector->sectorspercluster * _vbootsector->bytespersector : umax(file->fsentry.filesize, file->position);
+	file->fsentry.filesize = fileisdir(file) ? file->totalclusters * _vbootsector->sectorspercluster * _vbootsector->bytespersector : umax(file->fsentry.filesize, file->position);
 
 	return 0;
 }
@@ -527,6 +571,37 @@ int fileseek(struct file *file, uint seek) {
 	return 0;
 }
 
+int fileflush(struct file *file) {
+
+	if (file == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (file->opened == 0) {
+		errno = EBADF;
+		return -1;
+	}
+
+	if (!file->dirty) return 0;
+
+	// flush to disk
+	if (fatwritesector(file->currentcluster, file->sectorincluster, file->buffer) < 0)
+		return -1;
+
+	// update sector and cluster values
+	file->sectorincluster++;
+	if (file->sectorincluster >= _vbootsector->sectorspercluster) {
+		file->sectorincluster = 0;
+		file->currentcluster = fatclustervalue(file->currentcluster);
+	}
+	
+	// file no longer dirty
+	file->dirty = 0;
+
+	return 0;
+}
+
 int fileclose(struct file *file) {
 
 	if (file == NULL)  {
@@ -539,59 +614,31 @@ int fileclose(struct file *file) {
 		return -1;
 	}
 
-	printf("debug closing %s, size=%d\n", file->fsentry.filename, file->fsentry.filesize);
+	// if we need to update entry in parent
+	if (file->dirty && file->parentdircluster != 0) {
 
-	// TODO: better way to edit files
-	if (file->dirty) {
+		struct fatdirentry parentfakeentry = { 
+			.attributes = DIRECTORY, 
+			.firstclusterlo = file->parentdircluster, 
+			.firstclusterhi = file->parentdircluster >> 16
+		};
 
-		// update size in parent dir
-		if (file->parentdircluster != 0) {
+		// open parent dir
+		struct file parentdir;
+		filenew(0, &parentfakeentry, &parentdir);
 
-			struct fatdirentry parentfakeentry = { 
-				.attributes = DIRECTORY, 
-				.firstclusterlo = file->parentdircluster, 
-				.firstclusterhi = file->parentdircluster >> 16
-			};
-			filenew(0, &parentfakeentry, &_staticfiles[STATIC_FCLOSE]);
-			_staticfiles[STATIC_FCLOSE].opened = 1;
+		// update entry in parent
+		dirupdateentry(&parentdir, &file->fsentry);
 
-			printf("debug name=%s\n", file->fsentry.filename);
-
-			// parentfakeentry used here as dummy
-			if (dirfindentry(&_staticfiles[STATIC_FCLOSE], (char *) file->fsentry.filename, &parentfakeentry) < 0)
-				return -1;
-			// TODO: set accesstime and modifydate and modifytime
-
-			printf("debug get here 1\n");
-
-			uint entryposition = _staticfiles[STATIC_FCLOSE].position - sizeof(struct fatdirentry);
-
-			// goto entry position
-			if (fileseek(&_staticfiles[STATIC_FCLOSE], entryposition) < 0)
-				return -1;
-
-			// write entry to file
-			if (_filewrite(&_staticfiles[STATIC_FCLOSE], &file->fsentry, sizeof(struct fatdirentry)) < 0)
-				return -1;
-
-			// flush parent dir buffer to disk
-			if (fatwritesector(_staticfiles[STATIC_FCLOSE].currentcluster, 
-							   _staticfiles[STATIC_FCLOSE].sectorincluster, 
-							   _staticfiles[STATIC_FCLOSE].buffer) < 0)
-				return -1;
-
-			// close parent dir
-			_staticfiles[STATIC_FCLOSE].opened = 0;
-
-		}
-
-		// write buffer and fat table to disk
-		fatwritesector(file->currentcluster, file->sectorincluster, file->buffer);
-		fatcommit();
+		// close parent dir
+		// (we don't fileclose because that would loop up to root dir, which isn't necessary)
+		// (and dirupdateentry flushes automatically)
+		parentdir.opened = 0;
 
 	}
 
-	file->dirty = 0;
+	fileflush(file);
+
 	file->opened = 0;
 
 	return 0;

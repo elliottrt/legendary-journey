@@ -24,6 +24,9 @@ enum ferror {
 	EPERM = 13, /* operation not permitted */
 };
 
+#define fileisdir(fp) ((fp->fsentry.attributes & DIRECTORY) != 0)
+#define entryisdir(ep) ((ep->attributes) != 0)
+
 struct file {
 	
 	struct fatdirentry fsentry;
@@ -48,29 +51,27 @@ enum fflags {
 	FAPPEND = BIT(1), /* open file at end */
 	FCREATE = BIT(2), /* create a file if none exists */
 	FDIRECTORY = BIT(3), /* create a dir if FCREATE set */
-};	
-
-// TODO: function for editing entry in directory
+};
 
 // TODO: flag in direntry: is file open already
 // if so, user shouldn't be able to edit/rename/delete
 // etc. that file
 
-// TODO: filecommit(struct file *file)
-
 // TODO: remove FDIRECTORY and create separate function
-
-// TODO: make fileexpand into fileresize, allow shrinking
+// TODO: fileremove(const char *pathname);
+// TODO: fileremove(struct file *file); <- is this something I want to do?
 
 extern int errno;
 
 void fileinit(void);
 
+int fileresize(struct file *file, uint size);
 int fileopen(struct file *file, const char *pathname, int flags);
 int fileread(struct file *file, void *buffer, uint size);
 int filewrite(struct file *file, const void *buffer, uint size);
 int filereset(struct file *file);
 int fileseek(struct file *file, uint seek);
+int fileflush(struct file *file);
 int fileclose(struct file *file);
 
 #endif

@@ -11,7 +11,7 @@ char FAT_VALID_FILENAME_CHARS[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&'()-
 uint _first_fat;
 
 uint _cachefirstentry;
-fat_entry_t _fatcache[ENTRIES_PER_SECTOR * FAT_CACHE_SIZE];
+fat_entry_t _fatcache[ENTRIES_PER_SECTOR];
 
 void fatinit(void) {
 
@@ -45,7 +45,7 @@ int fatcache(uint fat, uint offsetsector) {
 	if (offsetsector >= _bootsector->fatsize32)
 		return -1;
 
-	ataread(_first_fat + offsetsector, FAT_CACHE_SIZE, _fatcache);
+	ataread(_first_fat + offsetsector, 1, _fatcache);
 	_cachefirstentry = offsetsector * ENTRIES_PER_SECTOR;
 
 	return 0;
@@ -66,7 +66,7 @@ uint fattotalclusters(fat_entry_t cluster, uint *lastcluster) {
 }
 
 fat_entry_t fatclustervalue(uint entryposition) {
-	if (entryposition < _cachefirstentry || entryposition >= _cachefirstentry + (ENTRIES_PER_SECTOR * FAT_CACHE_SIZE))
+	if (entryposition < _cachefirstentry || entryposition >= _cachefirstentry + ENTRIES_PER_SECTOR)
 		fatcache(0, entryposition / ENTRIES_PER_SECTOR);
 
 	return _fatcache[entryposition % ENTRIES_PER_SECTOR];

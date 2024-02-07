@@ -1,8 +1,9 @@
-CC=i386-elf-gcc
-LD=i386-elf-ld
-AS=i386-elf-as
+PREFIX=i386-elf
+
+CC=$(PREFIX)-gcc
+LD=$(PREFIX)-ld
+AS=$(PREFIX)-as
 EMU=qemu-system-i386
-OBJCOPY=i386-elf-objcopy
 
 BIN=bin
 OS=$(BIN)/os.img

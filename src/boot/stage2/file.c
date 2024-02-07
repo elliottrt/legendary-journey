@@ -22,7 +22,7 @@ int findentry(struct file *directory, const char *name, struct file *fileout) {
 	int possibleentries = (directory->totalclusters * _bootsector->sectorspercluster * _bootsector->bytespersector) 
 								/ sizeof(struct fatdirentry);
 
-	if ((directory->fsentry.attributes & DIRECTORY) == 0)
+	if (!fileisdir(directory))
 		return -1;
 
 	/* make sure we start from the beginning when reading a directory */
@@ -108,7 +108,7 @@ int _fileread(struct file *file, void *buffer, uint size) {
 	uchar *bytebuffer = (uchar *) buffer;
 	uint filetotalbytes = file->totalclusters * _bootsector->sectorspercluster * _bootsector->bytespersector;
 
-	if (!(file->fsentry.attributes & DIRECTORY))
+	if (!fileisdir(file))
 		filetotalbytes = min(filetotalbytes, file->fsentry.filesize);
 
 	size = min(size, filetotalbytes - file->position);

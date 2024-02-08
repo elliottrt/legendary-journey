@@ -2,12 +2,6 @@
 #include "std.h"
 #include "printf.h"
 
-// UNUSED
-int filewrite(struct file *file, const void *buffer, uint size);
-
-// TODO: move errno to a stdlib file
-int errno = -1;
-
 enum staticfileid {
 	STATIC_FCREAT0 = 0,
 	STATIC_FCREAT1 = 1,
@@ -87,7 +81,6 @@ int dirfindentry(struct file *dir, const char *name, struct fatdirentry *entry) 
 		return -1;
 	}
 
-	// TODO: this should be the same as dir->size, check that
 	int possibleentries = (dir->totalclusters * _vbootsector->sectorspercluster * _vbootsector->bytespersector) 
 								/ sizeof(struct fatdirentry);
 
@@ -410,6 +403,7 @@ int _fileread(struct file *file, void *buffer, uint size)
 	size = min(size, filetotalbytes - file->position);
 
 	sectorpos = file->position % SECTOR_SIZE;
+	// TODO: this doesn't take file->fsentry.filesize into account, which it should
 	newsectorstoread = (sectorpos + size) / SECTOR_SIZE;
 
 	while (newsectorstoread--)
@@ -444,15 +438,18 @@ int _fileread(struct file *file, void *buffer, uint size)
 }
 
 int fileread(struct file *file, void *buffer, uint size) {
-	if (file == NULL || buffer == NULL)
-	{
+	if (file == NULL || buffer == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	if (file->opened == 0)
-	{
+	if (file->opened == 0) {
 		errno = EBADF;
+		return -1;
+	}
+
+	if (file->fsentry.attributes & READ_ONLY) {
+		errno = EACCES;
 		return -1;
 	}
 

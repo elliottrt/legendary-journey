@@ -1,8 +1,6 @@
 OUTPUT_FORMAT("elf32-i386")
 ENTRY(_start)
 
-/* TODO: discard debug info and otherwise make the kernel smaller */
-
 SECTIONS
 {
 	. = 0x80100000;

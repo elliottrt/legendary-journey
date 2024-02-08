@@ -6,24 +6,6 @@
 
 #define PATH_SEP '/'
 
-// TODO: strerror(int errno)
-enum ferror {
-	ENOENT = 0, /* no such file or directory */
-	EBADF = 1, /* bad file descriptor */
-	ENOTDIR = 2, /* tried to read something not a directory as a directory */
-	EISDIR = 3, /* is a directory */
-	EINVAL = 4, /* invalid argument */
-	EPATH = 5, /* bad file path */
-	EEXIST = 6, /* file already exists */
-	EACCES = 7, /* permission denied */
-	EIO = 8, /* general io error */
-	ENAMETOOLONG = 9, /* filename too long */
-	ENOMEM = 10, /* not enough space / can't allocate memory */
-	ENOSYS = 11, /* function not implemented */
-	ENOTEMPTY = 12, /* directory not empty */
-	EPERM = 13, /* operation not permitted */
-};
-
 #define fileisdir(fp) ((fp->fsentry.attributes & DIRECTORY) != 0)
 #define entryisdir(ep) ((ep->attributes) != 0)
 
@@ -58,10 +40,7 @@ enum fflags {
 // etc. that file
 
 // TODO: remove FDIRECTORY and create separate function
-// TODO: fileremove(const char *pathname);
-// TODO: fileremove(struct file *file); <- is this something I want to do?
-
-extern int errno;
+// TODO: fileremove(struct file *parent, const char *pathname); <- parent can be null
 
 void fileinit(void);
 

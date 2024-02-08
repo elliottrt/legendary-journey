@@ -1,5 +1,27 @@
 #include "std.h"
 
+enum errno errno;
+
+const char *strerror(enum errno _errno) {
+	static const char *strs[] = {
+		"no such file or directory",
+		"bad file descriptor",
+		"not directory",
+		"is a directory",
+		"invalid argument",
+		"bad file path",
+		"file already exists",
+		"permission denied",
+		"io error",
+		"name too long",
+		"not enough space",
+		"function not implemented",
+		"directory not empty",
+		"operation not permitted"
+	};
+	return strs[_errno];
+}
+
 int memcmp(const void *buf1, const void *buf2, uint n)
 {
 	uchar *left = (uchar *) buf1;

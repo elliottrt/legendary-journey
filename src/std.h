@@ -8,6 +8,27 @@
 
 #define UNUSED(X) (void)(X)
 
+enum errno {
+	ENOENT = 0, /* no such file or directory */
+	EBADF = 1, /* bad file descriptor */
+	ENOTDIR = 2, /* tried to read something not a directory as a directory */
+	EISDIR = 3, /* is a directory */
+	EINVAL = 4, /* invalid argument */
+	EPATH = 5, /* bad file path */
+	EEXIST = 6, /* file already exists */
+	EACCES = 7, /* permission denied */
+	EIO = 8, /* general io error */
+	ENAMETOOLONG = 9, /* filename too long */
+	ENOMEM = 10, /* not enough space / can't allocate memory */
+	ENOSYS = 11, /* function not implemented */
+	ENOTEMPTY = 12, /* directory not empty */
+	EPERM = 13, /* operation not permitted */
+};
+
+extern enum errno errno;
+
+const char *strerror(enum errno _errno);
+
 /* See https://www.ibm.com/docs/en/i/7.3?topic=extensions-standard-c-library-functions-table-by-name */
 /* descriptions copied from there */
 

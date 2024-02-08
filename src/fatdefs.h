@@ -15,7 +15,6 @@ typedef uint fat_entry_t;
 #define ENTRY_SIZE sizeof(fat_entry_t)
 #define ENTRIES_PER_SECTOR (SECTOR_SIZE/ENTRY_SIZE)
 
-// TODO: actually do something with these
 enum fatdirattributes {
 	READ_ONLY = 0x01,
 	HIDDEN = 0x02,

@@ -8,7 +8,6 @@
 #define PGROUNDUP(a)  (((a)+PGSIZE-1) & ~(PGSIZE-1))
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE-1))
 
-#define KERNBASE 0x80000000
 #define V2P(a) (((uint) (a)) - KERNBASE)
 #define P2V(a) ((void *)(((char *) (a)) + KERNBASE))
 #define V2P_WO(x) ((x) - KERNBASE)

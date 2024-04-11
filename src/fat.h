@@ -12,7 +12,7 @@
 #define FAT_CACHE_SIZE 8
 
 #define _bootsector ((struct fatbootsector *) 0x7C00)
-#define _vbootsector ((struct fatbootsector *) V2P_WO(0x7C00))
+#define _vbootsector ((struct fatbootsector *) P2V_WO(0x7C00))
 
 void fatinit(void);
 

@@ -8,7 +8,8 @@
 
 #define EMPTY_CHAR '\0'
 
-ushort *screen_addr = (ushort *) V2P_WO(0xB8000);
+// TODO: why are we doing this???
+ushort *screen_addr = (ushort *) P2V_WO(0xB8000);
 uint cursor = 0;
 uchar color = 15;
 

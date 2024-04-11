@@ -16,8 +16,8 @@
 void main(void)
 {
 
-	printf("loaded %d bytes of kernel!\n", V2P(end) - KERNEL_LOAD);
-	printf("memory bound: %d mb\n", ((PHYSTOP / 1024) + 1023)/1024);
+	printf("loaded %d bytes of kernel, VADDR=0x%x!\n", V2P(end) - KERNEL_LOAD, KERNBASE);
+	printf("physical memory bound: %d mb\n", ((PHYSTOP / 1024) + 1023)/1024);
 
 	kallocinit();
 
@@ -39,19 +39,6 @@ void main(void)
 	kallocexpand();
 
 	printf("initialization complete\n");
-
-	/*
-	struct file file;
-
-	if (fileopen(&file, "/test.txt", FCREATE) < 0)
-		printf("fopen: %d\n", errno);
-
-	if (filewrite(&file, "file created successfully!", 26) < 0)
-		printf("fwrite: %d\n", errno);
-
-	if (fileclose(&file) < 0)
-		printf("fclose: %d\n", errno);
-	*/
 
 	while(1);
 }

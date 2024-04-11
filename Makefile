@@ -37,6 +37,10 @@ STAGE2_SEGMENT=0
 STAGE2_OFFSET=0x7E00
 # size in sectors (512 bytes)
 STAGE2_SIZE=24
+# kernel virtual memory location
+# KERNBASE=0x80000000
+# KERNBASE=0xC0000000
+KERNBASE=0xE0000000
 
 # See https://www.rapidtables.com/code/linux/gcc/gcc-o.html#optimization
 CFLAGS=-m32 -c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
@@ -49,6 +53,7 @@ ASFLAGS=--32
 KERNELFLAGS=-c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
 KERNELFLAGS:=$(KERNELFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
 KERNELFLAGS:=$(KERNELFLAGS) -Isrc/ -fno-pic -DKERNEL_LOAD=$(KERNELLOAD) -Wunused -O2
+KERNELFLAGS:=$(KERNELFLAGS) -DKERNBASE=$(KERNBASE)
 
 BOOTFLAGS=-defsym S2LOC=$(STAGE2_LOCATION) -defsym S2SEG=$(STAGE2_SEGMENT) -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=$(STAGE2_SIZE)
 
@@ -80,13 +85,13 @@ $(BIN)/kernel/%.o: src/kernel/%.S
 	# nasm -o $@ $^ -felf32
 
 $(KERNEL): $(BIN) $(KERNELTARGETS) src/kernel/link.ld
-	$(LD) -o $(KERNEL) $(KERNELTARGETS) -Tsrc/kernel/link.ld --gc-sections
+	$(LD) -o $(KERNEL) $(KERNELTARGETS) -Tsrc/kernel/link.ld
 	
 $(ROOT):
 	mkdir -p $(ROOT)
 
 run: OS Makefile
-	$(EMU) -drive format=raw,file=$(OS) -m 64 -monitor stdio -full-screen -action reboot=shutdown -action shutdown=pause -D trace.log -d int
+	$(EMU) -drive format=raw,file=$(OS) -m 64 -monitor stdio -action reboot=shutdown -action shutdown=pause -D trace.log -d int
 
 clean:
 	rm -rf $(BIN) $(ROOT)

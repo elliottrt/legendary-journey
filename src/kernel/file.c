@@ -344,7 +344,6 @@ int fileopen(struct file *file, const char *pathname, int flags) {
 		return -1;
 	}
 
-	// TODO: test this with increased folder depth
 	while ((pathnextsize = pathnext(&start)) > 0) {
 
 		fatformatfilename(start, pathnextsize, fatformattedname);
@@ -401,9 +400,9 @@ int _fileread(struct file *file, void *buffer, uint size)
 		filetotalbytes = min(filetotalbytes, file->fsentry.filesize);
 
 	size = min(size, filetotalbytes - file->position);
+	uint bytesleft = size;
 
 	sectorpos = file->position % SECTOR_SIZE;
-	// TODO: this doesn't take file->fsentry.filesize into account, which it should
 	newsectorstoread = (sectorpos + size) / SECTOR_SIZE;
 
 	while (newsectorstoread--)
@@ -411,6 +410,7 @@ int _fileread(struct file *file, void *buffer, uint size)
 		memcpy(bytebuffer, &file->buffer[sectorpos], SECTOR_SIZE - sectorpos);
 		file->position += SECTOR_SIZE - sectorpos;
 		bytebuffer += SECTOR_SIZE - sectorpos;
+		bytesleft -= SECTOR_SIZE - sectorpos;
 		sectorpos = 0;
 
 		file->sectorincluster++;
@@ -430,10 +430,10 @@ int _fileread(struct file *file, void *buffer, uint size)
 
 	}
 
-	// TODO: this seems wrong, we never seem to adjust size
-	// so we might be reading way too much data
-	memcpy(bytebuffer, &file->buffer[sectorpos], size);
-	file->position += size;
+	if (bytesleft != 0) {
+		memcpy(bytebuffer, &file->buffer[sectorpos], bytesleft);
+		file->position += bytesleft;
+	}
 	return size;
 }
 

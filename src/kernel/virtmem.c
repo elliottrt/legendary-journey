@@ -93,8 +93,6 @@ static int mappages(uint *pgdir, void *va, uint size, uint pa, int perm) {
     return 0;
 }
 
-extern ushort *screen_addr;
-
 void kpginit(void) {
 
     kmap[2].phyend = PHYSTOP;

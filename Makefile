@@ -38,16 +38,16 @@ STAGE2_OFFSET=0x7E00
 # size in sectors (512 bytes)
 STAGE2_SIZE=24
 # kernel virtual memory location
-# KERNBASE=0x80000000
+KERNBASE=0x80000000
 # KERNBASE=0xC0000000
-KERNBASE=0xE0000000
+# KERNBASE=0xE0000000
 
 # See https://www.rapidtables.com/code/linux/gcc/gcc-o.html#optimization
 CFLAGS=-m32 -c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
 CFLAGS:=$(CFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
 CFLAGS:=$(CFLAGS) -DKERNEL_LOAD=$(KERNELLOAD) -DKERNEL_NAME='"/$(KERNELNAME)"'
 CFLAGS:=$(CFLAGS) -Isrc/ -fno-pic -static -fno-strict-aliasing -MD -no-pie
-CFLAGS:=$(CFLAGS) -fno-omit-frame-pointer -Wunused -Os
+CFLAGS:=$(CFLAGS) -fno-omit-frame-pointer -Wunused -O2
 LDFLAGS=-nostdlib -static -Isrc/ -m elf_i386
 ASFLAGS=--32
 KERNELFLAGS=-c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
@@ -91,7 +91,7 @@ $(ROOT):
 	mkdir -p $(ROOT)
 
 run: OS Makefile
-	$(EMU) -drive format=raw,file=$(OS) -m 64 -monitor stdio -action reboot=shutdown -action shutdown=pause -D trace.log -d int
+	$(EMU) -drive format=raw,file=$(OS) -m 128 -monitor stdio -action reboot=shutdown -action shutdown=pause -D trace.log -d int
 
 clean:
 	rm -rf $(BIN) $(ROOT)

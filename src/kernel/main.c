@@ -12,6 +12,8 @@
 #include "fat.h"
 #include "file.h"
 #include "x86.h"
+#include "proc.h"
+#include "kgdt.h"
 
 void main(void)
 {

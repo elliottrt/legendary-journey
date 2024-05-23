@@ -13,23 +13,25 @@
 #include "file.h"
 #include "x86.h"
 #include "proc.h"
-#include "kgdt.h"
+#include "gdt.h"
 
 void main(void)
 {
 
-	printf("loaded %d bytes of kernel, VADDR=0x%x!\n", V2P(end) - KERNEL_LOAD, KERNBASE);
+	printf("loaded %d bytes of kernel, VADDR=0x%x\n", V2P(end) - KERNEL_LOAD, KERNBASE);
 	printf("physical memory bound: %d mb\n", ((PHYSTOP / 1024) + 1023)/1024);
 
 	kallocinit();
 
 	kpginit();
 
-	kgdtinit();
+	gdtinit();
 
 	atainit();
 	fatinit();
 	fileinit();
+
+// TODO: do process setup between here
 
 	idtinit();
 	isrinit();
@@ -39,6 +41,8 @@ void main(void)
 //	timerinit();
 
 	kallocexpand();
+
+// TODO: run processes here
 
 	printf("initialization complete\n");
 

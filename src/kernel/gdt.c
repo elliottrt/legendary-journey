@@ -1,17 +1,17 @@
-#include "kgdt.h"
+#include "gdt.h"
 #include "x86.h"
 #include "proc.h"
 
-struct gdtentry kgdt[KGDT_SIZE] = {0};
-struct gdtdesc kgdtdesc = {
-	.size = (sizeof(struct gdtentry) * KGDT_SIZE) - 1,
-	.offset = (uint) kgdt,
+struct gdtentry gdt[GDT_SIZE] = {0};
+struct gdtdesc gdtdesc = {
+	.size = (sizeof(struct gdtentry) * GDT_SIZE) - 1,
+	.offset = (uint) gdt,
 };
 
-void kgdtinit(void) {
+void gdtinit(void) {
 
-	kgdt[0] = (struct gdtentry) {0}; // null descriptor
-	kgdt[1] = (struct gdtentry) { // code segment
+	gdt[GDT_NULL] = (struct gdtentry) {0}; // null descriptor
+	gdt[GDT_CODE] = (struct gdtentry) { // code segment
 		.limit_lo = 0xFFFF,
 		.base_lo = 0x0000,
 		.base_mid = 0x00,
@@ -19,7 +19,7 @@ void kgdtinit(void) {
 		.granularity = 0b11001111,
 		.base_hi = 0x00
 	};
-	kgdt[2] = (struct gdtentry) { // data segment
+	gdt[GDT_DATA] = (struct gdtentry) { // data segment
 		.limit_lo = 0xFFFF,
 		.base_lo = 0x0000,
 		.base_mid = 0x00,
@@ -27,7 +27,7 @@ void kgdtinit(void) {
 		.granularity = 0b11001111,
 		.base_hi = 0x00
 	};
-	kgdt[3] = (struct gdtentry) { // user code segment
+	gdt[GDT_USER_CODE] = (struct gdtentry) { // user code segment
 		.limit_lo = 0xFFFF,
 		.base_lo = 0x0000,
 		.base_mid = 0x00,
@@ -35,7 +35,7 @@ void kgdtinit(void) {
 		.granularity = 0b11001111,
 		.base_hi = 0x00
 	};
-	kgdt[4] = (struct gdtentry) { // user data segment
+	gdt[GDT_USER_DATA] = (struct gdtentry) { // user data segment
 		.limit_lo = 0xFFFF,
 		.base_lo = 0x0000,
 		.base_mid = 0x00,
@@ -43,7 +43,7 @@ void kgdtinit(void) {
 		.granularity = 0b11001111,
 		.base_hi = 0x00
 	};
-	proc_gdt_segment(&kgdt[5]); // tss segment
+	proc_gdt_segment(&gdt[GDT_TSS]); // tss segment
 
-	kgdtload();
+	gdtload();
 }

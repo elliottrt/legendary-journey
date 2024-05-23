@@ -35,16 +35,16 @@ _start_virt:
 	movl %eax, (PHYSTOP)
 
 	// make an actual stack
-	movl $(stack + 0x1000), %esp
+	movl $(stack + STACK_SIZE), %esp
 
 	// i spent two weeks trying to fix a page fault
 	// and all i needed was this instead of 'call main'
 	mov $main, %eax
   	jmp *%eax
 
-.comm stack, 0x1000
-
 .section .bss
+
+.comm stack, STACK_SIZE
 
 .globl _ataidentify
 _ataidentify:

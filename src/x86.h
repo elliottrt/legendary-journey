@@ -21,9 +21,13 @@ uchar ASMCALL inb(ushort port);
 void ASMCALL outw(ushort port, ushort value);
 ushort ASMCALL inw(ushort port);
 
-// for kernel::kgdt.c
+// for kernel::proc.c
 
-void ASMCALL kgdtload(void);
+void ASMCALL ltr(ushort gdtsegment);
+
+// for kernel::gdt.c
+
+void ASMCALL gdtload(void);
 
 // for kernel::virtmem.c
 

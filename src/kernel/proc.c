@@ -1,5 +1,6 @@
 #include "proc.h"
 #include "printf.h"
+#include "x86.h"
 
 static struct tss tss_entry = {0};
 
@@ -13,4 +14,12 @@ void proc_gdt_segment(struct gdtentry *entry) {
 	entry->access = 0b10001001;
 	entry->granularity = (0b0000 << 4) | ((limit >> 16) & 0xF);
 	entry->base_hi = (base >> 24) & 0xFF;
+
+	printf("you have stuff to do in %s, line %d\n", __FILE__, __LINE__); while(1);
+
+	// TODO: need to set this, hangs otherwise
+	tss_entry.esp0 = 0;
+	tss_entry.ss0 = GDT_DATA << 3;
+
+	ltr(GDT_TSS << 3);
 }

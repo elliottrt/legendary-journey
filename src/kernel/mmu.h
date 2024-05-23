@@ -5,6 +5,8 @@
 #define PGENTRIES 1024
 #define PGSIZE 4096
 
+#define STACK_SIZE PGSIZE
+
 #define PGROUNDUP(a)  (((a)+PGSIZE-1) & ~(PGSIZE-1))
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE-1))
 

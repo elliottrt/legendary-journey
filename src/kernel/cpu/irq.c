@@ -1,7 +1,7 @@
 #include "irq.h"
 #include "idt.h"
 #include "isr.h"
-#include "printf.h"
+#include "graphics/printf.h"
 #include "x86.h"
 
 // PIC constants

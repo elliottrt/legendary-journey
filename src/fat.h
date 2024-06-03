@@ -3,7 +3,7 @@
 
 #include "fatdefs.h"
 #include "types.h"
-#include "kernel/mmu.h"
+#include "kernel/memory/mmu.h"
 
 #define FAT_DEFAULT_FILENAME_CHAR '_'
 #define FAT_DEFAULT_FILENAME_PADDING ' '

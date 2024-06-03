@@ -17,17 +17,15 @@ STAGE2BIN=$(BIN)/stage2.bin
 STAGE2CSRC=$(wildcard src/boot/stage2/*.c) $(wildcard src/boot/stage2/disk/*.c)
 STAGE2ASMSRC=$(wildcard src/boot/stage2/*.S)
 STAGE2TARGETS=$(STAGE2ASMSRC:.S=.o) $(STAGE2CSRC:.c=.o)
-STAGE2TARGETS:=$(subst src/boot,$(BIN),$(STAGE2TARGETS))
 
 # physical memory address to load the kernel
 KERNELLOAD=0x100000
 # name of the kernel file
 KERNELNAME=kernel.elf
 KERNEL=$(BIN)/$(KERNELNAME)
-KERNELCSRC=$(wildcard src/kernel/*.c)
-KERNELASMSRC=$(wildcard src/kernel/*.S)
+KERNELCSRC=$(wildcard src/kernel/*.c) $(wildcard src/kernel/*/*.c)
+KERNELASMSRC=$(wildcard src/kernel/*.S) $(wildcard src/kernel/*/*.S)
 KERNELTARGETS=$(KERNELCSRC:.c=.o) $(KERNELASMSRC:.S=.o)
-KERNELTARGETS:=$(subst src,$(BIN),$(KERNELTARGETS))
 
 # LBA disk location
 STAGE2_LOCATION=8
@@ -52,8 +50,8 @@ LDFLAGS=-nostdlib -static -Isrc/ -m elf_i386
 ASFLAGS=--32
 KERNELFLAGS=-c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
 KERNELFLAGS:=$(KERNELFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
-KERNELFLAGS:=$(KERNELFLAGS) -Isrc/ -fno-pic -DKERNEL_LOAD=$(KERNELLOAD) -Wunused -O2
-KERNELFLAGS:=$(KERNELFLAGS) -DKERNBASE=$(KERNBASE)
+KERNELFLAGS:=$(KERNELFLAGS) -fno-pic -DKERNEL_LOAD=$(KERNELLOAD) -Wunused -O2
+KERNELFLAGS:=$(KERNELFLAGS) -DKERNBASE=$(KERNBASE) -Isrc/kernel/ -Isrc/
 
 BOOTFLAGS=-defsym S2LOC=$(STAGE2_LOCATION) -defsym S2SEG=$(STAGE2_SEGMENT) -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=$(STAGE2_SIZE)
 
@@ -61,26 +59,24 @@ all: OS
 	
 $(BIN):
 	mkdir -p $(BIN)
-	mkdir -p $(BIN)/stage2
-	mkdir -p $(BIN)/kernel
 
 $(STAGE1BIN): $(BIN) $(STAGE1SRC)
 	$(AS) -o $(STAGE1BIN).o $(STAGE1SRC) $(ASFLAGS) $(BOOTFLAGS)
 	$(LD) -o $(STAGE1BIN) $(STAGE1BIN).o -Ttext 0x7C00 --oformat binary -e _start
 
-$(BIN)/stage2/%.o: src/boot/stage2/%.S
+src/boot/stage2/%.o: src/boot/stage2/%.S
 	$(AS) -o $@ $^ $(ASFLAGS)
 
-$(BIN)/stage2/%.o: src/boot/stage2/%.c
+src/boot/stage2/%.o: src/boot/stage2/%.c
 	$(CC) -o $@ $^ $(CFLAGS)
 
 $(STAGE2BIN): $(BIN) $(STAGE2TARGETS) src/boot/stage2/link.ld
 	$(LD) -o $(STAGE2BIN) $(STAGE2TARGETS) $(LDFLAGS) -Tsrc/boot/stage2/link.ld
 
-$(BIN)/kernel/%.o: src/kernel/%.c
+src/kernel/%.o: src/kernel/%.c
 	$(CC) -o $@ $^ $(KERNELFLAGS)
 
-$(BIN)/kernel/%.o: src/kernel/%.S
+src/kernel/%.o: src/kernel/%.S
 	$(CC) -o $@ $^ $(KERNELFLAGS)
 	# nasm -o $@ $^ -felf32
 
@@ -95,6 +91,8 @@ run: OS Makefile
 
 clean:
 	rm -rf $(BIN) $(ROOT)
+	find . -name '*.o' -delete
+	find . -name '*.d' -delete
 
 OS: ./mkfat $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) Makefile
 	cp $(KERNEL) $(ROOT)/$(KERNELNAME)

@@ -1,6 +1,6 @@
 #include "kbd.h"
-#include "irq.h"
-#include "printf.h"
+#include "cpu/irq.h"
+#include "graphics/printf.h"
 #include "std.h"
 
 uchar keyboard_us[2][128] = {

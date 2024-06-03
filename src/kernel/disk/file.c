@@ -1,6 +1,6 @@
 #include "file.h"
 #include "std.h"
-#include "printf.h"
+#include "graphics/printf.h"
 
 enum staticfileid {
 	STATIC_FCREAT0 = 0,

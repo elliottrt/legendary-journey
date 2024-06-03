@@ -1,6 +1,6 @@
 #include "kalloc.h"
 #include "virtmem.h"
-#include "printf.h"
+#include "graphics/printf.h"
 #include "std.h"
 #include "mmu.h"
 

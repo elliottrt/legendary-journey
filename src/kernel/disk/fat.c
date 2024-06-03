@@ -1,8 +1,8 @@
 #include "fat.h"
 #include "ata.h"
 #include "std.h"
-#include "printf.h"
-#include "kalloc.h"
+#include "graphics/printf.h"
+#include "memory/kalloc.h"
 
 char FAT_VALID_FILENAME_CHARS[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&'()-@^_`{}~";
 

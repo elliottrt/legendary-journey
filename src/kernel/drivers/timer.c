@@ -1,7 +1,7 @@
 #include "timer.h"
-#include "printf.h"
+#include "graphics/printf.h"
 #include "x86.h"
-#include "irq.h"
+#include "cpu/irq.h"
 #include "std.h"
 
 ulong _timer_ticks = 0;

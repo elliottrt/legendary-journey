@@ -1,7 +1,7 @@
 #include "virtmem.h"
 #include "types.h"
 #include "x86.h"
-#include "printf.h"
+#include "graphics/printf.h"
 #include "std.h"
 #include "kalloc.h"
 #include "mmu.h"

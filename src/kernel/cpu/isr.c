@@ -1,5 +1,5 @@
 #include "isr.h"
-#include "printf.h"
+#include "graphics/printf.h"
 #include "idt.h"
 #include "isrstubs.h"
 

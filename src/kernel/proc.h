@@ -2,7 +2,7 @@
 #define _KERNEL_PROC
 
 #include "types.h"
-#include "gdt.h"
+#include "cpu/gdt.h"
 
 // See https://wiki.osdev.org/Getting_to_Ring_3
 struct tss {

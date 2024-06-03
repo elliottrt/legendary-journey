@@ -3,7 +3,7 @@
 #include "graphics/printf.h"
 #include "std.h"
 
-uchar keyboard_us[2][128] = {
+uint8_t keyboard_us[2][128] = {
     {
         KEY_NULL, KEY_ESC, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
         '-', '=', KEY_BACKSPACE, KEY_TAB, 'q', 'w', 'e', 'r', 't', 'y', 'u',
@@ -27,16 +27,17 @@ uchar keyboard_us[2][128] = {
 
 struct keyboard keyboard;
 
-char getkeychar(ushort scancode)
+char getkeychar(uint16_t scancode)
 {
-    uint shift = KEY_MOD(keyboard.mods, KEY_MOD_SHIFT) ? 1 : 0;
+    uint32_t shift = KEY_MOD(keyboard.mods, KEY_MOD_SHIFT) ? 1 : 0;
     return KEY_SCANCODE(scancode) < 128 ? keyboard_us[shift][KEY_SCANCODE(scancode)] : 0;
 }
 
+#define HIBIT(_x) (31 - __builtin_clz((_x)))
 static void kbdhandler(struct registers *regs) {
     UNUSED(regs);
 
-    ushort scancode = (ushort) inb(0x60);
+    uint16_t scancode = (uint16_t) inb(0x60);
 
     if (KEY_SCANCODE(scancode) == KEY_LALT ||
         KEY_SCANCODE(scancode) == KEY_RALT) {
@@ -60,7 +61,7 @@ static void kbdhandler(struct registers *regs) {
     char keychar = getkeychar(scancode);
 
     keyboard.keys[KEY_SCANCODE(scancode)] = KEY_PRESSED(scancode);
-    keyboard.chars[(uchar) keychar] = KEY_PRESSED(scancode);
+    keyboard.chars[(uint8_t) keychar] = KEY_PRESSED(scancode);
 
     if (KEY_PRESSED(scancode) && keychar != 0)
         printf("%c", keychar);

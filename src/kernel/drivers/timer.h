@@ -8,7 +8,7 @@
 
 void timerinit(void);
 
-extern ulong _timer_ticks;
+extern uint64_t _timer_ticks;
 #define timerget() (_timer_ticks)
 
 #define timeruntil(t)   while (_timer_ticks < t) {}

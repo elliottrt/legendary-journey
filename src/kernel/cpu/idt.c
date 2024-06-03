@@ -5,27 +5,27 @@
 struct idtentry entries[256];
 struct idtptr pointer;
 
-void idtset(uchar index, void (*base)(struct registers), ushort selector, enum idt_flags flags) {
+void idtset(uint8_t index, void (*base)(struct registers), uint16_t selector, enum idt_flags flags) {
     entries[index] = (struct idtentry) {
-        .offset_lo = ((uint) base) & 0xFFFF,
-        .offset_hi = (((uint) base) >> 16) & 0xFFFF,
+        .offset_lo = ((uint32_t) base) & 0xFFFF,
+        .offset_hi = (((uint32_t) base) >> 16) & 0xFFFF,
         .selector = selector,
         .flags = flags,
         .reserved = 0
     };
 }
 
-void idtenable(uchar index) {
+void idtenable(uint8_t index) {
     entries[index].flags |= IDT_FLAG_PRESENT;
 }
 
-void idtdisable(uchar index) {
+void idtdisable(uint8_t index) {
     entries[index].flags &= ~IDT_FLAG_PRESENT;
 }
 
 void idtinit() {
     pointer.limit = sizeof(entries) - 1;
-    pointer.base = (uint) entries;
+    pointer.base = (uint32_t) entries;
     memset(entries, 0x00, sizeof(entries));
     idtload(&pointer);
 }

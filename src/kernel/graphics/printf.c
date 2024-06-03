@@ -9,19 +9,19 @@
 #define EMPTY_CHAR '\0'
 
 // TODO: why are we doing this???
-ushort *screen_addr = (ushort *) P2V_WO(0xB8000);
-uint cursor = 0;
-uchar color = 15;
+uint16_t *screen_addr = (uint16_t *) P2V_WO(0xB8000);
+uint32_t cursor = 0;
+uint8_t color = 15;
 
 void scroll(void) {
 
-	ushort *line = screen_addr;
+	uint16_t *line = screen_addr;
 
-	for (uint row = 0; row < SCREEN_HEIGHT - 1; row++, line += SCREEN_WIDTH) {
-		memcpy(line, line + SCREEN_WIDTH, SCREEN_WIDTH * sizeof(ushort));
+	for (uint32_t row = 0; row < SCREEN_HEIGHT - 1; row++, line += SCREEN_WIDTH) {
+		memcpy(line, line + SCREEN_WIDTH, SCREEN_WIDTH * sizeof(uint16_t));
 	}
 
-	for (uint col = 0; col < SCREEN_WIDTH; col++)
+	for (uint32_t col = 0; col < SCREEN_WIDTH; col++)
 		line[col] = EMPTY_CHAR | (color << 8);
 }
 
@@ -56,7 +56,7 @@ void putc(char c) {
 
 }
 
-void printint(uint x, int base, int sign) {
+void printint(uint32_t x, int base, int sign) {
 	
 	const char digits[] = "0123456789ABCDEF";
 	char buffer[16];
@@ -79,11 +79,11 @@ void printint(uint x, int base, int sign) {
 
 }
 
-#define ASU(X) (* (uint *) &(X))
+#define ASU(X) (* (uint32_t *) &(X))
 
 void printf(const char *format, ...) {
 
-	uint *varargs = (uint *) ((void *) &format) + 1;
+	uint32_t *varargs = (uint32_t *) ((void *) &format) + 1;
 
 	for (int i = 0; format[i]; i++) {
 		if (format[i] != '%')
@@ -99,12 +99,12 @@ void printf(const char *format, ...) {
 					varargs++;
 				} break;
 				case 'u': {
-					printint(*(uint *)varargs, 10, 0);
+					printint(*(uint32_t *)varargs, 10, 0);
 					varargs++;
 				} break;
 				case 'p':
 				case 'x': {
-					printint(*(uint *)varargs, 16, 0);
+					printint(*(uint32_t *)varargs, 16, 0);
 					varargs++;
 				} break;
 				case 'c': {

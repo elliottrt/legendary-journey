@@ -4,13 +4,13 @@
 #include "std.h"
 
 // UNUSED
-int fatwritesector(fat_entry_t cluster, uint sector, const void *data);
+bool fatwritesector(fat_entry_t cluster, uint32_t sector, const void *data);
 
 char FAT_VALID_FILENAME_CHARS[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&'()-@^_`{}~";
 
-uint _first_fat;
+uint32_t _first_fat;
 
-uint _cachefirstentry;
+uint32_t _cachefirstentry;
 fat_entry_t _fatcache[ENTRIES_PER_SECTOR];
 
 void fatinit(void) {
@@ -25,35 +25,35 @@ void fatinit(void) {
 
 }
 
-uint fatclustertolba(fat_entry_t cluster) {
-	uint dataregionstart = _bootsector->reservedsectors + (_bootsector->fatcount * _bootsector->fatsize32);
+uint32_t fatclustertolba(fat_entry_t cluster) {
+	uint32_t dataregionstart = _bootsector->reservedsectors + (_bootsector->fatcount * _bootsector->fatsize32);
 	return ((cluster - _bootsector->rootcluster) * _bootsector->sectorspercluster) + dataregionstart;
 }
 
-int fatnomoredirentry(struct fatdirentry *direntry) {
+bool fatnomoredirentry(struct fatdirentry *direntry) {
 	return direntry == NULL || direntry->filename[0] == 0x00;
 }
 
-int fatreadsector(fat_entry_t cluster, uint sector, void *out) {
-	uint clusterlba = fatclustertolba(cluster);
+bool fatreadsector(fat_entry_t cluster, uint32_t sector, void *out) {
+	uint32_t clusterlba = fatclustertolba(cluster);
 	return ataread(clusterlba + sector, 1, out);
 }
 
-int fatcache(uint fat, uint offsetsector) {
+bool fatcache(uint32_t fat, uint32_t offsetsector) {
 	UNUSED(fat);
 
 	if (offsetsector >= _bootsector->fatsize32)
-		return -1;
+		return false;
 
 	ataread(_first_fat + offsetsector, 1, _fatcache);
 	_cachefirstentry = offsetsector * ENTRIES_PER_SECTOR;
 
-	return 0;
+	return true;
 }
 
-uint fattotalclusters(fat_entry_t cluster, uint *lastcluster) {
+uint32_t fattotalclusters(fat_entry_t cluster, uint32_t *lastcluster) {
 
-	uint count = 0;
+	uint32_t count = 0;
 
 	fat_entry_t value = cluster;
 	do {
@@ -65,7 +65,7 @@ uint fattotalclusters(fat_entry_t cluster, uint *lastcluster) {
 	return count;
 }
 
-fat_entry_t fatclustervalue(uint entryposition) {
+fat_entry_t fatclustervalue(uint32_t entryposition) {
 	if (entryposition < _cachefirstentry || entryposition >= _cachefirstentry + ENTRIES_PER_SECTOR)
 		fatcache(0, entryposition / ENTRIES_PER_SECTOR);
 
@@ -89,7 +89,7 @@ int _fatformatchar(int c) {
 	return FAT_DEFAULT_FILENAME_CHAR;
 }
 
-int _fatformatfilename(const char *name, char *dest, uint max) {
+int _fatformatfilename(const char *name, char *dest, uint32_t max) {
 
 	if (dest == 0)
 		return -1;
@@ -113,7 +113,7 @@ int _fatformatfilename(const char *name, char *dest, uint max) {
 	return 0;
 }
 
-void fatformatfilename(const char *input, uint inputlength, char *output) {
+void fatformatfilename(const char *input, uint32_t inputlength, char *output) {
 
 	memset(output, FAT_DEFAULT_FILENAME_PADDING, FAT_FILETOTAL_LEN);
 

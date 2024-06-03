@@ -7,7 +7,7 @@
 
 typedef void (*isrhandler_t)(struct registers *);
 
-void isrinstall(uchar i, isrhandler_t handler);
+void isrinstall(uint8_t i, isrhandler_t handler);
 void isrinit();
 
 #endif

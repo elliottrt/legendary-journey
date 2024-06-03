@@ -4,20 +4,20 @@
 
 struct file root;
 
-int _fileread(struct file *file, void *buffer, uint size);
+int32_t _fileread(struct file *file, void *buffer, uint32_t size);
 
 void filenew(struct fatdirentry *entry, struct file *fileout) {
 	memcpy(&fileout->fsentry, entry, sizeof(struct fatdirentry));
-	fileout->opened = 1;
+	fileout->opened = true;
 	fileout->position = 0;
-	fileout->firstcluster = entry->firstclusterlo | (uint) entry->firstclusterhi << 16;
+	fileout->firstcluster = entry->firstclusterlo | (uint32_t) entry->firstclusterhi << 16;
 	fileout->totalclusters = fattotalclusters(fileout->firstcluster, &fileout->lastcluster);
 	fileout->currentcluster = fileout->firstcluster;
     fileout->sectorincluster = 0;
 	fatreadsector(fileout->firstcluster, 0, fileout->buffer);
 }
 
-int findentry(struct file *directory, const char *name, struct file *fileout) {
+int32_t findentry(struct file *directory, const char *name, struct file *fileout) {
 	struct fatdirentry entry;
 	int possibleentries = (directory->totalclusters * _bootsector->sectorspercluster * _bootsector->bytespersector) 
 								/ sizeof(struct fatdirentry);
@@ -43,9 +43,9 @@ int findentry(struct file *directory, const char *name, struct file *fileout) {
 	return -1;
 }
 
-uint pathnext(char **start) {
+uint32_t pathnext(char **start) {
 	char *cursor = *start;
-	uint size = 0;
+	uint32_t size = 0;
 	// move past current path
 	while (*cursor != PATH_SEP && *cursor) 
 	{
@@ -73,7 +73,7 @@ void fileinit(void) {
 	filenew(&rootentry, &root);
 }
 
-int fileopen(struct file *file, const char *pathname, int flags) {
+bool fileopen(struct file *file, const char *pathname, int flags) {
 
 	UNUSED(flags);
 
@@ -85,7 +85,7 @@ int fileopen(struct file *file, const char *pathname, int flags) {
 	char fatformattedname[FAT_FILETOTAL_LEN];
 
 	if (pathname == NULL || pathname[0] != PATH_SEP)
-		return -1;
+		return false;
 
 
 	while ((pathnextsize = pathnext(&start))) {
@@ -93,20 +93,20 @@ int fileopen(struct file *file, const char *pathname, int flags) {
 		fatformatfilename(start, pathnextsize, fatformattedname);
 
 		if (findentry(file, fatformattedname, file) < 0)
-			return -1;
+			return false;
 
 	}
 
-	file->opened = 1;
+	file->opened = true;
 
-	return 0;
+	return true;
 
 }
 
-int _fileread(struct file *file, void *buffer, uint size) {
-	uint sectorpos, newsectorstoread;
-	uchar *bytebuffer = (uchar *) buffer;
-	uint filetotalbytes = file->totalclusters * _bootsector->sectorspercluster * _bootsector->bytespersector;
+int32_t _fileread(struct file *file, void *buffer, uint32_t size) {
+	uint32_t sectorpos, newsectorstoread;
+	uint8_t *bytebuffer = (uint8_t *) buffer;
+	uint32_t filetotalbytes = file->totalclusters * _bootsector->sectorspercluster * _bootsector->bytespersector;
 
 	if (!fileisdir(file))
 		filetotalbytes = min(filetotalbytes, file->fsentry.filesize);
@@ -145,7 +145,7 @@ int _fileread(struct file *file, void *buffer, uint size) {
 	return size;
 }
 
-int fileread(struct file *file, void *buffer, uint size) {
+int32_t fileread(struct file *file, void *buffer, uint32_t size) {
 	
 	if (file == NULL || file->opened == 0)
 		return -1;
@@ -154,10 +154,10 @@ int fileread(struct file *file, void *buffer, uint size) {
 
 }
 
-int filereset(struct file *file) {
+bool filereset(struct file *file) {
 
 	if (file == NULL || file->opened == 0)
-		return -1;
+		return false;
 
 	// read new sector if the current buffer isn't the very first sector
 	if (file->position >= SECTOR_SIZE)
@@ -167,42 +167,19 @@ int filereset(struct file *file) {
     file->currentcluster = file->firstcluster;
     file->sectorincluster = 0;
 
-    return 0;
+    return true;
 
 }
 
-void printint(uint x, int base, int sign) {
-	
-	const char digits[] = "0123456789ABCDEF";
-	char buffer[16];
-	int negative = 0;
-
-	if (sign && (* (int *) &x) < 0) {
-		negative = 1;
-		x = -x;
-	}
-
-	int i = 0;
-	do {
-		buffer[i++] = digits[x % base];
-	} while ((x /= base) != 0);
-
-	if (negative) buffer[i++] = '-';
-
-	while(--i >= 0)
-    	putc(buffer[i]);
-
-}
-
-int fileseek(struct file *file, uint seek) {
+bool fileseek(struct file *file, uint32_t seek) {
 
 	if (file == NULL || file->opened == 0 || seek >= file->fsentry.filesize)
-		return -1;
+		return false;
 
-	uint clustersin = seek / (_bootsector->sectorspercluster * _bootsector->bytespersector);
-	uint newsector = (seek / _bootsector->bytespersector) % _bootsector->sectorspercluster;
+	uint32_t clustersin = seek / (_bootsector->sectorspercluster * _bootsector->bytespersector);
+	uint32_t newsector = (seek / _bootsector->bytespersector) % _bootsector->sectorspercluster;
 
-	uint newcluster = file->firstcluster;
+	uint32_t newcluster = file->firstcluster;
 	while (clustersin--)
 		newcluster = fatclustervalue(newcluster);
 
@@ -213,5 +190,5 @@ int fileseek(struct file *file, uint seek) {
 	file->currentcluster = newcluster;
 	file->sectorincluster = newsector;
 
-	return 0;
+	return true;
 }

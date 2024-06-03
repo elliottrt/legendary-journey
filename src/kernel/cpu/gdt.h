@@ -12,17 +12,17 @@
 #define GDT_SIZE 		6
 
 struct gdtentry {
-	ushort limit_lo;
-	ushort base_lo;
-	uchar base_mid;
-	uchar access;
-	uchar granularity;
-	uchar base_hi;
+	uint16_t limit_lo;
+	uint16_t base_lo;
+	uint8_t base_mid;
+	uint8_t access;
+	uint8_t granularity;
+	uint8_t base_hi;
 } __attribute__((packed));
 
 struct gdtdesc {
-	ushort size;
-	uint offset;
+	uint16_t size;
+	uint32_t offset;
 } __attribute__((packed));
 
 void gdtinit(void);

@@ -1,9 +1,9 @@
 #include "std.h"
 
-int memcmp(const void *buf1, const void *buf2, uint n)
+int memcmp(const void *buf1, const void *buf2, uint32_t n)
 {
-	uchar *left = (uchar *) buf1;
-	uchar *right = (uchar *) buf2;
+	uint8_t *left = (uint8_t *) buf1;
+	uint8_t *right = (uint8_t *) buf2;
 
 	for (; n--; left++, right++)
 	{
@@ -14,10 +14,10 @@ int memcmp(const void *buf1, const void *buf2, uint n)
 	return 0;
 }
 
-void *memcpy(void *dst, const void *src, uint n)
+void *memcpy(void *dst, const void *src, uint32_t n)
 {
-	uchar *_dst = (uchar *) dst;
-	uchar *_src = (uchar *) src;
+	uint8_t *_dst = (uint8_t *) dst;
+	uint8_t *_src = (uint8_t *) src;
 
 	for (; n--; _dst++, _src++)
 		*_dst = *_src;
@@ -25,9 +25,9 @@ void *memcpy(void *dst, const void *src, uint n)
 	return dst;
 }
 
-void *memset(void *dst, uchar c, uint n)
+void *memset(void *dst, uint8_t c, uint32_t n)
 {
-	uchar *_dst = (uchar *) dst;
+	uint8_t *_dst = (uint8_t *) dst;
 
 	for (; n--; _dst++)
 		*_dst = c;
@@ -46,14 +46,14 @@ char *strchr(const char *str, char c)
 	return NULL;
 }
 
-uint strlen(const char *str)
+uint32_t strlen(const char *str)
 {
-	uint len = 0;
+	uint32_t len = 0;
 	while(str[len++]);
 	return len - 1;
 }
 
-int strncmp(const char *str1, const char *str2, uint n)
+int strncmp(const char *str1, const char *str2, uint32_t n)
 {
 	while(*str1 && *str2 && *str1 == *str2 && --n)
 	{
@@ -63,7 +63,7 @@ int strncmp(const char *str1, const char *str2, uint n)
 	return *str1 - *str2;
 }
 
-char *strncpy(char *str1, const char *str2, uint n)
+char *strncpy(char *str1, const char *str2, uint32_t n)
 {
 	char *str1_start = str1;
 
@@ -73,12 +73,12 @@ char *strncpy(char *str1, const char *str2, uint n)
 	return str1_start;
 }
 
-int min(int a, int b)
+int32_t min(int32_t a, int32_t b)
 {
 	return a > b ? b : a;
 }
 
-char *strnchr(const char *str, char c, uint n)
+char *strnchr(const char *str, char c, uint32_t n)
 {
 	for (; *str && n--; str++)
 	{

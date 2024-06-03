@@ -19,11 +19,11 @@ void stage2main(void)
 	struct file kernel;
 	void (*kernelentry)(); // we can ignore the args here
 
-	if (fileopen(&kernel, KERNEL_NAME, 0) < 0)
+	if (fileopen(&kernel, KERNEL_NAME, 0) == 0)
 		return;
 
 	// read kernel header to scratch space
-	if (elfread(&kernel, (void *) 0x10000, &kernelentry) < 0)
+	if (elfread(&kernel, (void *) 0x10000, &kernelentry) == 0)
 		return;
     
 	kernelentry(atagetidentify(), membound());

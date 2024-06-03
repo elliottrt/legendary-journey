@@ -2,7 +2,7 @@
 #include "write.h"
 #include "std.h"
 
-int elfread(struct file *file, void *scratch, void (**entry)())
+bool elfread(struct file *file, void *scratch, void (**entry)())
 {
 
 	struct elfheader *elfhdr = (struct elfheader *) scratch;
@@ -13,18 +13,18 @@ int elfread(struct file *file, void *scratch, void (**entry)())
 
 	scratch += sizeof(struct elfheader);
 
-	proghdr = (struct elfprogheader *)((uchar *) elfhdr + elfhdr->phoff);
+	proghdr = (struct elfprogheader *)((uint8_t *) elfhdr + elfhdr->phoff);
 	endproghdr = proghdr + elfhdr->phnum;
 
 	if (elfhdr->magic != ELF_MAGIC)
-		return -1;
+		return false;
 
 	if (fileread(file, scratch, (void *) endproghdr - scratch) < 0)
 		puterr("UNABLE TO READ ELF PROG HEADERS", 0);
 
 	for (; proghdr < endproghdr; proghdr++)
 	{
-		uchar *address = (uchar *) proghdr->paddr;
+		uint8_t *address = (uint8_t *) proghdr->paddr;
 		if (fileseek(file, proghdr->off) < 0)
 			puterr("UNABLE TO SEEK SEGMENT", 0);
 		if (fileread(file, address, proghdr->filesz) < 0)
@@ -33,6 +33,6 @@ int elfread(struct file *file, void *scratch, void (**entry)())
 			memset((void *)(address + proghdr->filesz), 0x00, proghdr->memsz - proghdr->filesz);
 	}
 
-	*entry = (void (*)(uint)) elfhdr->entry;
-	return 0;
+	*entry = (void (*)(uint32_t)) elfhdr->entry;
+	return true;
 }

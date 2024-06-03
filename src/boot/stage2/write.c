@@ -2,15 +2,15 @@
 
 #define SCR_WIDTH 80
 #define SCR_HEIGHT 25
-#define SCR_MEM ((ushort *)0xB8000)
+#define SCR_MEM ((uint16_t *)0xB8000)
 
 #define EMPTY_CHAR '\0'
 
-static uchar _curcol = 0;
-static uchar _currow = 0;
+static uint8_t _curcol = 0;
+static uint8_t _currow = 0;
 
 /* white with black background */
-static ushort _color = 0x0F << 8;
+static uint16_t _color = 0x0F << 8;
 
 void _checkcur(void)
 {
@@ -62,7 +62,7 @@ void puterr(const char *s, int recoverable)
 
 void clrscr(void)
 {
-    ushort clearchar = EMPTY_CHAR | _color;
+    uint16_t clearchar = EMPTY_CHAR | _color;
 
     for (int position = 0; position < SCR_WIDTH * SCR_HEIGHT; position++)
         SCR_MEM[position] = clearchar;

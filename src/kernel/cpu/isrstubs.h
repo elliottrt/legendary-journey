@@ -261,7 +261,7 @@ extern void _ISR254();
 extern void _ISR255();
 
 void isrfillstubs(void) {
-	uint code_seg = 0x8;
+	uint32_t code_seg = 0x8;
 	idtset(0,   _ISR0,   code_seg, IDT_FLAG_RING0 | IDT_FLAG_GATE_32BIT_INT);
     idtset(1,   _ISR1,   code_seg, IDT_FLAG_RING0 | IDT_FLAG_GATE_32BIT_INT);
     idtset(2,   _ISR2,   code_seg, IDT_FLAG_RING0 | IDT_FLAG_GATE_32BIT_INT);

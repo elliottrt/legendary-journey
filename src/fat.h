@@ -16,29 +16,29 @@
 
 void fatinit(void);
 
-uint fatclustertolba(fat_entry_t cluster);
-int fatnomoredirentry(struct fatdirentry *direntry);
-int fatreadsector(fat_entry_t cluster, uint sector, void *data);
-int fatwritesector(fat_entry_t cluster, uint sector, const void *data);
+uint32_t fatclustertolba(fat_entry_t cluster);
+bool fatnomoredirentry(struct fatdirentry *direntry);
+bool fatreadsector(fat_entry_t cluster, uint32_t sector, void *data);
+bool fatwritesector(fat_entry_t cluster, uint32_t sector, const void *data);
 
-int fatcache(uint fat, uint offsetsector);
+bool fatcache(uint32_t fat, uint32_t offsetsector);
 void fatcommit(void);
-uint fattotalclusters(fat_entry_t cluster, uint *lastcluster);
-fat_entry_t fatclustervalue(uint entryposition);
+uint32_t fattotalclusters(fat_entry_t cluster, uint32_t *lastcluster);
+fat_entry_t fatclustervalue(uint32_t entryposition);
 
-uint fatfindfreecluster(void);
-void fatsetcluster(uint cluster, fat_entry_t value);
+uint32_t fatfindfreecluster(void);
+void fatsetcluster(uint32_t cluster, fat_entry_t value);
 
 // travel count clusters from start
-fat_entry_t fattraverse(fat_entry_t start, uint count);
+fat_entry_t fattraverse(fat_entry_t start, uint32_t count);
 
 // returns the new end cluster
-fat_entry_t fatallocclusters(fat_entry_t start, uint count);
+fat_entry_t fatallocclusters(fat_entry_t start, uint32_t count);
 
 // returns the new end cluster
 // sets start as the end of a chain and deallocates all after it
 fat_entry_t fatdeallocclusters(fat_entry_t start);
 
-void fatformatfilename(const char *input, uint inputlength, char *output);
+void fatformatfilename(const char *input, uint32_t inputlength, char *output);
 
 #endif

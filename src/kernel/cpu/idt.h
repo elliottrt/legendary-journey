@@ -20,21 +20,21 @@ enum idt_flags
 };
 
 struct idtentry {
-    ushort offset_lo;
-    ushort selector;
-    uchar reserved;
-    uchar flags;
-    ushort offset_hi;
+    uint16_t offset_lo;
+    uint16_t selector;
+    uint8_t reserved;
+    uint8_t flags;
+    uint16_t offset_hi;
 } __attribute__ ((packed));
 
 struct idtptr {
-    ushort limit;
-    uint base;
+    uint16_t limit;
+    uint32_t base;
 } __attribute__ ((packed));
 
-void idtset(uchar index, void (*base)(struct registers), ushort selector, enum idt_flags flags);
-void idtenable(uchar index);
-void idtdisable(uchar index);
+void idtset(uint8_t index, void (*base)(struct registers), uint16_t selector, enum idt_flags flags);
+void idtenable(uint8_t index);
+void idtdisable(uint8_t index);
 void idtinit();
 
 #endif

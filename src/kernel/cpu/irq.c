@@ -17,8 +17,8 @@
 
 #define PIC_REMAP_OFFSET 0x20
 
-uchar autoeoi = 0;
-ushort mask = 0xFFFF;
+uint8_t autoeoi = 0;
+uint16_t mask = 0xFFFF;
 
 enum PIC_ICW1 {
     PIC_ICW1_ICW4           = 0x01,
@@ -46,14 +46,12 @@ enum PIC_CMD {
 static irqhandler_t handlers[16] = { 0 };
 
 static void irqstub(struct registers *regs) {
-    uint irq = regs->int_no - PIC_REMAP_OFFSET;
+    uint32_t irq = regs->int_no - PIC_REMAP_OFFSET;
 
     if (handlers[irq] != NULL) {
         handlers[irq](regs);
     } else {
-        printferr();
         printf("unhandled irq: %i\n", irq);
-        printfstd();
     }
 
     // send EOI
@@ -64,7 +62,7 @@ static void irqstub(struct registers *regs) {
 
 }
 
-void irqsetmask(ushort new_mask) {
+void irqsetmask(uint16_t new_mask) {
     mask = new_mask;
     outb(PIC1_DATA, mask & 0xFF);
     iowait();
@@ -72,7 +70,7 @@ void irqsetmask(ushort new_mask) {
     iowait();
 }
 
-static void irqremap(uchar offset_pic1, uchar offset_pic2) {
+static void irqremap(uint8_t offset_pic1, uint8_t offset_pic2) {
     irqsetmask(mask);
 
     outb(PIC1_COMMAND, PIC_ICW1_ICW4 | PIC_ICW1_INITIALIZE);
@@ -90,7 +88,7 @@ static void irqremap(uchar offset_pic1, uchar offset_pic2) {
     outb(PIC2_DATA, 0x2); // cascade identity
     iowait();
 
-    uchar ecw4 = PIC_ICW4_8086;
+    uint8_t ecw4 = PIC_ICW4_8086;
     if (autoeoi) ecw4 |= PIC_ICW4_AUTO_EOI;
 
     outb(PIC1_DATA, ecw4);
@@ -101,15 +99,15 @@ static void irqremap(uchar offset_pic1, uchar offset_pic2) {
     irqsetmask(mask);
 }
 
-void irqenable(uint i) {
+void irqenable(uint32_t i) {
     irqsetmask(mask & ~(1 << i));
 }
 
-void irqdisable(uint i) {
+void irqdisable(uint32_t i) {
     irqsetmask(mask | (1 << i));
 }
 
-void irqinstall(uint i, irqhandler_t handler) {
+void irqinstall(uint32_t i, irqhandler_t handler) {
     cli();
     handlers[i] = handler;
     irqenable(i);
@@ -120,7 +118,7 @@ void irqinstall(uint i, irqhandler_t handler) {
 void irqinit() {
     irqremap(PIC_REMAP_OFFSET, PIC_REMAP_OFFSET + 8);
 
-    for (uint i = 0; i < 16; i++) {
+    for (uint32_t i = 0; i < 16; i++) {
         isrinstall(PIC_REMAP_OFFSET + i, irqstub);
     }
 }

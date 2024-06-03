@@ -5,7 +5,7 @@
 struct gdtentry gdt[GDT_SIZE] = {0};
 struct gdtdesc gdtdesc = {
 	.size = (sizeof(struct gdtentry) * GDT_SIZE) - 1,
-	.offset = (uint) gdt,
+	.offset = (uint32_t) gdt,
 };
 
 void gdtinit(void) {

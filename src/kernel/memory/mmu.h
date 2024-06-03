@@ -10,7 +10,7 @@
 #define PGROUNDUP(a)  (((a)+PGSIZE-1) & ~(PGSIZE-1))
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE-1))
 
-#define V2P(a) (((uint) (a)) - KERNBASE)
+#define V2P(a) (((uint32_t) (a)) - KERNBASE)
 #define P2V(a) ((void *)(((char *) (a)) + KERNBASE))
 #define V2P_WO(x) ((x) - KERNBASE)
 #define P2V_WO(x) ((x) + KERNBASE)
@@ -29,10 +29,10 @@
 
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
 
-#define PDX(va) (((uint)(va) >> PDXSHIFT) & 0x3FF)
-#define PTX(va) (((uint)(va) >> PTXSHIFT) & 0x3FF)
+#define PDX(va) (((uint32_t)(va) >> PDXSHIFT) & 0x3FF)
+#define PTX(va) (((uint32_t)(va) >> PTXSHIFT) & 0x3FF)
 
-#define PTE_ADDR(pte)   ((uint)(pte) & ~0xFFF)
-#define PTE_FLAGS(pte)  ((uint)(pte) &  0xFFF)
+#define PTE_ADDR(pte)   ((uint32_t)(pte) & ~0xFFF)
+#define PTE_FLAGS(pte)  ((uint32_t)(pte) &  0xFFF)
 
 #endif

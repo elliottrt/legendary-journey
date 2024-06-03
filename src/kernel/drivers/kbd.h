@@ -64,12 +64,12 @@
 #define KEY_MOD(s, m) (!!((s) & (m)))
 
 struct keyboard {
-    ushort mods;
-    uchar keys[128];
-    uchar chars[128];
+    uint16_t mods;
+    uint8_t keys[128];
+    uint8_t chars[128];
 };
 
-extern uchar keyboard_us[2][128];
+extern uint8_t keyboard_us[2][128];
 extern struct keyboard keyboard;
 
 #define kbdkey(_s) (keyboard.keys[(_s)])

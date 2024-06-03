@@ -13,18 +13,18 @@ struct file {
 	
 	struct fatdirentry fsentry;
 
-	uchar opened;
-	uchar dirty;
+	bool opened;
+	bool dirty;
 
-	uint position;
-	uchar buffer[SECTOR_SIZE];
+	uint32_t position;
+	uint8_t buffer[SECTOR_SIZE];
 
-	uint totalclusters;
-	uint firstcluster;
-	uint lastcluster;
-    uint currentcluster;
-	uint parentdircluster;
-    uint sectorincluster;
+	uint32_t totalclusters;
+	uint32_t firstcluster;
+	uint32_t lastcluster;
+    uint32_t currentcluster;
+	uint32_t parentdircluster;
+    uint32_t sectorincluster;
 
 };
 
@@ -44,13 +44,15 @@ enum fflags {
 
 void fileinit(void);
 
-int fileresize(struct file *file, uint size);
-int fileopen(struct file *file, const char *pathname, int flags);
-int fileread(struct file *file, void *buffer, uint size);
-int filewrite(struct file *file, const void *buffer, uint size);
-int filereset(struct file *file);
-int fileseek(struct file *file, uint seek);
-int fileflush(struct file *file);
-int fileclose(struct file *file);
+bool fileresize(struct file *file, uint32_t size);
+bool fileopen(struct file *file, const char *pathname, int flags);
+// returns amount of bytes read
+int32_t fileread(struct file *file, void *buffer, uint32_t size);
+// returns whether operation completed successfully
+bool filewrite(struct file *file, const void *buffer, uint32_t size);
+bool filereset(struct file *file);
+bool fileseek(struct file *file, uint32_t seek);
+bool fileflush(struct file *file);
+bool fileclose(struct file *file);
 
 #endif

@@ -4,12 +4,12 @@
 #include "types.h"
 
 struct memregion {
-    ullong address;
-    ullong length;
-    uint type;
-    uint attributes;
+    uint64_t address;
+    uint64_t length;
+    uint32_t type;
+    uint32_t attributes;
 };
 
-char *membound(void);
+void *membound(void);
 
 #endif

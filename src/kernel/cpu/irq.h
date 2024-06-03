@@ -6,10 +6,10 @@
 
 typedef void (*irqhandler_t)(struct registers *);
 
-void irqenable(uint i);
-void irqdisable(uint i);
+void irqenable(uint32_t i);
+void irqdisable(uint32_t i);
 
 void irqinit(void);
-void irqinstall(uint i, irqhandler_t handler);
+void irqinstall(uint32_t i, irqhandler_t handler);
 
 #endif

@@ -7,14 +7,14 @@
 char FAT_VALID_FILENAME_CHARS[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&'()-@^_`{}~";
 
 static struct fatsearch {
-	uint start;
+	uint32_t start;
 } _fatsearch;
 
 static struct fatcache {
-	uchar dirty;
-	uint firstentry;
-	uint startingsector;
-	uchar sectorsbuffered;
+	bool dirty;
+	uint32_t firstentry;
+	uint32_t startingsector;
+	uint8_t sectorsbuffered;
 	// of size ENTRIES_PER_SECTOR * FAT_CACHE_SIZE
 	fat_entry_t *buffer;
 } _fatcache;
@@ -22,13 +22,11 @@ static struct fatcache {
 void fatinit(void) {
 
 	if (_vbootsector->bytespersector * FAT_CACHE_SIZE > PGSIZE) {
-		printferr();
 		printf("error: fatcache too large (%u bytes), must be <= to %u bytes\n", _vbootsector->bytespersector * FAT_CACHE_SIZE, PGSIZE);
 		while(1);
 	}
 
 	if ((_fatcache.buffer = (fat_entry_t *) kalloc()) == NULL) {
-		printferr();
 		printf("error: failed to allocate memory for fat cache\n");
 		while(1);
 	}
@@ -40,28 +38,28 @@ void fatinit(void) {
 
 }
 
-uint fatclustertolba(fat_entry_t cluster) {
-	uint dataregionstart = _vbootsector->reservedsectors + (_vbootsector->fatcount * _vbootsector->fatsize32);
+uint32_t fatclustertolba(fat_entry_t cluster) {
+	uint32_t dataregionstart = _vbootsector->reservedsectors + (_vbootsector->fatcount * _vbootsector->fatsize32);
 	return ((cluster - _vbootsector->rootcluster) * _vbootsector->sectorspercluster) + dataregionstart;
 }
 
-int fatnomoredirentry(struct fatdirentry *direntry) {
+bool fatnomoredirentry(struct fatdirentry *direntry) {
 	return direntry == NULL || direntry->filename[0] == 0x00;
 }
 
-int fatreadsector(fat_entry_t cluster, uint sector, void *data) {
-	uint clusterlba = fatclustertolba(cluster);
+bool fatreadsector(fat_entry_t cluster, uint32_t sector, void *data) {
+	uint32_t clusterlba = fatclustertolba(cluster);
 	return ataread(clusterlba + sector, 1, data);
 }
 
-int fatwritesector(fat_entry_t cluster, uint sector, const void *data) {
-	uint clusterlba = fatclustertolba(cluster);
+bool fatwritesector(fat_entry_t cluster, uint32_t sector, const void *data) {
+	uint32_t clusterlba = fatclustertolba(cluster);
 	return atawrite(clusterlba + sector, 1, data);
 }
 
-int fatcache(uint fat, uint offsetsector) {
+bool fatcache(uint32_t fat, uint32_t offsetsector) {
 	if (fat >= _vbootsector->fatcount || offsetsector >= _vbootsector->fatsize32)
-		return -1;
+		return false;
 
 	// write back to all fats if dirty
 	fatcommit();
@@ -69,31 +67,31 @@ int fatcache(uint fat, uint offsetsector) {
 	// sectors buffered is either the CACHE_SIZE or the number of sectors until the end of the fat
 	_fatcache.sectorsbuffered = min(FAT_CACHE_SIZE, _vbootsector->fatsize32 - offsetsector);
 
-	uint lba = _vbootsector->reservedsectors + (fat * _vbootsector->fatsize32) + offsetsector;
+	uint32_t lba = _vbootsector->reservedsectors + (fat * _vbootsector->fatsize32) + offsetsector;
 
 	ataread(lba, _fatcache.sectorsbuffered, _fatcache.buffer);
 
-	_fatcache.dirty = 0;
+	_fatcache.dirty = false;
 	_fatcache.firstentry = offsetsector * ENTRIES_PER_SECTOR;
 	_fatcache.startingsector = offsetsector;
 
-	return 0;
+	return true;
 }
 
 void fatcommit(void) {
 	if (_fatcache.dirty) {
 		// position of cached area in fat 0
-		uint lba = _vbootsector->reservedsectors + _fatcache.startingsector;
-		for (uint fatidx = 0; fatidx < _vbootsector->fatcount; ++fatidx) {
+		uint32_t lba = _vbootsector->reservedsectors + _fatcache.startingsector;
+		for (uint32_t fatidx = 0; fatidx < _vbootsector->fatcount; ++fatidx) {
 			atawrite(lba, _fatcache.sectorsbuffered, _fatcache.buffer);
 			lba += _vbootsector->fatsize32;
 		}
-		_fatcache.dirty = 0;
+		_fatcache.dirty = false;
 	}
 }
 
-uint fattotalclusters(fat_entry_t cluster, uint *lastcluster) {
-	uint count = 0;
+uint32_t fattotalclusters(fat_entry_t cluster, uint32_t *lastcluster) {
+	uint32_t count = 0;
 	fat_entry_t value = cluster;
 	do {
 		if (lastcluster) *lastcluster = value;
@@ -104,30 +102,30 @@ uint fattotalclusters(fat_entry_t cluster, uint *lastcluster) {
 	return count;
 }
 
-fat_entry_t fatclustervalue(uint entryposition) {
+fat_entry_t fatclustervalue(uint32_t entryposition) {
 	if (entryposition < _fatcache.firstentry || entryposition >= _fatcache.firstentry + (ENTRIES_PER_SECTOR * _fatcache.sectorsbuffered))
 		fatcache(0, entryposition / ENTRIES_PER_SECTOR);
 
 	return _fatcache.buffer[entryposition % (ENTRIES_PER_SECTOR * _fatcache.sectorsbuffered)];
 }
 
-void fatsetcluster(uint cluster, fat_entry_t value) {
+void fatsetcluster(uint32_t cluster, fat_entry_t value) {
 	if (cluster < _fatcache.firstentry || cluster >= _fatcache.firstentry + (ENTRIES_PER_SECTOR * _fatcache.sectorsbuffered))
 		fatcache(0, cluster / ENTRIES_PER_SECTOR);
 
-	_fatcache.dirty = 1;
+	_fatcache.dirty = true;
 	_fatcache.buffer[cluster % (ENTRIES_PER_SECTOR * _fatcache.sectorsbuffered)] = value;
 	
 	if (value == FEFREE && cluster < _fatsearch.start)
 		_fatsearch.start = cluster - 1;
 }
 
-uint fatfindfreecluster(void) {
+uint32_t fatfindfreecluster(void) {
 
 	// start where we are certain there is nothing open behind
-	uint current = _fatsearch.start;
+	uint32_t current = _fatsearch.start;
 
-	uint possible_entries_left = (_vbootsector->fatsize32 * _vbootsector->bytespersector / sizeof(fat_entry_t)) - current * sizeof(fat_entry_t);
+	uint32_t possible_entries_left = (_vbootsector->fatsize32 * _vbootsector->bytespersector / sizeof(fat_entry_t)) - current * sizeof(fat_entry_t);
 
 	while (possible_entries_left--) {
 		fat_entry_t value = fatclustervalue(current);
@@ -138,21 +136,19 @@ uint fatfindfreecluster(void) {
 		current++;
 	}
 
-	printferr();
 	printf("run out of disk space");
-	printfstd();
 
 	_fatsearch.start = _vbootsector->fatsize32 * _vbootsector->bytespersector / sizeof(fat_entry_t);
 
 	return 0;
 }
 
-fat_entry_t fattraverse(fat_entry_t start, uint count) {
+fat_entry_t fattraverse(fat_entry_t start, uint32_t count) {
 	if (count == 0) return start;
 
 	fat_entry_t nextcluster = start;
 	while (count--) {
-		uint value = fatclustervalue(nextcluster);
+		uint32_t value = fatclustervalue(nextcluster);
 		if (value >= FEEND32L)
 			return nextcluster;
 		nextcluster = value;
@@ -161,13 +157,13 @@ fat_entry_t fattraverse(fat_entry_t start, uint count) {
 	return nextcluster;
 }
 
-fat_entry_t fatallocclusters(fat_entry_t start, uint count) {
+fat_entry_t fatallocclusters(fat_entry_t start, uint32_t count) {
 	if (count == 0) return start;
 
-	uint clustersleft = count;
+	uint32_t clustersleft = count;
 	fat_entry_t top = start;
 	while (clustersleft--) {
-		uint freecluster = fatfindfreecluster();
+		uint32_t freecluster = fatfindfreecluster();
 		fatsetcluster(top, freecluster);
 		top = freecluster;
 	}
@@ -209,7 +205,7 @@ int _fatformatchar(int c) {
 	return FAT_DEFAULT_FILENAME_CHAR;
 }
 
-int _fatformatfilename(const char *name, char *dest, uint max) {
+int _fatformatfilename(const char *name, char *dest, uint32_t max) {
 
 	if (dest == 0 || name == 0)
 		return -1;
@@ -227,7 +223,7 @@ int _fatformatfilename(const char *name, char *dest, uint max) {
 	return 0;
 }
 
-void fatformatfilename(const char *input, uint inputlength, char *output) {
+void fatformatfilename(const char *input, uint32_t inputlength, char *output) {
 
 	memset(output, FAT_DEFAULT_FILENAME_PADDING, FAT_FILETOTAL_LEN);
 

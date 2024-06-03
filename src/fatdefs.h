@@ -11,7 +11,7 @@
 #define FAT_DOT ".          "
 #define FAT_DOTDOT "..         "
 
-typedef uint fat_entry_t;
+typedef uint32_t fat_entry_t;
 #define ENTRY_SIZE sizeof(fat_entry_t)
 #define ENTRIES_PER_SECTOR (SECTOR_SIZE/ENTRY_SIZE)
 
@@ -28,54 +28,54 @@ enum fatdirattributes {
 };
 
 struct fatdirentry {
-	uchar filename[FAT_FILENAME_LEN];
-	uchar fileext[FAT_FILEEXT_LEN];
-	uchar attributes;
-	uchar reserved;
-	uchar creationtimetenths;
-    ushort creationtime;
-    ushort creationdate;
-    ushort accessdate;
-    ushort firstclusterhi;
-    ushort modifytime;
-    ushort modifydate;
-    ushort firstclusterlo;
-    uint filesize;
+	uint8_t filename[FAT_FILENAME_LEN];
+	uint8_t fileext[FAT_FILEEXT_LEN];
+	uint8_t attributes;
+	uint8_t reserved;
+	uint8_t creationtimetenths;
+    uint16_t creationtime;
+    uint16_t creationdate;
+    uint16_t accessdate;
+    uint16_t firstclusterhi;
+    uint16_t modifytime;
+    uint16_t modifydate;
+    uint16_t firstclusterlo;
+    uint32_t filesize;
 } __attribute__ ((packed));
 
 #define FAT_PHYS_ROOT_ENTRY ((struct fatdirentry){ .attributes = SYSTEM | DIRECTORY, .firstclusterlo = _bootsector->rootcluster })
 #define FAT_VIRT_ROOT_ENTRY ((struct fatdirentry){ .attributes = SYSTEM | DIRECTORY, .firstclusterlo = _vbootsector->rootcluster })
 
 struct fatbootsector {
-	uchar bootjmp[3];
+	uint8_t bootjmp[3];
 	unsigned char oemname[8];
-	ushort bytespersector;
-	uchar sectorspercluster;
-	ushort reservedsectors;
-	uchar fatcount;
-	ushort rootentrycount;
-	ushort totalsectors16;
-	uchar mediatype;
-	ushort fatsize16;
-	ushort sectorspertrack;
-	ushort headcount;
-	uint hiddensectors;
-	uint totalsectors32;
+	uint16_t bytespersector;
+	uint8_t sectorspercluster;
+	uint16_t reservedsectors;
+	uint8_t fatcount;
+	uint16_t rootentrycount;
+	uint16_t totalsectors16;
+	uint8_t mediatype;
+	uint16_t fatsize16;
+	uint16_t sectorspertrack;
+	uint16_t headcount;
+	uint32_t hiddensectors;
+	uint32_t totalsectors32;
 
 	// fat32 specific
-	uint fatsize32;
-	ushort extensionflags;
-	ushort filesystemversion;
-	uint rootcluster;
-	ushort fsinfosector;
-	ushort backupbootsector;
-	uchar reserved[12];
-	uchar drivenumber;
-	uchar reserved1;
-	uchar bootsignature;
-	uint volumeid;
-	uchar volumelabel[11];
-	uchar fstype[8];
+	uint32_t fatsize32;
+	uint16_t extensionflags;
+	uint16_t filesystemversion;
+	uint32_t rootcluster;
+	uint16_t fsinfosector;
+	uint16_t backupbootsector;
+	uint8_t reserved[12];
+	uint8_t drivenumber;
+	uint8_t reserved1;
+	uint8_t bootsignature;
+	uint32_t volumeid;
+	uint8_t volumelabel[11];
+	uint8_t fstype[8];
 
 } __attribute__ ((packed));
 

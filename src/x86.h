@@ -15,15 +15,15 @@
 #define UNUSED_PORT 0x80
 #define iowait() outb(UNUSED_PORT, 0x00)
 
-void ASMCALL outb(ushort port, uchar value);
-uchar ASMCALL inb(ushort port);
+void ASMCALL outb(uint16_t port, uint8_t value);
+uint8_t ASMCALL inb(uint16_t port);
 
-void ASMCALL outw(ushort port, ushort value);
-ushort ASMCALL inw(ushort port);
+void ASMCALL outw(uint16_t port, uint16_t value);
+uint16_t ASMCALL inw(uint16_t port);
 
 // for kernel::proc.c
 
-void ASMCALL ltr(ushort gdtsegment);
+void ASMCALL ltr(uint16_t gdtsegment);
 
 // for kernel::gdt.c
 
@@ -31,7 +31,7 @@ void ASMCALL gdtload(void);
 
 // for kernel::virtmem.c
 
-void ASMCALL lcr3(uint val);
+void ASMCALL lcr3(uint32_t val);
 
 // for kernel::idt.c
 

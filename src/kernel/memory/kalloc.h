@@ -3,13 +3,13 @@
 
 #include "types.h"
 
-char *kalloc(void);
-void kfree(char *address);
+void *kalloc(void);
+void kfree(void *address);
 
 void kallocinit(void);
 void kallocexpand(void);
 
-uint kallocavailable(void);
-uint kalloctotal(void);
+uint32_t kallocavailable(void);
+uint32_t kalloctotal(void);
 
 #endif

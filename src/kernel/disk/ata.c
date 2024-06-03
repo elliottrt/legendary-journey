@@ -24,7 +24,7 @@ void atacacheflush(void)
 void atareset(void)
 {
 	/* get current control values */
-	uchar control = inb(0x03F6);
+	uint8_t control = inb(0x03F6);
 	/* send it back with software reset bit set */
 	outb(0x03F6, control | 0x04);
 	/* set it back to off */
@@ -34,24 +34,21 @@ void atareset(void)
 		ataerror();
 }
 
-int ataread(uint lba, uchar sectors, void *dst)
+bool ataread(uint32_t lba, uint8_t sectors, void *dst)
 {
-	uchar status = 0x00;
-	ushort *data = (ushort *) dst;
+	uint8_t status = 0x00;
+	uint16_t *data = (uint16_t *) dst;
 
 	lba &= 0x0FFFFFFF;
 
-	if (lba + sectors > _ataidentify->useraddressablesectors) 
-	{
-		printferr();
+	if (lba + sectors > _ataidentify->useraddressablesectors) {
 		printf("ata: error: cannot read beyond end of disk\n");
-		printfstd();
-		return -1;
+		return false;
 	}
 
 	/* why do io if we aren't reading anything? */
 	/* this is also a special value that would read a lot of sectors */
-	if (sectors == 0) return 0;
+	if (sectors == 0) return true;
 
 	/* drive and lba bits 24-27 */
 	outb(0x01F6, (lba >> 24) | 0xE0);
@@ -75,32 +72,30 @@ int ataread(uint lba, uchar sectors, void *dst)
 
 	if (atacheckerror()) {
 		ataerror();
-		return -1;
+		return false;
 	}
 
-	return 0;
+	return true;
 
 }
 
-int atawrite(uint lba, uchar sectors, const void *src)
+bool atawrite(uint32_t lba, uint8_t sectors, const void *src)
 {
 
-	uchar status = 0x00;
-	const ushort *data = (ushort *) src;
+	uint8_t status = 0x00;
+	const uint16_t *data = (uint16_t *) src;
 
 	lba &= 0x0FFFFFFF;
 
 	if (lba + sectors > _ataidentify->useraddressablesectors)
 	{
-		printferr();
 		printf("ata: error: cannot write beyond end of disk\n");
-		printfstd();
-		return -1;
+		return false;
 	}
 
 	/* why do io if we aren't writing anything? */
 	/* this is also a special value that would write a lot of sectors */
-	if (sectors == 0) return 0;
+	if (sectors == 0) return true;
 
 	/* drive and lba bits 24-27 */
 	outb(0x01F6, (lba >> 24) | 0xE0);
@@ -126,30 +121,28 @@ int atawrite(uint lba, uchar sectors, const void *src)
 
 	if (atacheckerror()) {
 		ataerror();
-		return -1;
+		return false;
 	}
 
 	/* need to do this to prevent issues */
 	atacacheflush();
 
-	return 0;
+	return true;
 
 }
 
-int atacheckerror(void)
+bool atacheckerror(void)
 {
 	/* read status port */
-	uchar status = inb(0x01F7);
+	uint8_t status = inb(0x01F7);
 	/* return whether ERR bit is set */
-	return (status & 1) != 0;
+	return status & 1;
 }
 
 void ataerror(void)
 {
 	/* read error register */
-	uchar error = inb(0x01F1);
-
-	printferr();
+	uint8_t error = inb(0x01F1);
 
 	if (error & BIT(0))
 		printf("\nata: error: address mark not found\n");
@@ -167,11 +160,9 @@ void ataerror(void)
 		printf("\nata: error: uncorrectable data error\n");
 	if (error & BIT(7))
 		printf("\nata: error: bad block detected\n");
-
-	printfstd();
 }
 
-uint atasectors(void)
+uint32_t atasectors(void)
 {
 	return _ataidentify->useraddressablesectors;
 }

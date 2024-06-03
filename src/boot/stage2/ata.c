@@ -5,15 +5,15 @@
 // UNUSED
 void atacacheflush(void);
 void atareset(void);
-int atawrite(uint lba, uchar sectors, const void *src);
-uint atasectors(void);
+bool atawrite(uint32_t lba, uint8_t sectors, const void *src);
+uint32_t atasectors(void);
 
 struct ataidentify _ataidentify;
 
 void atainit(void) {
 	/* avoid unaligned pointer warning */
 	void *tempaddr = (void *) &_ataidentify;
-	ushort *ataidentifyaddress = (ushort *) tempaddr;
+	uint16_t *ataidentifyaddress = (uint16_t *) tempaddr;
 
 	/* select master drive */
 	outb(0x01F6, 0xA0);
@@ -25,18 +25,16 @@ void atainit(void) {
 	/* send IDENTIFY command */
 	outb(0x01F7, 0xEC);
 	/* read status */
-	uchar status = inb(0x1F7);
+	uint8_t status = inb(0x1F7);
 	/* if status is 0 there is no drive */
-	if (status == 0)
-	{
+	if (status == 0) {
 		puterr("\nata: error: drive does not exist\n", 0);
 		return;
 	}
 	// wait for BSY (bit 7) to clear
 	while (inb(0x01F7) & 0x80);
 	// ensure drive is ATA
-	if (inb(0x01F4) != 0 || inb(0x01F5) != 0)
-	{
+	if (inb(0x01F4) != 0 || inb(0x01F5) != 0) {
 		puterr("\nata: error: drive is not ata", 0);
 		return;
 	}
@@ -45,14 +43,12 @@ void atainit(void) {
 	while ((status & 0x09) == 0)
 		status = inb(0x01F7);
 	/* if error, print and return failure */
-	if (status & 1)
-	{
+	if (status & 1) {
 		ataerror();
 		return;
 	}
 	/* otherwise we are ready to read data */
-	for (int reads = 0; reads < 256; reads++)
-	{
+	for (int reads = 0; reads < 256; reads++) {
 		ataidentifyaddress[reads] = inw(0x01F0);
 	}
 
@@ -62,20 +58,20 @@ void atainit(void) {
 
 }
 
-int ataread(uint lba, uchar sectors, void *dst) {
-	uchar status = 0x00;
-	ushort *data = (ushort *) dst;
+bool ataread(uint32_t lba, uint8_t sectors, void *dst) {
+	uint8_t status = 0x00;
+	uint16_t *data = (uint16_t *) dst;
 
 	lba &= 0x0FFFFFFF;
 
 	if (lba + sectors > _ataidentify.useraddressablesectors) {
 		puterr("ata: error: cannot read beyond end of disk\n", 1);
-		return -1;
+		return false;
 	}
 
 	/* why do io if we aren't reading anything? */
 	/* this is also a special value that would read a lot of sectors */
-	if (sectors == 0) return 0;
+	if (sectors == 0) return true;
 
 	/* drive and lba bits 24-27 */
 	outb(0x01F6, (lba >> 24) | 0xE0);
@@ -101,23 +97,23 @@ int ataread(uint lba, uchar sectors, void *dst) {
 
 	if (atacheckerror()) {
 		ataerror();
-		return -1;
+		return false;
 	}
 		
-	return 0;
+	return true;
 
 }
 
-int atacheckerror(void) {
+bool atacheckerror(void) {
 	/* read status port */
-	uchar status = inb(0x01F7);
+	uint8_t status = inb(0x01F7);
 	/* return whether ERR bit is set */
-	return (status & 1) != 0;
+	return status & 1;
 }
 
 void ataerror(void) {
 	/* read error register */
-	uchar error = inb(0x01F1);
+	uint8_t error = inb(0x01F1);
 	if (error & BIT(0))
 		puterr("\nata: error: address mark not found\n", 0);
 	if (error & BIT(1))

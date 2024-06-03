@@ -12,38 +12,38 @@ See https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
 
 struct elfheader 
 {
-	uint magic;
-	uchar bits;
-    uchar endian;
-    uchar headerversion;
-    uchar abi;
-    uchar abiversion;
-    uchar padding[7];
-    ushort type;
-    ushort machine;
-    uint version;
-    uint entry;
-    uint phoff;
-    uint shoff;
-    uint flags;
-    ushort ehsize;
-    ushort phentsize;
-    ushort phnum;
-    ushort shentsize;
-    ushort shnum;
-    ushort shstrndx;
+	uint32_t magic;
+	uint8_t bits;
+    uint8_t endian;
+    uint8_t headerversion;
+    uint8_t abi;
+    uint8_t abiversion;
+    uint8_t padding[7];
+    uint16_t type;
+    uint16_t machine;
+    uint32_t version;
+    uint32_t entry;
+    uint32_t phoff;
+    uint32_t shoff;
+    uint32_t flags;
+    uint16_t ehsize;
+    uint16_t phentsize;
+    uint16_t phnum;
+    uint16_t shentsize;
+    uint16_t shnum;
+    uint16_t shstrndx;
 } __attribute__ ((packed));
 
 struct elfprogheader
 {
-    uint type;
-	uint off;
-	uint vaddr;
-	uint paddr;
-	uint filesz;
-	uint memsz;
-	uint flags;
-	uint align;
+    uint32_t type;
+	uint32_t off;
+	uint32_t vaddr;
+	uint32_t paddr;
+	uint32_t filesz;
+	uint32_t memsz;
+	uint32_t flags;
+	uint32_t align;
 } __attribute__ ((packed));
 
 enum elfprogtype 
@@ -62,6 +62,6 @@ enum elfprogtype
     ELF_PTYPE_HIPROC = 0x7FFFFFFF
 };
 
-int elfread(struct file *file, void *scratch, void (**entry)());
+bool elfread(struct file *file, void *scratch, void (**entry)());
 
 #endif

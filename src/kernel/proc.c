@@ -5,8 +5,8 @@
 static struct tss tss_entry = {0};
 
 void proc_gdt_segment(struct gdtentry *entry) {
-	uint base = (uint) &tss_entry;
-	uint limit = sizeof(struct tss);
+	uint32_t base = (uint32_t) &tss_entry;
+	uint32_t limit = sizeof(struct tss);
 
 	entry->limit_lo = limit & 0xFFFF;
 	entry->base_lo = base & 0xFFFF;

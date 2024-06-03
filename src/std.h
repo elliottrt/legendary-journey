@@ -4,8 +4,6 @@
 #include "types.h"
 #include "x86.h"
 
-#define NULL 0
-
 #define UNUSED(X) (void)(X)
 
 enum errno {
@@ -33,44 +31,38 @@ const char *strerror(enum errno _errno);
 /* descriptions copied from there */
 
 /* Compares up to n bytes of buf1 and buf2. */
-int memcmp(const void *buf1, const void *buf2, uint n);
+int memcmp(const void *buf1, const void *buf2, uint32_t n);
 
 /* Copies n bytes of src to dest. */
-void *memcpy(void *dst, const void *src, uint n);
+void *memcpy(void *dst, const void *src, uint32_t n);
 
 /* Sets n bytes of dst to a value c. */
-void *memset(void *dst, uchar c, uint n);
+void *memset(void *dst, uint8_t c, uint32_t n);
 
 /* Locates the first occurrence of c in str. */
 char *strchr(const char *str, char c);
 
 /* Calculates the length of str. */
-uint strlen(const char *str);
+uint32_t strlen(const char *str);
 
 /* Compares up to n characters of str1 and str2. */
-int strncmp(const char *str1, const char *str2, uint n);
+int strncmp(const char *str1, const char *str2, uint32_t n);
 
 /* Copies up to n characters of str2 to str1. */
-char *strncpy(char *dst, const char *src, uint n);
+char *strncpy(char *dst, const char *src, uint32_t n);
 
 /* non-standard but useful */
 
 /* Returns the lower of a and b. */
-int min(int a, int b);
-uint umin(uint a, uint b);
+int32_t min(int32_t a, int32_t b);
+uint32_t umin(uint32_t a, uint32_t b);
 
 /* Returns the higher of a and b */
-int max(int a, int b);
-uint umax(uint a, uint b);
+int32_t max(int32_t a, int32_t b);
+uint32_t umax(uint32_t a, uint32_t b);
 
 /* Locates the first occurrence of c in str within n characters. */
-char *strnchr(const char *str, char c, uint n);
-
-#define HIBIT(_x) (31 - __builtin_clz((_x)))
-
-// returns the lowest set bit of x
-#define LOBIT(_x)\
-    __extension__({ __typeof__(_x) __x = (_x); HIBIT(__x & -__x); })
+char *strnchr(const char *str, char c, uint32_t n);
 
 // returns _v with _n-th bit = _x
 #define BIT_SET(_v, _n, _x) __extension__({\

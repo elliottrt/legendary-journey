@@ -5,8 +5,7 @@
 #include "write.h"
 #include "mem.h"
 
-void stage2main(void)
-{
+void stage2main(void) {
 
 	clrscr();
 
@@ -26,6 +25,7 @@ void stage2main(void)
 	if (elfread(&kernel, (void *) 0x10000, &kernelentry) == 0)
 		return;
     
+	// TODO: instead of membound, send pointer to memory map
 	kernelentry(atagetidentify(), membound());
 
 #else

@@ -177,19 +177,19 @@ memdetect:
 // See https://wiki.osdev.org/GDT
 GDT_start:
 GDT_null:
-	.quad 0
+	.8byte 0
 
 GDT_code:
-	.word 0xFFFF 		// limit
-	.word 0x0000		// base lo
+	.2byte 0xFFFF 		// limit
+	.2byte 0x0000		// base lo
 	.byte 0x00			// base mid
 	.byte 0b10011010	// access flags
 	.byte 0b11001111	// granularity
 	.byte 0x00			// base hi
 
 GDT_data:
-	.word 0xFFFF 		// limit
-	.word 0x0000		// base lo
+	.2byte 0xFFFF 		// limit
+	.2byte 0x0000		// base lo
 	.byte 0x00			// base mid
 	.byte 0b10010010	// access flags
 	.byte 0b11001111	// granularity
@@ -198,12 +198,12 @@ GDT_data:
 GDT_end:
 
 GDT_desc:
-	.word GDT_desc - GDT_start - 1
-	.long GDT_start
+	.2byte GDT_desc - GDT_start - 1
+	.4byte GDT_start
 
 .globl _entrymemcount
 _entrymemcount:
-	.word 0 // region count
+	.2byte 0 // region count
 .globl _entrymemregions
 _entrymemregions:
 	.fill (8 * 24) // region data (8 region spots)

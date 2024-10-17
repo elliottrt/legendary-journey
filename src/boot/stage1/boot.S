@@ -16,33 +16,33 @@ fsheaders:
 // general fat header
 
 oemname:               	.ascii "01234567"       // must be 8 bytes
-bytespersector:	       	.word 512
+bytespersector:	       	.2byte 512
 sectorspercluster:	   	.byte 1
-reservedsectors:       	.word 32
+reservedsectors:       	.2byte 32
 fatcount:              	.byte 2
-rootentries:           	.word 0 				// fat12/16 only
-totalsectors:          	.word 0 				// we dont know right now
+rootentries:           	.2byte 0 				// fat12/16 only
+totalsectors:          	.2byte 0 				// we dont know right now
 mediadescriptor:      	.byte 0xF0
-sectorsperfat:        	.word 0                	// fat12/16 only
-sectorspertrack: 	    .word 0
-heads:                  .word 0
-hiddensectors:         	.long 0
-largesectorcount:    	.long 0
+sectorsperfat:        	.2byte 0                	// fat12/16 only
+sectorspertrack: 	    .2byte 0
+heads:                  .2byte 0
+hiddensectors:         	.4byte 0
+largesectorcount:    	.4byte 0
 
 // fat32 specific header
 
-sectorsperfat32:      	.long 0
-flags32:                .word 0
-fatversion32:          	.word 0
-rootdircluster:     	.long 2
-fsinfosector:        	.word 0
-backupbootsector:     	.word 0
-reserved32:             .word 0, 0, 0, 0, 0, 0
+sectorsperfat32:      	.4byte 0
+flags32:                .2byte 0
+fatversion32:          	.2byte 0
+rootdircluster:     	.4byte 2
+fsinfosector:        	.2byte 0
+backupbootsector:     	.2byte 0
+reserved32:             .2byte 0, 0, 0, 0, 0, 0
 
 drivenum:              	.byte 0
 reserved0:				.byte 0
 signature:				.byte 0x29 			// 0x28 or 0x29
-serial:					.long 0
+serial:					.4byte 0
 volumelabel:			.ascii "0123456789A"	// must be 11 bytes
 systemidentifier:		.ascii "FAT32   "		// must be 8 bytes
 
@@ -79,9 +79,10 @@ after:
 
 extensionerror:
 	movb $0x0E, %ah
-	movb $'E', %al
+	movb $'B', %al
 	int $0x10
-	movb $'X', %al
+	movb $'O', %al
+	int $0x10
 	int $0x10
 	movb $'T', %al
 	int $0x10
@@ -121,7 +122,6 @@ loadstage2:
     movw %ax, %ds
     movw %ax, %es
 
-    hlt
 	ljmp $S2SEG, $S2OFF
 
 diskread:
@@ -161,11 +161,11 @@ diskread:
 diskreadpacket:
 .size:	 	.byte 0x10
 .resr:		.byte 0x00
-.blocks:	.word S2SIZ
-.offset:	.word S2OFF
-.segment:	.word S2SEG
-.lba:		.long S2LOC
+.blocks:	.2byte S2SIZ
+.offset:	.2byte S2OFF
+.segment:	.2byte S2SEG
+.lba:		.4byte S2LOC
 
-.fill 510 - (. - fsjump)
-.word 0xAA55
+.fill 510 - (. - _start)
+.2byte 0xAA55
 

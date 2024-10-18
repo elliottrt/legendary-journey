@@ -3,6 +3,8 @@
 
 #include "types.h"
 
+extern uint32_t PHYSTOP;
+
 void *kalloc(void);
 void kfree(void *address);
 

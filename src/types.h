@@ -24,6 +24,13 @@ struct registers {
     uint32_t eip, cs, eflags, useresp, ss;
 };
 
+struct memregion {
+    uint64_t address;
+    uint64_t length;
+    uint32_t type;
+    uint32_t attributes;
+};
+
 #define BIT(n) (1 << (n))
 
 #endif

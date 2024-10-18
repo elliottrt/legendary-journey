@@ -112,7 +112,7 @@ memdetect:
 	pushl %ebp
 	pushl %edi
 
-	movw $_entrymemregions, %di
+	movw $_memregions, %di
 	xorl %ebx, %ebx
 	xorw %bp, %bp
 	movl $0x534D4150, %edx
@@ -150,7 +150,7 @@ memdetect:
 	testl %ebx, %ebx
 	jne .setup
 .finish:
-	movw %bp, _entrymemcount
+	movw %bp, _memregioncount
 	clc
 	popl %edi
 	popl %ebp
@@ -201,9 +201,9 @@ GDT_desc:
 	.2byte GDT_desc - GDT_start - 1
 	.4byte GDT_start
 
-.globl _entrymemcount
-_entrymemcount:
+.globl _memregioncount
+_memregioncount:
 	.2byte 0 // region count
-.globl _entrymemregions
-_entrymemregions:
+.globl _memregions
+_memregions:
 	.fill (8 * 24) // region data (8 region spots)

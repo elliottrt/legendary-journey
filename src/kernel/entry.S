@@ -32,8 +32,12 @@ _start_virt:
 
 	// get second argument
 	movl 8(%esp), %eax
-	movl %eax, (PHYSTOP)
+	movl %eax, (_memregions)
 
+	// get third argument
+	movw 12(%esp), %ax
+	movw %ax, (_memregioncount)
+	
 	// make an actual stack
 	movl $(stack + STACK_SIZE), %esp
 
@@ -49,6 +53,10 @@ _start_virt:
 .globl _ataidentify
 _ataidentify:
 	.space 4
-.globl PHYSTOP
-PHYSTOP:
-	.space 4
+
+.globl _memregioncount
+_memregioncount:
+	.space 2 // region count
+.globl _memregions
+_memregions:
+	.space 4 // region pointer

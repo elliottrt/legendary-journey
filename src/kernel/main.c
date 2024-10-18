@@ -15,13 +15,12 @@
 #include "x86.h"
 #include "proc.h"
 
-void main(void)
-{
+void main(void) {
+
+	kallocinit();
 
 	printf("loaded %d bytes of kernel, VADDR=0x%x\n", V2P(end) - KERNEL_LOAD, KERNBASE);
 	printf("physical memory bound: %d mb\n", ((PHYSTOP / 1024) + 1023)/1024);
-
-	kallocinit();
 
 	kpginit();
 

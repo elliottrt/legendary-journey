@@ -4,6 +4,13 @@
 #include "std.h"
 #include "mmu.h"
 
+uint32_t PHYSTOP = 0;
+
+extern uint16_t _memregioncount;
+extern struct memregion *_memregions;
+
+void read_memory_regions(void);
+
 struct run {
     struct run *next;
 };
@@ -55,6 +62,11 @@ void kfreerange(void *start, void *end) {
 }
 
 void kallocinit(void) {
+    // correct memregions to virtual address
+    _memregions = P2V(_memregions);
+    // calculate PHYSTOP from memory map
+    read_memory_regions();
+
     kfreerange(end, P2V(4*1024*1024));
 }
 
@@ -68,4 +80,27 @@ uint32_t kallocavailable(void) {
 
 uint32_t kalloctotal(void) {
     return total;
+}
+
+void read_memory_regions(void) {
+
+    for (uint32_t i = 0; i < _memregioncount; i++) {
+        struct memregion *region = &_memregions[i];
+
+        printf("region %d: 0x%x\n", i, region);
+        printf("    addr: 0x%x\n", region->address);
+        printf("    length: %d\n", region->length);
+        printf("    type: %d\n", region->type);
+
+        if (region->address == KERNEL_LOAD && region->type == 1) {
+            PHYSTOP = (uint32_t) (KERNEL_LOAD + region->length);
+        }
+
+    }
+
+    if (PHYSTOP == 0) {
+        printf("unable to find region of memory beginning at 0x%x\n", KERNEL_LOAD);
+        while(1);
+    }
+
 }

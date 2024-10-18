@@ -8,7 +8,6 @@
 
 #define EMPTY_CHAR '\0'
 
-// TODO: why are we doing this???
 uint16_t *screen_addr = (uint16_t *) P2V_WO(0xB8000);
 uint32_t cursor = 0;
 uint8_t color = 15;
@@ -79,8 +78,8 @@ void printint(uint32_t x, int base, int sign) {
 
 }
 
-#define ASU(X) (* (uint32_t *) &(X))
-
+// TODO: support for 64 bit ints and padding
+// ex: %ld and %<x>d
 void printf(const char *format, ...) {
 
 	uint32_t *varargs = (uint32_t *) ((void *) &format) + 1;

@@ -3,7 +3,9 @@
 #include "file.h"
 #include "elf.h"
 #include "write.h"
-#include "mem.h"
+
+extern uint16_t _memregioncount;
+extern struct memregion _memregions[];
 
 void stage2main(void) {
 
@@ -16,7 +18,7 @@ void stage2main(void) {
 #if defined (KERNEL_LOAD) && defined (KERNEL_NAME)
 
 	struct file kernel;
-	void (*kernelentry)(); // we can ignore the args here
+	void (*kernelentry)(); // we ignore the args here
 
 	if (fileopen(&kernel, KERNEL_NAME, 0) == 0)
 		return;
@@ -25,8 +27,7 @@ void stage2main(void) {
 	if (elfread(&kernel, (void *) 0x10000, &kernelentry) == 0)
 		return;
     
-	// TODO: instead of membound, send pointer to memory map
-	kernelentry(atagetidentify(), membound());
+	kernelentry(atagetidentify(), _memregions, _memregioncount);
 
 #else
 	puterr("KERNEL_LOAD OR KERNEL_NAME NOT DEFINED\n", 0);

@@ -19,7 +19,6 @@ void main(void) {
 	kallocinit();
 
 	printf("loaded %d bytes of kernel, VADDR=0x%x\n", V2P(end) - KERNEL_LOAD, KERNBASE);
-	printf("physical memory bound: %d mb\n", ((PHYSTOP / 1024) + 1023)/1024);
 
 	kpginit();
 
@@ -41,8 +40,6 @@ void main(void) {
 	// TODO: do something after initialization
 
 	printf("initialization complete\n");
-
-	printf("char: %c\nint: %d\n", 'y', 500);
 
 	while(1);
 }

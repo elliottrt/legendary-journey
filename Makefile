@@ -56,7 +56,7 @@ KERNELFLAGS:=$(KERNELFLAGS) -DKERNBASE=$(KERNBASE) -Isrc/kernel/ -Isrc/
 
 BOOTFLAGS=-defsym S2LOC=$(STAGE2_LOCATION) -defsym S2SEG=$(STAGE2_SEGMENT) -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=$(STAGE2_SIZE)
 
-all: OS
+all: $(OS)
 	
 $(BIN):
 	mkdir -p $(BIN)
@@ -83,11 +83,8 @@ src/kernel/%.o: src/kernel/%.S
 
 $(KERNEL): $(BIN) $(KERNELTARGETS) src/kernel/link.ld
 	$(LD) -o $(KERNEL) $(KERNELTARGETS) -Tsrc/kernel/link.ld
-	
-$(ROOT):
-	mkdir -p $(ROOT)
 
-run: OS Makefile
+run: $(OS) Makefile
 	$(EMU) -drive format=raw,file=$(OS) -m 128 -monitor stdio -action reboot=shutdown -action shutdown=pause -D trace.log -d int
 
 clean:
@@ -95,7 +92,10 @@ clean:
 	find . -name '*.o' -delete
 	find . -name '*.d' -delete
 
-OS: ./mkfat $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) Makefile
+$(ROOT):
+	mkdir -p $(ROOT)
+
+$(OS): ./mkfat $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL)
 	cp $(KERNEL) $(ROOT)/$(KERNELNAME)
 	./mkfat 32 $(OS) -S$(ROOT) -B$(STAGE1BIN) -R$(STAGE2BIN) -VLEGENDARY
 

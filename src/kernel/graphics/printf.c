@@ -92,12 +92,11 @@ void printint(uint32_t x, int base, int sign, int padding) {
     	putc(buffer[i]);
 }
 
-// TODO: support for 64 bit numbers
-// ex: %ld
 void printf(const char *format, ...) {
+	int padding;
+	bool islong;
 
 	uint32_t *varargs = (uint32_t *) ((void *) &format) + 1;
-	int padding;
 
 	for (int i = 0; format[i]; i++) {
 		if (format[i] != '%')
@@ -111,6 +110,10 @@ void printf(const char *format, ...) {
 				padding = padding * 10 + (next - '0');
 				next = format[++i];
 			}
+
+			islong = next == 'l';
+			if (islong)
+				next = format[++i];
 
 			switch (next) {
 				case '%': {
@@ -128,6 +131,10 @@ void printf(const char *format, ...) {
 				case 'x': {
 					printint(*varargs, 16, 0, padding);
 					varargs++;
+					if (islong) {
+						printint(*varargs, 16, 0, 0);
+						varargs++;
+					}
 				} break;
 				case 'c': {
 					putc(*varargs);

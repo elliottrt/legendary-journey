@@ -54,7 +54,7 @@ KERNELFLAGS:=$(KERNELFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-buil
 KERNELFLAGS:=$(KERNELFLAGS) -fno-pic -Wunused -O2 -DTAB_WIDTH=$(TAB_WIDTH)
 KERNELFLAGS:=$(KERNELFLAGS) -DKERNBASE=$(KERNBASE) -Isrc/kernel/ -Isrc/
 
-BOOTFLAGS=-defsym S2LOC=$(STAGE2_LOCATION) -defsym S2SEG=$(STAGE2_SEGMENT) -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=$(STAGE2_SIZE)
+BOOTFLAGS=-defsym S2LOC=8 -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=24
 
 all: $(OS)
 	

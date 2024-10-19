@@ -92,7 +92,7 @@ exterrhlt:
 loadstage2:
 
 	movw $S2LOC, %si
-	movw $S2SEG, %ax 
+	movw $0, %ax // segment number
 	movw %ax, %es
 	movw $S2OFF, %bx
 
@@ -118,11 +118,11 @@ loadstage2:
 
 .finish:
 
-	movw $S2SEG, %ax          // set segment registers
+	movw $0, %ax          // set segment registers
     movw %ax, %ds
     movw %ax, %es
 
-	ljmp $S2SEG, $S2OFF
+	ljmp $0, $S2OFF
 
 diskread:
 	pushw %ax
@@ -163,7 +163,7 @@ diskreadpacket:
 .resr:		.byte 0x00
 .blocks:	.2byte S2SIZ
 .offset:	.2byte S2OFF
-.segment:	.2byte S2SEG
+.segment:	.2byte 0
 .lba:		.4byte S2LOC
 
 .fill 510 - (. - _start)

@@ -88,6 +88,48 @@ char *strncpy(char *str1, const char *str2, uint32_t n) {
 	return str1_start;
 }
 
+char *strnchr(const char *str, char c, uint32_t n) {
+	for (; *str && n--; str++) {
+		if (*str == c)
+			return (char *) str;
+	}
+
+	return NULL;
+}
+
+bool isdigit(int ch) {
+	return ch >= '0' && ch <= '9';
+}
+
+bool isxdigit(int ch) {
+	return (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F');
+}
+
+bool isascii(int ch) {
+	return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
+}
+
+bool isalnum(int ch) {
+	return isascii(ch) || isdigit(ch);
+}
+
+bool islower(int ch) {
+	return ch >= 'a' && ch <= 'z';
+}
+
+bool isupper(int ch) {
+	return ch >= 'A' && ch <= 'Z';
+}
+
+bool isspace(int ch) {
+	return 	ch == ' ' ||
+			ch == '\f' ||
+			ch == '\n' ||
+			ch == '\r' ||
+			ch == '\t' ||
+			ch == '\v';
+}
+
 int32_t min(int32_t a, int32_t b) {
 	return a > b ? b : a;
 }
@@ -102,15 +144,4 @@ int32_t max(int32_t a, int32_t b) {
 
 uint32_t umax(uint32_t a, uint32_t b) {
 	return a > b ? a : b;
-}
-
-char *strnchr(const char *str, char c, uint32_t n)
-{
-	for (; *str && n--; str++)
-	{
-		if (*str == c)
-			return (char *) str;
-	}
-
-	return NULL;
 }

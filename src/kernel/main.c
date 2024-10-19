@@ -42,5 +42,7 @@ void main(void) {
 
 	printf("initialization complete\n");
 
+	printf("char: %c\nint: %d\n", 'y', 500);
+
 	while(1);
 }

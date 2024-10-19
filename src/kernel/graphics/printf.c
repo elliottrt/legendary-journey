@@ -8,6 +8,11 @@
 
 #define EMPTY_CHAR '\0'
 
+// should be defined in Makefile
+#ifndef TAB_WIDTH
+#define TAB_WIDTH 4
+#endif
+
 uint16_t *screen_addr = (uint16_t *) P2V_WO(0xB8000);
 uint32_t cursor = 0;
 uint8_t color = 15;
@@ -42,6 +47,10 @@ void putc(char c) {
 			}
 			screen_addr[--cursor] = EMPTY_CHAR | (color << 8);
 			break;
+		case '\t':
+			cursor += cursor % TAB_WIDTH;
+			cursor -= cursor % SCREEN_WIDTH;
+			break;
 		default:
 			screen_addr[cursor++] = c | (color << 8);
 			break;
@@ -55,13 +64,14 @@ void putc(char c) {
 
 }
 
-void printint(uint32_t x, int base, int sign) {
-	
+// some number significantly above log10(2^32)
+#define PRINTINT_BUFFER_SIZE 32
+void printint(uint32_t x, int base, int sign, int padding) {
 	const char digits[] = "0123456789ABCDEF";
-	char buffer[16];
+	char buffer[PRINTINT_BUFFER_SIZE];
 	int negative = 0;
 
-	if (sign && (* (int *) &x) < 0) {
+	if (sign && (* (int32_t *) &x) < 0) {
 		negative = 1;
 		x = -x;
 	}
@@ -73,37 +83,50 @@ void printint(uint32_t x, int base, int sign) {
 
 	if (negative) buffer[i++] = '-';
 
-	while(--i >= 0)
-    	putc(buffer[i]);
+	padding = min(padding, PRINTINT_BUFFER_SIZE);
+	while (padding > i) {
+		buffer[i++] = base == 16 ? '0' : ' ';
+	}
 
+	while(i --> 0)
+    	putc(buffer[i]);
 }
 
-// TODO: support for 64 bit ints and padding
-// ex: %ld and %<x>d
+// TODO: support for 64 bit numbers
+// ex: %ld
 void printf(const char *format, ...) {
 
 	uint32_t *varargs = (uint32_t *) ((void *) &format) + 1;
+	int padding;
 
 	for (int i = 0; format[i]; i++) {
 		if (format[i] != '%')
 			putc(format[i]);
 		else {
 			char next = format[++i];
+
+			// calculate how much padding
+			padding = 0;
+			while (isdigit(next)) {
+				padding = padding * 10 + (next - '0');
+				next = format[++i];
+			}
+
 			switch (next) {
 				case '%': {
 					putc('%');
 				} break;
 				case 'd': {
-					printint(*varargs, 10, 1);
+					printint(*varargs, 10, 1, padding);
 					varargs++;
 				} break;
 				case 'u': {
-					printint(*(uint32_t *)varargs, 10, 0);
+					printint(*varargs, 10, 0, padding);
 					varargs++;
 				} break;
 				case 'p':
 				case 'x': {
-					printint(*(uint32_t *)varargs, 16, 0);
+					printint(*varargs, 16, 0, padding);
 					varargs++;
 				} break;
 				case 'c': {

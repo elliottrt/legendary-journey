@@ -38,6 +38,9 @@ KERNBASE=0x80000000
 # KERNBASE=0xC0000000
 # KERNBASE=0xE0000000
 
+# width of tabs in terminal
+TAB_WIDTH=4
+
 # See https://www.rapidtables.com/code/linux/gcc/gcc-o.html#optimization
 CFLAGS=-m32 -c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
 CFLAGS:=$(CFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
@@ -48,7 +51,7 @@ LDFLAGS=-nostdlib -static -m elf_i386
 ASFLAGS=--32
 KERNELFLAGS=-c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
 KERNELFLAGS:=$(KERNELFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
-KERNELFLAGS:=$(KERNELFLAGS) -fno-pic -Wunused -O2
+KERNELFLAGS:=$(KERNELFLAGS) -fno-pic -Wunused -O2 -DTAB_WIDTH=$(TAB_WIDTH)
 KERNELFLAGS:=$(KERNELFLAGS) -DKERNBASE=$(KERNBASE) -Isrc/kernel/ -Isrc/
 
 BOOTFLAGS=-defsym S2LOC=$(STAGE2_LOCATION) -defsym S2SEG=$(STAGE2_SEGMENT) -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=$(STAGE2_SIZE)

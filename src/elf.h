@@ -1,5 +1,5 @@
-#ifndef _STAGE2_ELF
-#define _STAGE2_ELF
+#ifndef _ELF_FORMAT
+#define _ELF_FORMAT
 
 #include "file.h"
 #include "types.h"
@@ -61,7 +61,5 @@ enum elfprogtype
     ELF_PTYPE_LOPROC = 0x70000000,
     ELF_PTYPE_HIPROC = 0x7FFFFFFF
 };
-
-bool elfread(struct file *file, void *scratch, void (**entry)());
 
 #endif

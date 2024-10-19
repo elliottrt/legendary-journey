@@ -46,7 +46,7 @@ CFLAGS:=$(CFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-functi
 CFLAGS:=$(CFLAGS) -DKERNEL_LOAD=$(KERNELLOAD) -DKERNEL_NAME='"/$(KERNELNAME)"'
 CFLAGS:=$(CFLAGS) -Isrc/ -fno-pic -static -fno-strict-aliasing -MD -no-pie
 CFLAGS:=$(CFLAGS) -fno-omit-frame-pointer -Wunused -O2
-LDFLAGS=-nostdlib -static -Isrc/ -m elf_i386
+LDFLAGS=-nostdlib -static -m elf_i386
 ASFLAGS=--32
 KERNELFLAGS=-c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
 KERNELFLAGS:=$(KERNELFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function

@@ -20,6 +20,8 @@ enum color {
 	CLR_WHITE = 15
 };
 
+void putc(char ch);
+
 void printf(const char *format, ...);
 
 void printfcolor(enum color fg, enum color bg);

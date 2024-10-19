@@ -16,9 +16,8 @@ in no particular order:
 - change STAGE2_x in Makefile to be dynamically calculated instead of manually
 - allocation for large structures like entries (idt.c) and keyboard (kbd.c)
 - don't have standard library function implementations duplicated in stage2 and kernel - maybe a #define for each function?
-- irq handlers should be as short as possible, try to make kbd::kbdhandler shorter - don't call printf - buffer kbd input
+- irq handlers should be as short as possible, try to make kbd::kbdhandler shorter - buffer kbd input
 - find CPU features
-- userspace
 - video mode
 - figure out what video modes are available
 - actually learn what I'm doing

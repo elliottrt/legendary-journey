@@ -20,6 +20,11 @@ static uint32_t available;
 static uint32_t total;
 
 void *kalloc(void) {
+    if (freemem == NULL) {
+        errno = ENOMEM;
+        return NULL;
+    } 
+
     struct run *allocated = freemem;
     freemem = freemem->next;
 

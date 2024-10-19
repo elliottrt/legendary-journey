@@ -13,7 +13,6 @@
 #include "fat.h"
 #include "file.h"
 #include "x86.h"
-#include "proc.h"
 
 void main(void) {
 
@@ -30,8 +29,6 @@ void main(void) {
 	fatinit();
 	fileinit();
 
-// TODO: do process setup between here
-
 	idtinit();
 	isrinit();
 	irqinit();
@@ -41,7 +38,7 @@ void main(void) {
 
 	kallocexpand();
 
-// TODO: run processes here
+	// TODO: do something after initialization
 
 	printf("initialization complete\n");
 

@@ -64,7 +64,7 @@ static void kbdhandler(struct registers *regs) {
     keyboard.chars[(uint8_t) keychar] = KEY_PRESSED(scancode);
 
     if (KEY_PRESSED(scancode) && keychar != 0)
-        printf("%c", keychar);
+        putc(keychar);
 }
 
 

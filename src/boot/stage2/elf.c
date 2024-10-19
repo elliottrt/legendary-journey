@@ -2,8 +2,7 @@
 #include "write.h"
 #include "std.h"
 
-bool elfread(struct file *file, void *scratch, void (**entry)())
-{
+bool elfread(struct file *file, void *scratch, void (**entry)()) {
 
 	struct elfheader *elfhdr = (struct elfheader *) scratch;
 	struct elfprogheader *proghdr, *endproghdr;

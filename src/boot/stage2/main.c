@@ -7,6 +7,9 @@
 extern uint16_t _memregioncount;
 extern struct memregion _memregions[];
 
+// to read elf file
+bool elfread(struct file *file, void *scratch, void (**entry)());
+
 void stage2main(void) {
 
 	clrscr();

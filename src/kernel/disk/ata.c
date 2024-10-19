@@ -1,7 +1,7 @@
 #include "ata.h"
 #include "x86.h"
 #include "graphics/printf.h"
-#include "memory/mmu.h"
+#include "mmu.h"
 
 extern struct ataidentify *_ataidentify;
 

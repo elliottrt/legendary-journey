@@ -92,13 +92,14 @@ void read_memory_regions(void) {
     for (uint32_t i = 0; i < _memregioncount; i++) {
         struct memregion *region = &_memregions[i];
 
-        printf("region %d: 0x%x\n", i, region);
-        printf("    addr: 0x%x\n", region->address);
-        printf("    length: %d\n", region->length);
-        printf("    type: %d\n", region->type);
+        // printf("region %d: 0x%x\n", i, region);
+        // printf("    addr: 0x%x\n", region->address);
+        // printf("    length: %d\n", region->length);
+        // printf("    type: %d\n", region->type);
 
         if (region->address == KERNEL_LOAD && region->type == 1) {
             PHYSTOP = (uint32_t) (KERNEL_LOAD + region->length);
+            printf("kernel memory region: 0x%x to 0x%x\n", KERNEL_LOAD, KERNEL_LOAD + region->length);
         }
 
     }

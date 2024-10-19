@@ -1,7 +1,7 @@
 #include "printf.h"
 #include "types.h"
 #include "std.h"
-#include "memory/mmu.h"
+#include "mmu.h"
 
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25

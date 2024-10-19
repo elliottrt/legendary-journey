@@ -23,6 +23,8 @@
 #define PTXSHIFT        12      // offset of PTX in a linear address
 #define PDXSHIFT        22      // offset of PDX in a linear address
 
+#define KERNEL_LOAD 0x100000
+
 #define EXTMEM KERNEL_LOAD            // Start of extended memory
 
 #define KERNLINK (KERNBASE+EXTMEM)  // Address where kernel is linked

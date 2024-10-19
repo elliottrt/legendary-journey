@@ -18,8 +18,6 @@ STAGE2CSRC=$(wildcard src/boot/stage2/*.c) $(wildcard src/boot/stage2/disk/*.c)
 STAGE2ASMSRC=$(wildcard src/boot/stage2/*.S)
 STAGE2TARGETS=$(STAGE2ASMSRC:.S=.o) $(STAGE2CSRC:.c=.o)
 
-# physical memory address to load the kernel
-KERNELLOAD=0x100000
 # name of the kernel file
 KERNELNAME=kernel.elf
 KERNEL=$(BIN)/$(KERNELNAME)
@@ -43,14 +41,14 @@ KERNBASE=0x80000000
 # See https://www.rapidtables.com/code/linux/gcc/gcc-o.html#optimization
 CFLAGS=-m32 -c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
 CFLAGS:=$(CFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
-CFLAGS:=$(CFLAGS) -DKERNEL_LOAD=$(KERNELLOAD) -DKERNEL_NAME='"/$(KERNELNAME)"'
-CFLAGS:=$(CFLAGS) -Isrc/ -fno-pic -static -fno-strict-aliasing -MD -no-pie
+CFLAGS:=$(CFLAGS) -DKERNEL_NAME='"/$(KERNELNAME)"' -Isrc/
+CFLAGS:=$(CFLAGS) -fno-pic -static -fno-strict-aliasing -MD -no-pie
 CFLAGS:=$(CFLAGS) -fno-omit-frame-pointer -Wunused -O2
 LDFLAGS=-nostdlib -static -m elf_i386
 ASFLAGS=--32
 KERNELFLAGS=-c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
 KERNELFLAGS:=$(KERNELFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
-KERNELFLAGS:=$(KERNELFLAGS) -fno-pic -DKERNEL_LOAD=$(KERNELLOAD) -Wunused -O2
+KERNELFLAGS:=$(KERNELFLAGS) -fno-pic -Wunused -O2
 KERNELFLAGS:=$(KERNELFLAGS) -DKERNBASE=$(KERNBASE) -Isrc/kernel/ -Isrc/
 
 BOOTFLAGS=-defsym S2LOC=$(STAGE2_LOCATION) -defsym S2SEG=$(STAGE2_SEGMENT) -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=$(STAGE2_SIZE)

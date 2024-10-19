@@ -8,7 +8,7 @@
 #include "drivers/kbd.h"
 #include "memory/virtmem.h"
 #include "memory/kalloc.h"
-#include "memory/mmu.h"
+#include "mmu.h"
 #include "ata.h"
 #include "fat.h"
 #include "file.h"

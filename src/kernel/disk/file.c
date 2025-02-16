@@ -29,7 +29,6 @@ void filenew(uint32_t parentcluster, struct fatdirentry *entry, struct file *fil
 		fileout->fsentry.filesize = fileout->totalclusters * _vbootsector->sectorspercluster * _vbootsector->bytespersector;
 
 	// TODO: error check this?
-	printf("about to read new file\n");
 	fatreadsector(fileout->firstcluster, 0, fileout->buffer);
 }
 
@@ -100,8 +99,6 @@ int32_t dirfindentry(struct file *dir, const char *name, struct fatdirentry *ent
 
 		if (_fileread(dir, entry, sizeof(struct fatdirentry)) != sizeof(struct fatdirentry)) 
 			return -1;
-
-		printf("comparing %s to %s\n", (char *) entry->filename, name);
 
 		if (memcmp(entry->filename, name, FAT_FILETOTAL_LEN) == 0)
 			return entryindex;
@@ -181,7 +178,7 @@ int diraddentry(struct file *dir, struct fatdirentry *entry) {
 	// where we want to write
 	// TODO: update this when we implement deleting files
 
-	if (fileseek(dir, dir->position - sizeof(struct fatdirentry)) < 0)
+	if (!fileseek(dir, dir->position - sizeof(struct fatdirentry)))
 		return -1;
 
 	return _filewrite(dir, entry, sizeof(struct fatdirentry));
@@ -329,7 +326,7 @@ void fileinit(void) {
 	/* intentionally left empty */
 }
 
-int fileopen(struct file *file, const char *pathname, int flags) {
+bool fileopen(struct file *file, const char *pathname, int flags) {
 
 	if (flags == 0)
 		flags = FTRUNC;
@@ -345,7 +342,7 @@ int fileopen(struct file *file, const char *pathname, int flags) {
 
 	if (pathname == NULL || pathname[0] != PATH_SEP) {
 		errno = EPATH;
-		return -1;
+		return false;
 	}
 
 	while ((pathnextsize = pathnext(&start)) > 0) {
@@ -353,8 +350,6 @@ int fileopen(struct file *file, const char *pathname, int flags) {
 		fatformatfilename(start, pathnextsize, fatformattedname);
 
 		char *tempstart = start;
-
-		printf("checking %s\n", fatformattedname);
 
 		if (filefromentry(file, fatformattedname, file) < 0) {
 
@@ -370,20 +365,23 @@ int fileopen(struct file *file, const char *pathname, int flags) {
 				memcpy(&_staticfiles[STATIC_FCREAT0], file, sizeof(struct file));
 				int res = dircreatefile(&_staticfiles[STATIC_FCREAT0], file, filename, flags & FDIRECTORY);
 				fileclose(&_staticfiles[STATIC_FCREAT0]);
-				if (res < 0) memset(file, 0, sizeof(struct file));
-				return res;
+				if (res < 0) {
+					memset(file, 0, sizeof(struct file));
+					errno = EIO;
+				}
+				return res >= 0;
 			}
 
 			memset(file, 0, sizeof(struct file));
 			errno = ENOENT;
-			return -1;
+			return false;
 		
 		} else if ((flags & FCREATE) && pathnext(&tempstart) == 0) {
 			// if we find the last part of the filepath and it's the same name
 			// and we're trying to create a file, we error
 			memset(file, 0, sizeof(struct file));
 			errno = EEXIST;
-			return -1;
+			return false;
 		}
 
 	}
@@ -393,11 +391,11 @@ int fileopen(struct file *file, const char *pathname, int flags) {
 	if (flags & FAPPEND)
 		fileseek(file, file->fsentry.filesize);
 
-	return 0;
+	return true;
 
 }
 
-int _fileread(struct file *file, void *buffer, uint32_t size)
+int32_t _fileread(struct file *file, void *buffer, uint32_t size)
 {
 	uint32_t sectorpos, newsectorstoread;
 	uint8_t *bytebuffer = (uint8_t *) buffer;
@@ -433,6 +431,7 @@ int _fileread(struct file *file, void *buffer, uint32_t size)
 			}
 		}
 
+		// TODO: return number of bytes read if read fails
 		fatreadsector(file->currentcluster, file->sectorincluster, file->buffer);
 
 	}
@@ -444,7 +443,7 @@ int _fileread(struct file *file, void *buffer, uint32_t size)
 	return size;
 }
 
-int fileread(struct file *file, void *buffer, uint32_t size) {
+int32_t fileread(struct file *file, void *buffer, uint32_t size) {
 	if (file == NULL || buffer == NULL) {
 		errno = EINVAL;
 		return -1;
@@ -466,7 +465,7 @@ int fileread(struct file *file, void *buffer, uint32_t size) {
 	return _fileread(file, buffer, size);
 }
 
-bool _filewrite(struct file *file, const void *buffer, uint32_t size) {
+int32_t _filewrite(struct file *file, const void *buffer, uint32_t size) {
 	const uint8_t *bytebuffer = (const uint8_t *) buffer;
 
 	uint32_t maxpossiblebytes = file->position + size;
@@ -479,6 +478,7 @@ bool _filewrite(struct file *file, const void *buffer, uint32_t size) {
 	uint32_t sectorpos = file->position % SECTOR_SIZE;
 	int newsectorstowrite = (sectorpos + size) / SECTOR_SIZE;
 
+	// TODO: is this right??? needs more comments.
 	// write to buffer
 	do {
 		uint32_t bytestowrite = min(bytesleft, SECTOR_SIZE - sectorpos);
@@ -490,8 +490,9 @@ bool _filewrite(struct file *file, const void *buffer, uint32_t size) {
 		bytesleft  -= bytestowrite;
 		sectorpos = 0;
 
-		if (bytesleft > 0)
-			fileflush(file);
+		// flush bytes if we need more space, and return the number written if flushing fails
+		if (bytesleft > 0 && !fileflush(file))
+			return bytesleft + bytestowrite;
 
 	} while ((newsectorstowrite--) > 0);
 
@@ -500,10 +501,10 @@ bool _filewrite(struct file *file, const void *buffer, uint32_t size) {
 	// else file size == sizeof contents
 	file->fsentry.filesize = fileisdir(file) ? file->totalclusters * _vbootsector->sectorspercluster * _vbootsector->bytespersector : umax(file->fsentry.filesize, file->position);
 
-	return true;
+	return size;
 }
 
-bool filewrite(struct file *file, const void *buffer, uint32_t size) {
+int32_t filewrite(struct file *file, const void *buffer, uint32_t size) {
 	if (file == NULL || buffer == NULL) {
 		errno = EINVAL;
 		return false;
@@ -591,7 +592,7 @@ bool fileflush(struct file *file) {
 	if (!file->dirty) return true;
 
 	// flush to disk
-	if (fatwritesector(file->currentcluster, file->sectorincluster, file->buffer) == 0)
+	if (!fatwritesector(file->currentcluster, file->sectorincluster, file->buffer))
 		return false;
 
 	// update sector and cluster values
@@ -604,7 +605,7 @@ bool fileflush(struct file *file) {
 	// file no longer dirty
 	file->dirty = false;
 
-	return 0;
+	return true;
 }
 
 bool fileclose(struct file *file) {

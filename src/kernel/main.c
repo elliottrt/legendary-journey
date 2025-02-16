@@ -40,6 +40,22 @@ void main(void) {
 
 	// TODO: do something after initialization
 
+	struct file f;
+	char buf[32] = {0};
+
+	if (fileopen(&f, "/test.txt", 0)) {
+		if (fileread(&f, buf, sizeof(buf) - 1)) {
+			printf("read: %s\n", buf);
+		} else {
+			printf("failed to read file: %s\n", strerror(errno));
+		}
+
+		if (!fileclose(&f))
+			printf("failed to close file: %s\n", strerror(errno));
+	} else {
+		printf("failed to open file: %s\n", strerror(errno));
+	}
+
 	printf("initialization complete\n");
 
 	while(1);

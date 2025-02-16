@@ -1,12 +1,9 @@
 #ifndef _ELF_FORMAT
 #define _ELF_FORMAT
 
-#include "file.h"
 #include "types.h"
 
-/*
-See https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
-*/
+// See https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
 
 #define ELF_MAGIC 0x464C457F
 
@@ -33,6 +30,18 @@ struct elfheader {
 	uint16_t e_shstrndx;
 } __attribute__ ((packed));
 
+enum elffiletype {
+	ET_NONE = 0,
+	ET_REL = 1,
+	ET_EXEC = 2,
+	ET_DYN = 3,
+	ET_CORE = 4,
+	ET_LOOS = 0xFE00,
+	ET_HIOS = 0xFEFF,
+	ET_LOPROC = 0xFF00,
+	ET_HIPROC = 0xFFFF
+};
+
 struct elfprogheader {
 	uint32_t p_type;
 	uint32_t p_offset;
@@ -45,18 +54,18 @@ struct elfprogheader {
 } __attribute__ ((packed));
 
 enum elfprogtype {
-	ELF_PTYPE_NULL = 0,
-	ELF_PTYPE_LOAD = 1,
-	ELF_PTYPE_DYNAMIC = 2,
-	ELF_PTYPE_INTERP = 3,
-	ELF_PTYPE_NOTE = 4,
-	ELF_PTYPE_SHLIB = 5,
-	ELF_PTYPE_PHDR = 6,
-	ELF_PTYPE_TLS = 7,
-	ELF_PTYPE_LOOS = 0x60000000,
-	ELF_PTYPE_HIOS = 0x6FFFFFFF,
-	ELF_PTYPE_LOPROC = 0x70000000,
-	ELF_PTYPE_HIPROC = 0x7FFFFFFF
+	PT_NULL = 0,
+	PT_LOAD = 1,
+	PT_DYNAMIC = 2,
+	PT_INTERP = 3,
+	PT_NOTE = 4,
+	PT_SHLIB = 5,
+	PT_PHDR = 6,
+	PT_TLS = 7,
+	PT_LOOS = 0x60000000,
+	PT_HIOS = 0x6FFFFFFF,
+	PT_LOPROC = 0x70000000,
+	PT_HIPROC = 0x7FFFFFFF
 };
 
 #endif

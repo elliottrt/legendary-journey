@@ -53,6 +53,7 @@ void isrhandler(struct registers *regs) {
 
 static void exceptionhandler(struct registers *regs) {
     printf("exception: %s\n", exceptions[regs->int_no]);
+    // TODO: should we try to recover?
     while(1);
 }
 

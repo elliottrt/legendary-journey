@@ -49,7 +49,7 @@ bool fatnomoredirentry(struct fatdirentry *direntry) {
 
 bool fatreadsector(fat_entry_t cluster, uint32_t sector, void *data) {
 	uint32_t clusterlba = fatclustertolba(cluster);
-	printf("c=%u,s=%u,pos=0x%x\n", cluster, sector, (clusterlba + sector) * SECTOR_SIZE);
+	// printf("c=%u,s=%u,pos=0x%x\n", cluster, sector, (clusterlba + sector) * SECTOR_SIZE);
 	return ataread(clusterlba + sector, 1, data);
 }
 

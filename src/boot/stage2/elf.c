@@ -1,13 +1,14 @@
 #include "elf.h"
 #include "write.h"
 #include "std.h"
+#include "file.h"
 
 bool elfread(struct file *file, void *dest, void (**entry)()) {
 
 	struct elfheader *elfhdr = (struct elfheader *) dest;
 	struct elfprogheader *proghdr, *endproghdr;
 
-	if (fileread(file, dest, sizeof(struct elfheader)) < 0)
+	if (!fileread(file, dest, sizeof(struct elfheader)))
 		puterr("UNABLE TO READ ELF", 0);
 
 	dest += sizeof(struct elfheader);
@@ -24,9 +25,9 @@ bool elfread(struct file *file, void *dest, void (**entry)()) {
 	for (; proghdr < endproghdr; proghdr++) {
 		uint8_t *address = (uint8_t *) proghdr->p_paddr;
 		
-		if (fileseek(file, proghdr->p_offset) < 0)
+		if (!fileseek(file, proghdr->p_offset))
 			puterr("UNABLE TO SEEK SEGMENT", 0);
-		if (fileread(file, address, proghdr->p_filesz) < 0)
+		if (!fileread(file, address, proghdr->p_filesz))
 			puterr("UNABLE TO READ SEGMENT", 0);
 		if (proghdr->p_filesz < proghdr->p_memsz)
 			memset(address + proghdr->p_filesz, 0x00, proghdr->p_memsz - proghdr->p_filesz);

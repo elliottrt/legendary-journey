@@ -48,10 +48,10 @@ void fileinit(void);
 
 bool fileresize(struct file *file, uint32_t size);
 bool fileopen(struct file *file, const char *pathname, int flags);
-// returns amount of bytes read
+// returns number of bytes read, or -1 on failure
 int32_t fileread(struct file *file, void *buffer, uint32_t size);
-// returns whether operation completed successfully
-bool filewrite(struct file *file, const void *buffer, uint32_t size);
+// returns number of bytes written, or -1 on failure
+int32_t filewrite(struct file *file, const void *buffer, uint32_t size);
 bool filereset(struct file *file);
 bool fileseek(struct file *file, uint32_t seek);
 bool fileflush(struct file *file);

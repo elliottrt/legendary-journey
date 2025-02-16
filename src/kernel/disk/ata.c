@@ -3,6 +3,8 @@
 #include "graphics/printf.h"
 #include "mmu.h"
 
+// TODO: ata stuff is VERY slow - because we need to use port io for each word. try something else after we get the kernel loaded? would solve code duplication issue
+
 extern struct ataidentify *_ataidentify;
 
 void atainit(void)
@@ -27,6 +29,7 @@ void atareset(void)
 	uint8_t control = inb(0x03F6);
 	/* send it back with software reset bit set */
 	outb(0x03F6, control | 0x04);
+	// TODO: it says to wait 5us between setting and clearing... are we doing that?
 	/* set it back to off */
 	outb(0x03F6, control);
 
@@ -36,6 +39,12 @@ void atareset(void)
 
 bool ataread(uint32_t lba, uint8_t sectors, void *dst)
 {
+
+	// TODO: I shouldn't need this, but it only works once without it...
+	// note that it could be a temporary bad sector, which are caused by unflushed write caches, power spikes, and power failures
+	atareset();
+	atacacheflush();
+
 	uint8_t status = 0x00;
 	uint16_t *data = (uint16_t *) dst;
 
@@ -63,11 +72,14 @@ bool ataread(uint32_t lba, uint8_t sectors, void *dst)
 	/* command: read w/ retry */
 	outb(0x01F7, 0x20);
 
+	// TODO: it says to poll after each sector. will this fail with >1 sector?
+
 	/* wait until ready to read */
 	while ((status & 8) == 0)
 		status = inb(0x01F7);
 
-	for (int reads = 0; reads < sectors * 256; reads++)	
+	/* read the data from ATA */
+	for (int reads = 0; reads < sectors * 256; reads++)
 		data[reads] = inw(0x01F0);
 
 	if (atacheckerror()) {
@@ -110,14 +122,14 @@ bool atawrite(uint32_t lba, uint8_t sectors, const void *src)
 	/* command: write w/ retry */
 	outb(0x01F7, 0x30);
 
+	// TODO: it says to poll after each sector. will this fail with >1 sector?
+
 	/* wait until ready to write */
 	while ((status & 8) == 0)
 		status = inb(0x01F7);
 
 	for (int writes = 0; writes < sectors * 256; writes++)	
-	{
 		outw(0x01F0, data[writes]);
-	}
 
 	if (atacheckerror()) {
 		ataerror();

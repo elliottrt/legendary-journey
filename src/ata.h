@@ -5,8 +5,8 @@
 
 struct ataidentify;
 
-/* from https://wiki.osdev.org/ataread/write_sectors */
-/* and  https://wiki.osdev.org/atapio_mode */
+/* from https://wiki.osdev.org/ATA_read/write_sectors */
+/* and  https://wiki.osdev.org/ATA_PIO_Mode */
 
 // TODO: ata code is duplicated, fix it
 
@@ -26,6 +26,7 @@ bool atacheckerror(void);
 void ataerror(void);
 /* returns writable/readable sectors */
 uint32_t atasectors(void);
+// TODO: use 'extern struct ataidentify *' instead
 /* returns the address of the ATAIDENTIFY block */
 struct ataidentify *atagetidentify(void);
 

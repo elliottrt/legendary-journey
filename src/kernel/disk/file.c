@@ -28,6 +28,8 @@ void filenew(uint32_t parentcluster, struct fatdirentry *entry, struct file *fil
 	if (entryisdir(entry))
 		fileout->fsentry.filesize = fileout->totalclusters * _vbootsector->sectorspercluster * _vbootsector->bytespersector;
 
+	// TODO: error check this?
+	printf("about to read new file\n");
 	fatreadsector(fileout->firstcluster, 0, fileout->buffer);
 }
 
@@ -96,10 +98,12 @@ int32_t dirfindentry(struct file *dir, const char *name, struct fatdirentry *ent
 
 	do {
 
-		if (_fileread(dir, entry, sizeof(struct fatdirentry)) < 0) 
+		if (_fileread(dir, entry, sizeof(struct fatdirentry)) != sizeof(struct fatdirentry)) 
 			return -1;
 
-		if (strncmp((char *) entry->filename, name, FAT_FILETOTAL_LEN) == 0)
+		printf("comparing %s to %s\n", (char *) entry->filename, name);
+
+		if (memcmp(entry->filename, name, FAT_FILETOTAL_LEN) == 0)
 			return entryindex;
 
 		entryindex++;
@@ -337,7 +341,7 @@ int fileopen(struct file *file, const char *pathname, int flags) {
 	int pathnextsize = 0;
 
 	char *start = (char *) pathname;
-	char fatformattedname[FAT_FILETOTAL_LEN + 1];
+	char fatformattedname[FAT_FILETOTAL_LEN];
 
 	if (pathname == NULL || pathname[0] != PATH_SEP) {
 		errno = EPATH;
@@ -350,11 +354,14 @@ int fileopen(struct file *file, const char *pathname, int flags) {
 
 		char *tempstart = start;
 
+		printf("checking %s\n", fatformattedname);
+
 		if (filefromentry(file, fatformattedname, file) < 0) {
 
 			// if we don't find the next step and this is the last
-			// part of the filepath, create a new file (if that's)
-			// what's desired or return an error
+			// part of the filepath, either:
+			// create a new file if FCREATE
+			// or return an error
 			char *filename = start;
 
 			// create file
@@ -448,6 +455,7 @@ int fileread(struct file *file, void *buffer, uint32_t size) {
 		return -1;
 	}
 
+	// TODO: is this right??? we're erroring if we try to read a read-only file...
 	if (file->fsentry.attributes & READ_ONLY) {
 		errno = EACCES;
 		return -1;
@@ -507,6 +515,8 @@ bool filewrite(struct file *file, const void *buffer, uint32_t size) {
 	}
 
 	if (size == 0) return true;
+
+	// TODO: we're not checking if file is read-only...
 
 	return _filewrite(file, buffer, size);
 }

@@ -44,6 +44,8 @@ enum fflags {
 
 void fileinit(void);
 
+// TODO: definitions in kernel's file.c don't match... also I should probably write documentations
+
 bool fileresize(struct file *file, uint32_t size);
 bool fileopen(struct file *file, const char *pathname, int flags);
 // returns amount of bytes read

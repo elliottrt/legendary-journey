@@ -4,6 +4,7 @@ enum errno errno;
 
 const char *strerror(enum errno _errno) {
 	static const char *strs[] = {
+		"no error",
 		"no such file or directory",
 		"bad file descriptor",
 		"not directory",

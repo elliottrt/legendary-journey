@@ -13,6 +13,7 @@
 #include "fat.h"
 #include "file.h"
 #include "x86.h"
+#include "std.h"
 
 void main(void) {
 

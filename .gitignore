@@ -59,11 +59,12 @@ dkms.conf
 # Other
 .DS_Store
 .vscode
-fs.img
+*.img
 *.sublime-workspace
 *.sublime-project
 old
 *.old
 mkfat
-root
+root/kernel.elf
 fatgen103.pages
+BackupMakefile

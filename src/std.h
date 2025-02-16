@@ -7,20 +7,20 @@
 #define UNUSED(X) (void)(X)
 
 enum errno {
-	ENOENT = 0, /* no such file or directory */
-	EBADF = 1, /* bad file descriptor */
-	ENOTDIR = 2, /* tried to read something not a directory as a directory */
-	EISDIR = 3, /* is a directory */
-	EINVAL = 4, /* invalid argument */
-	EPATH = 5, /* bad file path */
-	EEXIST = 6, /* file already exists */
-	EACCES = 7, /* permission denied */
-	EIO = 8, /* general io error */
-	ENAMETOOLONG = 9, /* filename too long */
-	ENOMEM = 10, /* not enough space / can't allocate memory */
-	ENOSYS = 11, /* function not implemented */
-	ENOTEMPTY = 12, /* directory not empty */
-	EPERM = 13, /* operation not permitted */
+	ENOENT = 1, 	/* no such file or directory */
+	EBADF, 			/* bad file descriptor */
+	ENOTDIR, 		/* tried to read something not a directory as a directory */
+	EISDIR, 		/* is a directory */
+	EINVAL, 		/* invalid argument */
+	EPATH, 			/* bad file path */
+	EEXIST, 		/* file already exists */
+	EACCES, 		/* permission denied */
+	EIO, 			/* general io error */
+	ENAMETOOLONG, 	/* filename too long */
+	ENOMEM, 		/* not enough space / can't allocate memory */
+	ENOSYS, 		/* function not implemented */
+	ENOTEMPTY, 		/* directory not empty */
+	EPERM, 			/* operation not permitted */
 };
 
 extern enum errno errno;

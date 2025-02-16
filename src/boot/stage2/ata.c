@@ -56,6 +56,8 @@ void atainit(void) {
 	if (_ataidentify.useraddressablesectors == 0)
 		puterr("\nata: error: lba28 not supported", 0);
 
+	/* clear control register */
+	outb(0x3F6, 0x00);
 }
 
 bool ataread(uint32_t lba, uint8_t sectors, void *dst) {

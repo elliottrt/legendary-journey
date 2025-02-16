@@ -22,7 +22,7 @@ STAGE2ASMSRC=$(wildcard $(STAGE2_DIR)/*.S)
 STAGE2TARGETS=$(STAGE2ASMSRC:.S=.o) $(STAGE2CSRC:.c=.o)
 
 # name of the kernel file
-KERNELNAME=kernel.elf
+KERNELNAME=kernel
 KERNEL=$(ROOT)/$(KERNELNAME)
 KERNELCSRC=$(wildcard $(KERNEL_DIR)/*.c) $(wildcard $(KERNEL_DIR)/*/*.c)
 KERNELASMSRC=$(wildcard $(KERNEL_DIR)/*.S) $(wildcard $(KERNEL_DIR)/*/*.S)

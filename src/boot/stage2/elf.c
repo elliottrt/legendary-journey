@@ -2,36 +2,36 @@
 #include "write.h"
 #include "std.h"
 
-bool elfread(struct file *file, void *scratch, void (**entry)()) {
+bool elfread(struct file *file, void *dest, void (**entry)()) {
 
-	struct elfheader *elfhdr = (struct elfheader *) scratch;
+	struct elfheader *elfhdr = (struct elfheader *) dest;
 	struct elfprogheader *proghdr, *endproghdr;
 
-	if (fileread(file, scratch, sizeof(struct elfheader)) < 0)
+	if (fileread(file, dest, sizeof(struct elfheader)) < 0)
 		puterr("UNABLE TO READ ELF", 0);
 
-	scratch += sizeof(struct elfheader);
+	dest += sizeof(struct elfheader);
 
-	proghdr = (struct elfprogheader *)((uint8_t *) elfhdr + elfhdr->phoff);
-	endproghdr = proghdr + elfhdr->phnum;
+	proghdr = (struct elfprogheader *)((uint8_t *) elfhdr + elfhdr->e_phoff);
+	endproghdr = proghdr + elfhdr->e_phnum;
 
-	if (elfhdr->magic != ELF_MAGIC)
+	if (elfhdr->e_magic != ELF_MAGIC)
 		return false;
 
-	if (fileread(file, scratch, (void *) endproghdr - scratch) < 0)
+	if (fileread(file, dest, (void *) endproghdr - dest) < 0)
 		puterr("UNABLE TO READ ELF PROG HEADERS", 0);
 
-	for (; proghdr < endproghdr; proghdr++)
-	{
-		uint8_t *address = (uint8_t *) proghdr->paddr;
-		if (fileseek(file, proghdr->off) < 0)
+	for (; proghdr < endproghdr; proghdr++) {
+		uint8_t *address = (uint8_t *) proghdr->p_paddr;
+		
+		if (fileseek(file, proghdr->p_offset) < 0)
 			puterr("UNABLE TO SEEK SEGMENT", 0);
-		if (fileread(file, address, proghdr->filesz) < 0)
+		if (fileread(file, address, proghdr->p_filesz) < 0)
 			puterr("UNABLE TO READ SEGMENT", 0);
-		if (proghdr->filesz < proghdr->memsz)
-			memset((void *)(address + proghdr->filesz), 0x00, proghdr->memsz - proghdr->filesz);
+		if (proghdr->p_filesz < proghdr->p_memsz)
+			memset(address + proghdr->p_filesz, 0x00, proghdr->p_memsz - proghdr->p_filesz);
 	}
 
-	*entry = (void (*)(uint32_t)) elfhdr->entry;
+	*entry = (void (*)()) elfhdr->e_entry;
 	return true;
 }

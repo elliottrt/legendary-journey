@@ -7,9 +7,6 @@
 extern uint16_t _memregioncount;
 extern struct memregion _memregions[];
 
-// to read elf file
-bool elfread(struct file *file, void *scratch, void (**entry)());
-
 void stage2main(void) {
 
 	clrscr();
@@ -27,7 +24,7 @@ void stage2main(void) {
 		return;
 
 	// read kernel header to scratch space
-	if (elfread(&kernel, (void *) 0x10000, &kernelentry) == 0)
+	if (stage2_elfread(&kernel, (void *) 0x10000, &kernelentry) == 0)
 		return;
     
 	kernelentry(atagetidentify(), _memregions, _memregioncount);

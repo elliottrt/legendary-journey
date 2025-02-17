@@ -8,15 +8,18 @@
 
 // This table defines the kernel's mappings, which are present in
 // every process's page table.
-static struct kmap {
+struct kmap {
   void *virt;
   uint32_t phystart;
   uint32_t phyend;
   int perm;
-} kmap[] = {
+}; 
+
+static struct kmap kmap[] = {
  	{ (void*)KERNBASE,    0,              EXTMEM,                 PTE_W}, // I/O space + BIOS stuff
  	{ (void*)KERNLINK,    V2P(KERNLINK),  V2P(data),              0},     // kern text+rodata
  	{ (void*)data,        V2P(data),      0/*set in kpginit*/,    PTE_W}, // kern data+memory
+    { (void*)USERBASE,    0,              0,                      PTE_W}, // user code location
 };
 
 uint32_t *kpgdir;
@@ -94,7 +97,9 @@ static int mappages(uint32_t *pgdir, void *va, uint32_t size, uint32_t pa, int p
 
 void kpginit(void) {
 
-    kmap[2].phyend = PHYSTOP;
+    kmap[2].phyend = KERNEL_VEND;
+    kmap[3].phystart = KERNEL_VEND;
+    kmap[3].phyend = PHYSTOP;
 
     kpgdir = (uint32_t *) kalloc();
 
@@ -102,7 +107,7 @@ void kpginit(void) {
 
     for (struct kmap *k = kmap; k < &kmap[NELEM(kmap)]; k++) {
 
-        //printf("kmap elem: 0x%p 0x%p 0x%p 0x%x\n", k->virt, k->phystart, k->phyend, k->perm);
+        // printf("kmap elem: 0x%8p 0x%8p 0x%8p 0x%x\n", k->virt, k->phystart, k->phyend, k->perm);
 
         int success = mappages(kpgdir, k->virt, k->phyend - k->phystart, (uint32_t) k->phystart, k->perm);
         if (success < 0) {

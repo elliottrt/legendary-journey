@@ -38,8 +38,8 @@ STAGE2_OFFSET=0x7E00
 STAGE2_SIZE=24
 # kernel virtual memory location
 KERNBASE=0x80000000
-# KERNBASE=0xC0000000
-# KERNBASE=0xE0000000
+# place to load user code at (seems to be a linux default)
+USERBASE=0x08048000
 
 # width of tabs in terminal
 TAB_WIDTH=4
@@ -54,14 +54,20 @@ LDFLAGS=-nostdlib -static -m elf_i386
 ASFLAGS=--32
 KERNELFLAGS=-c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
 KERNELFLAGS:=$(KERNELFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
-KERNELFLAGS:=$(KERNELFLAGS) -fno-pic -Wunused -O2 -DTAB_WIDTH=$(TAB_WIDTH)
+KERNELFLAGS:=$(KERNELFLAGS) -fno-pic -Wunused -O2 -DTAB_WIDTH=$(TAB_WIDTH) -DUSERBASE=$(USERBASE)
 KERNELFLAGS:=$(KERNELFLAGS) -DKERNBASE=$(KERNBASE) -I$(KERNEL_DIR) -Isrc/
 
 BOOTFLAGS=-defsym S2LOC=8 -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=24
 
-.PHONY: all run clean
+.PHONY: all run clean user _user
 
 all: $(OS)
+
+user:
+	$(CC) -nostdlib -o user/ret -Wl,-emain user/ret.c
+	cp user/ret root/ret
+	objdump -h -x -z -d user/ret
+	touch $(ROOT)
 
 $(STAGE1BIN): $(BIN) $(STAGE1SRC)
 	$(AS) -o $(STAGE1BIN).o $(STAGE1SRC) $(ASFLAGS) $(BOOTFLAGS)

@@ -76,7 +76,7 @@ void kallocinit(void) {
 }
 
 void kallocexpand(void) {
-    kfreerange(P2V(4*1024*1024), P2V(PHYSTOP));
+    kfreerange(P2V(4*1024*1024), P2V(KERNEL_VEND));
 }
 
 uint32_t kallocavailable(void) {

@@ -2,6 +2,7 @@
 #define _ELF_FORMAT
 
 #include "types.h"
+#include "file.h"
 
 // See https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
 
@@ -67,5 +68,14 @@ enum elfprogtype {
 	PT_LOPROC = 0x70000000,
 	PT_HIPROC = 0x7FFFFFFF
 };
+
+// the signature for the main function of user programs
+typedef int (*user_entry_t)(int, char **);
+
+// used by stage2 to go to the kernel entry point
+bool stage2_elfread(struct file *file, void *dest, void (**entry)());
+
+// used by the kernel to load elf files
+bool elfread(struct file *file, void *dest, user_entry_t *entry);
 
 #endif

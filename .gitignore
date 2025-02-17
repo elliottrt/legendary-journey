@@ -68,3 +68,6 @@ mkfat
 root/kernel.elf
 fatgen103.pages
 BackupMakefile
+# user program code
+user
+!src/kernel/user

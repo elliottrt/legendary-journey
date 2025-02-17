@@ -1,0 +1,55 @@
+#include "elf.h"
+#include "std.h"
+#include "file.h"
+
+#include "graphics/printf.h"
+
+bool elfread(struct file *file, void *dest, user_entry_t *entry) {
+
+	struct elfheader *elfhdr = (struct elfheader *) dest;
+	// points to the first program header
+	struct elfprogheader *proghdr;
+	// points to the end of the last program header
+	struct elfprogheader *endproghdr;
+
+	printf("spot 0\n");
+
+	if (!fileread(file, dest, sizeof(struct elfheader)))
+		return false;
+
+	dest += sizeof(struct elfheader);
+
+	proghdr = (struct elfprogheader *)((uint8_t *) elfhdr + elfhdr->e_phoff);
+	endproghdr = proghdr + elfhdr->e_phnum;
+
+	printf("spot 1, %d header(s)\n", elfhdr->e_phnum);
+
+	if (elfhdr->e_magic != ELF_MAGIC)
+		return false;
+
+	if (fileread(file, dest, sizeof(struct elfprogheader) * elfhdr->e_phnum) < 0)
+		return false;
+
+	printf("spot 2\n");
+
+	for (; proghdr < endproghdr; proghdr++) {
+		uint8_t *address = (uint8_t *) proghdr->p_vaddr;
+
+		printf("spot 3\n");
+		
+		if (!fileseek(file, proghdr->p_offset))
+			return false;
+
+		printf("loading type %d at 0x%x (%u bytes)\n", proghdr->p_type, address, proghdr->p_filesz);
+
+		if (!fileread(file, address, proghdr->p_filesz))
+			return false;
+		if (proghdr->p_filesz < proghdr->p_memsz)
+			memset(address + proghdr->p_filesz, 0x00, proghdr->p_memsz - proghdr->p_filesz);
+	}
+
+	printf("spot 4\n");
+
+	*entry = (user_entry_t) elfhdr->e_entry;
+	return true;
+}

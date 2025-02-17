@@ -3,7 +3,7 @@
 #include "std.h"
 #include "file.h"
 
-bool elfread(struct file *file, void *dest, void (**entry)()) {
+bool stage2_elfread(struct file *file, void *dest, void (**entry)()) {
 
 	struct elfheader *elfhdr = (struct elfheader *) dest;
 	struct elfprogheader *proghdr, *endproghdr;

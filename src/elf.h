@@ -69,6 +69,41 @@ enum elfprogtype {
 	PT_HIPROC = 0x7FFFFFFF
 };
 
+struct elfsectionheader {
+	uint32_t sh_name;
+	uint32_t sh_type;
+	uint32_t sh_flags;
+	uint32_t sh_addr;
+	uint32_t sh_offset;
+	uint32_t sh_size;
+	uint32_t sh_link;
+	uint32_t sh_info;
+	uint32_t sh_addralign;
+	uint32_t sh_entsize;
+} __attribute__ ((packed));
+
+enum elfsectiontype {
+	SHT_NULL = 0,
+	SHT_PROGBITS = 1,
+	SHT_SYMTAB = 2,
+	SHT_STRTAB = 3,
+	SHT_RELA = 4,
+	SHT_HASH = 5,
+	SHT_DYNAMIC = 6,
+	SHT_NOTE = 7,
+	SHT_NOBITS = 8,
+	SHT_REL = 9,
+	SHT_SHLIB = 0xA,
+	SHT_DYNSYM = 0xB,
+	SHT_INIT_ARRAY = 0xE,
+	SHT_FINI_ARRAY = 0xF,
+	SHT_PREINIT_ARRAY = 0x10,
+	SHT_GROUP = 0x11,
+	SHT_SYMTAB_SHNDX = 0x12,
+	SHT_NUM = 0x13,
+	SHT_LOOS = 0x60000000
+};
+
 // the signature for the main function of user programs
 typedef int (*user_entry_t)(int, char **);
 

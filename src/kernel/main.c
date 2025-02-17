@@ -48,6 +48,7 @@ void main(void) {
 		printf("opened file successfully\n");
 
 		if (elfread(&elf, (void *) USERBASE, &entry)) {
+			// TODO: will this work with interrupts?
 			printf("user code returned: %d\n", entry(0, NULL));
 		} else {
 			printf("failed to read elf file: %s\n", strerror(errno));

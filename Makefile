@@ -3,6 +3,7 @@ PREFIX=i386-elf
 CC=$(PREFIX)-gcc
 LD=$(PREFIX)-ld
 AS=$(PREFIX)-as
+OBJDUMP=$(PREFIX)-objdump
 EMU=qemu-system-i386
 
 OS=os.img
@@ -64,9 +65,15 @@ BOOTFLAGS=-defsym S2LOC=8 -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=24
 all: $(OS)
 
 user:
-	$(CC) -nostdlib -o user/ret -Wl,-emain user/ret.c
+	$(CC) -nostdlib -o user/print -Wl,-emain,-zundefs,-q user/print.c
+	cp user/print root/ret
+	touch $(ROOT)
+	$(OBJDUMP) -hxzdrst user/print
+
+_user:
+	$(CC) -nostdlib -o user/ret -Wl,-emain,-zundefs,-q user/ret.c
 	cp user/ret root/ret
-	objdump -h -x -z -d user/ret
+	$(OBJDUMP) -hxzdrst user/ret
 	touch $(ROOT)
 
 $(STAGE1BIN): $(BIN) $(STAGE1SRC)

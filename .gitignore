@@ -65,9 +65,8 @@ dkms.conf
 old
 *.old
 mkfat
-root/kernel.elf
+root/kernel
 fatgen103.pages
-BackupMakefile
 # user program code
 user
 !src/kernel/user

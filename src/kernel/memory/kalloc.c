@@ -51,7 +51,7 @@ void kfree(void *address) {
     }
 
     memset(address, 0x00, PGSIZE);
-        
+
     struct run *deallocated = (struct run *) address;
 
     deallocated->next = freemem;

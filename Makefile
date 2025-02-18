@@ -64,7 +64,7 @@ BOOTFLAGS=-defsym S2LOC=8 -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=24
 
 all: $(OS)
 
-USERFLAGS=-nostdlib -Wl,-emain,--warn-unresolved-symbols,-q -Wno-builtin-declaration-mismatch
+USERFLAGS=-nostdlib -Wl,-emain,--warn-unresolved-symbols,-q
 user:
 	$(CC) $(USERFLAGS) -o root/print user/print.c
 	touch $(ROOT)

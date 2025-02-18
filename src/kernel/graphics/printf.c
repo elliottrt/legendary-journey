@@ -29,7 +29,7 @@ void scroll(void) {
 		line[col] = EMPTY_CHAR | (color << 8);
 }
 
-void putc(char c) {
+int putc(char c) {
 	switch (c) {
 		case '\n':
 			cursor += SCREEN_WIDTH;
@@ -39,7 +39,7 @@ void putc(char c) {
 			// we need to go up a line
 			if (cursor % SCREEN_WIDTH == 0) {
 				// don't do anything if we are at the start
-				if (cursor == 0) return;
+				if (cursor == 0) return 0;
 
 				while ((screen_addr[--cursor] & 0xFF) == EMPTY_CHAR);
 				// fix the overshoot
@@ -63,6 +63,13 @@ void putc(char c) {
 		cursor = SCREEN_WIDTH * (SCREEN_HEIGHT - 1);
 	}
 
+	return 0;
+}
+
+int puts(const char *str) {
+	while (*str) putc(*(str++));
+	putc('\n');
+	return 0;
 }
 
 // some number significantly above log10(2^32)
@@ -93,7 +100,7 @@ void printint(uint32_t x, int base, int sign, int padding) {
     	putc(buffer[i]);
 }
 
-void printf(const char *format, ...) {
+int printf(const char *format, ...) {
 	int padding;
 	bool islong;
 
@@ -156,6 +163,7 @@ void printf(const char *format, ...) {
 		}
 	}
 
+	return 0;
 }
 
 void printfcolor(enum color fg, enum color bg) {

@@ -5,7 +5,9 @@
 
 // TODO: add more system functions
 struct sysdef __sysdefs[] = {
-	{"printf", (uint32_t) printf}
+	{"printf", (uint32_t) printf},
+	{"puts",   (uint32_t) puts},
+	{"putc",   (uint32_t) putc}
 };
 
 uint32_t sysfunc_get(const char *name) {

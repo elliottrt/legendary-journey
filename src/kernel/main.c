@@ -39,6 +39,11 @@ void main(void) {
 
 	kallocexpand();
 
+	// TODO: write shell
+	// TODO: add more system functions
+	// TODO: figure out how to tell the compiler that certain functions do exist - stub library?
+	// TODO: write user programs like ls, mkdir, etc.
+
 	struct file elf;
 	user_entry_t entry;
 

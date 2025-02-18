@@ -60,14 +60,13 @@ KERNELFLAGS:=$(KERNELFLAGS) -DKERNBASE=$(KERNBASE) -I$(KERNEL_DIR) -Isrc/
 
 BOOTFLAGS=-defsym S2LOC=8 -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=24
 
-.PHONY: all run clean user _user
+.PHONY: all run clean user
 
 all: $(OS)
 
 USERFLAGS=-nostdlib -Wl,-emain,--warn-unresolved-symbols,-q -Wno-builtin-declaration-mismatch
 user:
-	$(CC) $(USERFLAGS) -o user/print user/print.c
-	cp user/print root/print
+	$(CC) $(USERFLAGS) -o root/print user/print.c
 	touch $(ROOT)
 
 $(STAGE1BIN): $(BIN) $(STAGE1SRC)

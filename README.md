@@ -15,8 +15,8 @@ I am not at all qualified to do this. The [posted warnings](https://wiki.osdev.o
 - there is only a single running process
 - when a system call is issued, control jumps to the operating system then back to the program
 - the kernel will act as the shell
-- user programs can be compiled with `i386-elf-gcc -nostdlib -Wl,-emain <source>`
-	- do we need `-fpic`?
+- user programs must be compiled with the flags `-nostdlib -Wl,-emain,--warn-unresolved-symbols,-q -Wno-builtin-declaration-mismatch`
+	- this will allow undefined functions and variables. if these are not system functions, the OS will warn you and not run the desired program.
 
 ## todo/ideas (in no particular order)
 - change STAGE2_x in Makefile to be dynamically calculated instead of manually

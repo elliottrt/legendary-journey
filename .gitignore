@@ -67,6 +67,3 @@ old
 mkfat
 root
 fatgen103.pages
-# user program code
-user
-!src/kernel/user

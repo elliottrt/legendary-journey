@@ -5,21 +5,21 @@
 
 bool stage2_elfread(struct file *file, void *dest, void (**entry)()) {
 
-	struct elfheader *elfhdr = (struct elfheader *) dest;
-	struct elfprogheader *proghdr, *endproghdr;
+	struct elf_hdr *elfhdr = dest;
+	struct elf_prog_hdr *proghdr, *endproghdr;
 
-	if (!fileread(file, dest, sizeof(struct elfheader)))
+	if (!fileread(file, dest, sizeof(struct elf_hdr)))
 		puterr("UNABLE TO READ ELF", 0);
 
-	dest += sizeof(struct elfheader);
+	dest += sizeof(struct elf_hdr);
 
-	proghdr = (struct elfprogheader *)((uint8_t *) elfhdr + elfhdr->e_phoff);
+	proghdr = (struct elf_prog_hdr *)((uint8_t *) elfhdr + elfhdr->e_phoff);
 	endproghdr = proghdr + elfhdr->e_phnum;
 
 	if (elfhdr->e_magic != ELF_MAGIC)
 		return false;
 
-	if (fileread(file, dest, (void *) endproghdr - dest) < 0)
+	if (fileread(file, dest, elfhdr->e_phnum * sizeof(struct elf_prog_hdr)) < 0)
 		puterr("UNABLE TO READ ELF PROG HEADERS", 0);
 
 	for (; proghdr < endproghdr; proghdr++) {

@@ -65,7 +65,7 @@ dkms.conf
 old
 *.old
 mkfat
-root/kernel
+root
 fatgen103.pages
 # user program code
 user

@@ -54,6 +54,7 @@ void isrhandler(struct registers *regs) {
 static void exceptionhandler(struct registers *regs) {
     printf("exception: %s\n", exceptions[regs->int_no]);
     // TODO: should we try to recover?
+    // TODO: page fault data -> print cr2 (which has accessed address that caused fault)
     while(1);
 }
 

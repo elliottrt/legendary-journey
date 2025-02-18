@@ -64,16 +64,10 @@ BOOTFLAGS=-defsym S2LOC=8 -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=24
 
 all: $(OS)
 
+USERFLAGS=-nostdlib -Wl,-emain,--warn-unresolved-symbols,-q -Wno-builtin-declaration-mismatch
 user:
-	$(CC) -nostdlib -o user/print -Wl,-emain,-zundefs,-q user/print.c
-	cp user/print root/ret
-	touch $(ROOT)
-	$(OBJDUMP) -hxzdrst user/print
-
-_user:
-	$(CC) -nostdlib -o user/ret -Wl,-emain,-zundefs,-q user/ret.c
-	cp user/ret root/ret
-	$(OBJDUMP) -hxzdrst user/ret
+	$(CC) $(USERFLAGS) -o user/print user/print.c
+	cp user/print root/print
 	touch $(ROOT)
 
 $(STAGE1BIN): $(BIN) $(STAGE1SRC)
@@ -102,7 +96,8 @@ run: $(OS)
 	$(EMU) -drive format=raw,file=$(OS) -m 128 -monitor stdio -action reboot=shutdown -action shutdown=pause -D trace.log -d int
 
 clean:
-	$(RM) -r $(KERNEL)
+	$(RM) $(OS)
+	$(RM) -r $(ROOT)
 	$(RM) $(KERNELTARGETS)
 	$(RM) $(STAGE2TARGETS)
 

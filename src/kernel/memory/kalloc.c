@@ -34,6 +34,7 @@ void *kalloc(void) {
 }
 
 void kfree(void *address) {
+    if (!address) return;
 
     if ((uint32_t) address % PGSIZE) {
         printf("error: unaligned address %p to kfree\n", address);
@@ -52,11 +53,11 @@ void kfree(void *address) {
 
     memset(address, 0x00, PGSIZE);
 
-    struct run *deallocated = (struct run *) address;
+    struct run *dealloced = address;
 
-    deallocated->next = freemem;
-    freemem = deallocated;
-
+    dealloced->next = freemem;
+    freemem = dealloced;
+    
     available++;
 }
 

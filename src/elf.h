@@ -8,7 +8,7 @@
 
 #define ELF_MAGIC 0x464C457F
 
-struct elfheader {
+struct elf_hdr {
 	uint32_t e_magic;
 	uint8_t e_bits;
 	uint8_t e_endian;
@@ -31,19 +31,7 @@ struct elfheader {
 	uint16_t e_shstrndx;
 } __attribute__ ((packed));
 
-enum elffiletype {
-	ET_NONE = 0,
-	ET_REL = 1,
-	ET_EXEC = 2,
-	ET_DYN = 3,
-	ET_CORE = 4,
-	ET_LOOS = 0xFE00,
-	ET_HIOS = 0xFEFF,
-	ET_LOPROC = 0xFF00,
-	ET_HIPROC = 0xFFFF
-};
-
-struct elfprogheader {
+struct elf_prog_hdr {
 	uint32_t p_type;
 	uint32_t p_offset;
 	uint32_t p_vaddr;
@@ -54,7 +42,7 @@ struct elfprogheader {
 	uint32_t p_align;
 } __attribute__ ((packed));
 
-enum elfprogtype {
+enum elf_prog_type {
 	PT_NULL = 0,
 	PT_LOAD = 1,
 	PT_DYNAMIC = 2,
@@ -69,7 +57,7 @@ enum elfprogtype {
 	PT_HIPROC = 0x7FFFFFFF
 };
 
-struct elfsectionheader {
+struct elf_sec_hdr {
 	uint32_t sh_name;
 	uint32_t sh_type;
 	uint32_t sh_flags;
@@ -82,7 +70,7 @@ struct elfsectionheader {
 	uint32_t sh_entsize;
 } __attribute__ ((packed));
 
-enum elfsectiontype {
+enum elf_sec_type {
 	SHT_NULL = 0,
 	SHT_PROGBITS = 1,
 	SHT_SYMTAB = 2,
@@ -103,6 +91,28 @@ enum elfsectiontype {
 	SHT_NUM = 0x13,
 	SHT_LOOS = 0x60000000
 };
+
+struct elf_rel {
+	uint32_t r_offset;
+	uint32_t r_info;
+} __attribute__ ((packed));
+
+#define ELF32_R_SYM(i)	(((i) >> 8) & 0xFF)
+#define ELF32_R_TYPE(i)   ((i) & 0xFF)
+
+struct elf_sym {
+	uint32_t st_name; // index into symstrtab
+	uint32_t st_value; // value of symbol, 
+	uint32_t st_size; // size of data object, or 0
+	uint8_t st_info; // bind and type info
+	uint8_t st_other; // 0, no meaning
+	uint16_t st_shndx; // index to relevant section header
+} __attribute__ ((packed));
+
+#define ELF32_ST_BIND(i) (((i)>>4) & 0xF)
+#define ELF32_ST_TYPE(i) ((i) & 0xF)
+
+#define SHN_UNDEF (0) // for st_shndx, denotes undefined symbol
 
 // the signature for the main function of user programs
 typedef int (*user_entry_t)(int, char **);

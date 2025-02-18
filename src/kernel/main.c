@@ -39,25 +39,28 @@ void main(void) {
 
 	kallocexpand();
 
-	// TODO: do something after initialization
-
 	struct file elf;
 	user_entry_t entry;
 
-	if (fileopen(&elf, "/ret", 0)) {
-		printf("opened file successfully\n");
+	if (fileopen(&elf, "/print", 0)) {
 
 		if (elfread(&elf, (void *) USERBASE, &entry)) {
 			// TODO: will this work with interrupts?
-			printf("user code returned: %d\n", entry(0, NULL));
+			printf("jumping to user code... ");
+			int result = entry(0, NULL);
+
+			if (result != 0) {
+				printf("\nbad exit code: %d\n", result);
+			}
 		} else {
 			printf("failed to read elf file: %s\n", strerror(errno));
 		}
 	} else {
-		printf("failed to open file: %s\n", strerror(errno));
+		printf("failed to open file '/print': %s\n", strerror(errno));
+		printf("this may be because you forgot to do 'make user' first\n");
 	}
 
-	printf("initialization complete\n");
+	printf("initialization complete, halting.\n");
 
-	while(1);
+	halt();
 }

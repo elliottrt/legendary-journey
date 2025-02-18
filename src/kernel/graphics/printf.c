@@ -48,6 +48,7 @@ void putc(char c) {
 			screen_addr[--cursor] = EMPTY_CHAR | (color << 8);
 			break;
 		case '\t':
+			// TODO: this does not work
 			cursor += cursor % TAB_WIDTH;
 			cursor -= cursor % SCREEN_WIDTH;
 			break;
@@ -110,6 +111,8 @@ void printf(const char *format, ...) {
 				padding = padding * 10 + (next - '0');
 				next = format[++i];
 			}
+
+			// TODO: padding only affects integers. it should also affect %c and %s
 
 			islong = next == 'l';
 			if (islong)

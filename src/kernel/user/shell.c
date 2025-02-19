@@ -4,6 +4,7 @@
 #include "user/program.h"
 #include "std.h"
 #include "graphics/printf.h"
+#include "drivers/kbd.h"
 
 int shell_exec(char *command) {
 	char *argv[SHELL_MAX_ARGS] = {0};
@@ -44,4 +45,47 @@ int shell_exec(char *command) {
 
 	user_entry_t entry = program_load(argv[0]);
 	return entry ? entry(argc, argv) : SHELL_FAIL;
+}
+
+int shell(void) {
+	printf(SHELL_PROMPT);
+
+	char cmd[SHELL_MAX_CMD_LEN] = {0};
+	uint32_t cmd_idx = 0;
+
+	while (1) {
+		if (cmd_idx >= SHELL_MAX_CMD_LEN) {
+			errno = ENOMEM;
+			return SHELL_FAIL;
+		}
+
+		char ch = kbd_getc_blocking();
+
+		if (ch == '\n') {
+			// null terminate the command, replacing the new line
+			// and finished getting input
+			cmd[cmd_idx] = '\0';
+			putc(ch);
+			break;
+		} else if (ch == '\b') {
+			if (cmd_idx > 0) {
+				cmd[--cmd_idx] = 0;
+				putc(ch);
+			}
+		} else {
+			cmd[cmd_idx++] = ch;
+			putc(ch);
+		}
+	}
+
+	// reset errno and execute command
+	errno = 0;
+	int result = shell_exec(cmd);
+
+	// if there's an error, display it
+	if (result == SHELL_FAIL) {
+		printf("shell: error: %s\n", strerror(errno));
+	}
+
+	return result;
 }

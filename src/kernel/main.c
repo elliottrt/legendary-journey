@@ -56,9 +56,7 @@ void main(void) {
 	printf("initialization complete, halting.\n");
 
 	while (1) {
-		char ch = kbd_getc_blocking();
-		//printf("got key: '%c'\n", ch);
-		putc(ch);
+		shell();
 	}
 
 	cli(); halt();

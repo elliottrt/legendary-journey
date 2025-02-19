@@ -8,7 +8,7 @@ EMU=qemu-system-i386
 
 OS=os.img
 ROOT=root
-USER_PROGS=root/print
+USER_PROGS=root/echo
 
 SOURCE_DIR=src
 STAGE1_DIR=$(SOURCE_DIR)/boot/stage1

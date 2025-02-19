@@ -81,6 +81,13 @@ int puts(const char *str) {
 	return 0;
 }
 
+int putsn(const char *str, uint32_t n) {
+	for (uint32_t i = 0; i < n; i++)
+		putc(str[i]);
+	
+	return 0;
+}
+
 // some number significantly above log10(2^32)
 #define PRINTINT_BUFFER_SIZE 32
 void printint(uint32_t x, int base, int sign, int padding) {

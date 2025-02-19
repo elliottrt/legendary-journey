@@ -1,6 +1,8 @@
 #ifndef _KERNEL_PRINTF
 #define _KERNEL_PRINTF
 
+#include "types.h"
+
 enum color {
 	CLR_BLACK = 0,
 	CLR_BLUE = 1,
@@ -22,6 +24,7 @@ enum color {
 
 int putc(char ch);
 int puts(const char *str);
+int putsn(const char *str, uint32_t n);
 
 int printf(const char *format, ...);
 

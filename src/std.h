@@ -21,6 +21,7 @@ enum errno {
 	ENOSYS, 		/* function not implemented */
 	ENOTEMPTY, 		/* directory not empty */
 	EPERM, 			/* operation not permitted */
+	ENOEXEC,		/* file is not executable */
 };
 
 extern enum errno errno;

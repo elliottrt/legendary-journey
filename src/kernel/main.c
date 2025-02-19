@@ -40,24 +40,16 @@ void main(void) {
 	kbdinit();
 	timerinit();
 
-	// TODO: keyboard input for shell and user programs
 	// TODO: add more system functions
 	// TODO: figure out how to tell the compiler that certain functions do exist - stub library?
-	// TODO: write user programs like ls, mkdir, etc.
-
-	char str[] = "/print 5 6 'ab cd'";
-	char buf[32] = {0};
-	memcpy(buf, str, sizeof(buf) - 1);
-
-	errno = 0;
-	printf("shell -> %d\n", shell_exec(buf));
-	printf("error = %s\n", strerror(errno));
-
-	printf("initialization complete, halting.\n");
+	// TODO: write user programs like cat, mkdir, etc.
+	// TODO: port txed to this
+	// TODO: /ls /folder/.. fails... why? -> note that first cluster is 0 -> implies file isn't read but no error was returned
 
 	while (1) {
 		shell();
 	}
 
+	printf("initialization complete, halting.\n");
 	cli(); halt();
 }

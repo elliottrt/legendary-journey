@@ -32,14 +32,13 @@ enum fflags {
 	FTRUNC = BIT(0), /* open file at start */
 	FAPPEND = BIT(1), /* open file at end */
 	FCREATE = BIT(2), /* create a file if none exists */
-	FDIRECTORY = BIT(3), /* create a dir if FCREATE set */
+	FDIRECTORY = BIT(3), /* open a dir, or create a dir if FCREATE set */
 };
 
 // TODO: flag in direntry: is file open already
 // if so, user shouldn't be able to edit/rename/delete
 // etc. that file
 
-// TODO: remove FDIRECTORY and create separate function
 // TODO: fileremove(struct file *parent, const char *pathname); <- parent can be null
 
 void fileinit(void);

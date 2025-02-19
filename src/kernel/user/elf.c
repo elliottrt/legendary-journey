@@ -81,14 +81,20 @@ bool elf_rel_patch(struct file *file, struct elf_sec_hdr *relhdr, struct elf_sym
 }
 
 bool read_elf_header(struct file *file, void *dest) {
-	if (!fileseek(file, 0)) 
+	if (!fileseek(file, 0)) {
+		errno = ENOEXEC;
 		return false;
+	}
 
-	if (!fileread(file, dest, sizeof(struct elf_hdr)))
+	if (!fileread(file, dest, sizeof(struct elf_hdr))) {
+		errno = ENOEXEC;
 		return false;
+	}
 
-	if (((struct elf_hdr *) dest)->e_magic != ELF_MAGIC)
+	if (((struct elf_hdr *) dest)->e_magic != ELF_MAGIC) {
+		errno = ENOEXEC;
 		return false;
+	}
 
 	return true;
 }
@@ -252,6 +258,6 @@ done:
 	kfree(sechdr);
 	kfree(symtab);
 
-	*entry = (user_entry_t) elfhdr.e_entry;
+	*entry = result ? (user_entry_t) elfhdr.e_entry : NULL;
 	return result;
 }

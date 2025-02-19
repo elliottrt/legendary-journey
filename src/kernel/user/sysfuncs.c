@@ -3,6 +3,7 @@
 
 #include "graphics/printf.h"
 #include "drivers/timer.h"
+#include "file.h"
 
 uint64_t timer_read(void) {
 	return timerget();
@@ -10,10 +11,13 @@ uint64_t timer_read(void) {
 
 // TODO: add more system functions
 struct sysdef __sysdefs[] = {
-	{"printf", 	(uint32_t) printf},
-	{"puts",   	(uint32_t) puts},
-	{"putchar",	(uint32_t) putc},
-	{"timer",  	(uint32_t) timer_read}
+	{"printf", 		(uint32_t) printf},
+	{"puts",   		(uint32_t) puts},
+	{"putchar",		(uint32_t) putc},
+	{"timer",  		(uint32_t) timer_read},
+	{"fileopen", 	(uint32_t) fileopen},
+	{"fileread", 	(uint32_t) fileread},
+	{"fileclose",	(uint32_t) fileclose},
 };
 
 uint32_t sysfunc_get(const char *name) {

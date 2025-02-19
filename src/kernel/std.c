@@ -18,7 +18,8 @@ const char *strerror(enum errno _errno) {
 		"not enough space",
 		"function not implemented",
 		"directory not empty",
-		"operation not permitted"
+		"operation not permitted",
+		"file not executable"
 	};
 	return strs[_errno];
 }

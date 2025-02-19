@@ -385,6 +385,16 @@ bool fileopen(struct file *file, const char *pathname, int flags) {
 
 	}
 
+	// TODO: this is a terrible fix. do something better
+	// .. entries in folders in root have firstcluster = 0, so this patches that - terrible solution
+	if (file->firstcluster == 0)
+		filenew(0, &rootentry, file);
+
+	if ((flags & FDIRECTORY) && !fileisdir(file)) {
+		errno = ENOTDIR;
+		return false;
+	}
+
 	file->opened = 1;
 
 	if (flags & FAPPEND)

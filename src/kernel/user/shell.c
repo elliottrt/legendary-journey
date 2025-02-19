@@ -14,6 +14,14 @@ int shell_exec(char *command) {
 	while (*command == ' ') command++;
 	if (*command == '\0') return SHELL_FAIL;
 
+	// trim ending spaces
+	uint32_t command_len = strlen(command);
+	char *back_iter = command + command_len - 1;
+	while (*back_iter == ' ') {
+		*back_iter = '\0';
+		back_iter--;
+	}
+
 	char target;
 	for (char *cmd_iter = command; cmd_iter && *cmd_iter;) {
 		switch (*cmd_iter) {

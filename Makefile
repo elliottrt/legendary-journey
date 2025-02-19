@@ -8,7 +8,8 @@ EMU=qemu-system-i386
 
 OS=os.img
 ROOT=root
-USER_PROGS=root/echo
+USER_PROGS=echo ls
+USER_PROGS:=$(addprefix $(ROOT)/,$(USER_PROGS))
 
 SOURCE_DIR=src
 STAGE1_DIR=$(SOURCE_DIR)/boot/stage1
@@ -102,6 +103,14 @@ clean:
 
 $(ROOT):
 	mkdir -p $(ROOT)
+
+	# test contents for the root directory
+	mkdir -p $(ROOT)/folder
+	mkdir -p $(ROOT)/folder/dir
+
+	touch $(ROOT)/folder/thing.c
+	touch $(ROOT)/folder/test.txt
+	touch $(ROOT)/folder/dir/hi
 
 $(OS): $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) $(USER_PROGS)
 	./mkfat 32 $(OS) -S$(ROOT) -B$(STAGE1BIN) -R$(STAGE2BIN) -VLEGENDARY

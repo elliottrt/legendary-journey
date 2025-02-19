@@ -41,10 +41,10 @@ void main(void) {
 	timerinit();
 
 	// TODO: add more system functions
-	// TODO: figure out how to tell the compiler that certain functions do exist - stub library?
+	// TODO: figure out how to tell the compiler that certain functions do exist - stub library
 	// TODO: write user programs like cat, mkdir, etc.
 	// TODO: port txed to this
-	// TODO: /ls /folder/.. fails... why? -> note that first cluster is 0 -> implies file isn't read but no error was returned
+	// TODO: change file structure so it's opaque to the user
 
 	while (1) {
 		shell();

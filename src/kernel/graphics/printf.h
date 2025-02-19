@@ -22,7 +22,7 @@ enum color {
 	CLR_WHITE = 15
 };
 
-int putc(char ch);
+int putchar(char ch);
 int puts(const char *str);
 int putsn(const char *str, uint32_t n);
 

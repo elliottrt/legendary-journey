@@ -55,5 +55,6 @@ bool filereset(struct file *file);
 bool fileseek(struct file *file, uint32_t seek);
 bool fileflush(struct file *file);
 bool fileclose(struct file *file);
+uint32_t filesize(struct file *file);
 
 #endif

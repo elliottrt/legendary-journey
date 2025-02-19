@@ -68,7 +68,6 @@ static void kbdhandler(struct registers *regs) {
     keyboard.chars[(uint8_t) keychar] = KEY_PRESSED(scancode);
 
     if (KEY_PRESSED(scancode) && keychar != 0)
-        // TODO: check for overflow?
         ringbuf_put(&key_input_buf, &keychar, sizeof(keychar));
 }
 

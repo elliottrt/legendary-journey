@@ -18,6 +18,8 @@ uint16_t *screen_addr = (uint16_t *) P2V_WO(0xB8000);
 uint32_t cursor = 0;
 uint8_t color = 15;
 
+// TODO: cursor position should be different color
+
 void scroll(void) {
 	uint16_t *line = screen_addr;
 
@@ -34,7 +36,7 @@ void scroll(void) {
 		line[col] = EMPTY_CHAR | (color << 8);
 }
 
-int putc(char c) {
+int putchar(char c) {
 	switch (c) {
 		case '\n':
 			cursor += SCREEN_WIDTH;
@@ -76,14 +78,14 @@ int putc(char c) {
 }
 
 int puts(const char *str) {
-	while (*str) putc(*(str++));
-	putc('\n');
+	while (*str) putchar(*(str++));
+	putchar('\n');
 	return 0;
 }
 
 int putsn(const char *str, uint32_t n) {
 	for (uint32_t i = 0; i < n; i++)
-		putc(str[i]);
+		putchar(str[i]);
 	
 	return 0;
 }
@@ -113,7 +115,7 @@ void printint(uint32_t x, int base, int sign, int padding) {
 	}
 
 	while(i --> 0)
-    	putc(buffer[i]);
+		putchar(buffer[i]);
 }
 
 int printf(const char *format, ...) {
@@ -124,7 +126,7 @@ int printf(const char *format, ...) {
 
 	for (int i = 0; format[i]; i++) {
 		if (format[i] != '%')
-			putc(format[i]);
+			putchar(format[i]);
 		else {
 			char next = format[++i];
 
@@ -143,7 +145,7 @@ int printf(const char *format, ...) {
 
 			switch (next) {
 				case '%': {
-					putc('%');
+					putchar('%');
 				} break;
 				case 'd': {
 					printint(*varargs, 10, 1, padding);
@@ -163,17 +165,17 @@ int printf(const char *format, ...) {
 					}
 				} break;
 				case 'c': {
-					putc(*varargs);
+					putchar(*varargs);
 					varargs++;
 				} break;
 				case 's': {
 					char *s = (char *) *varargs;
-					while (*s) putc(*s++);
+					while (*s) putchar(*s++);
 					varargs++;
 				} break;
 				default: {
-					putc('%');
-					putc(next);
+					putchar('%');
+					putchar(next);
 				} break;
 			}
 		}

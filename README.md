@@ -14,14 +14,14 @@ I am not at all qualified to do this. The [posted warnings](https://wiki.osdev.o
 ## user space model
 - there is only a single running process
 - when a system call is issued, control jumps to the operating system then back to the program
-- the kernel will act as the shell
+- the kernel acts as the shell
 - user programs must be compiled with the flags `-nostdlib -Wl,-emain,--warn-unresolved-symbols,-q`
 	- this will allow undefined functions and variables. if these are not system functions, the OS will warn you and not run the desired program.
 
 ## todo/ideas (in no particular order)
 - change STAGE2_x in Makefile to be dynamically calculated instead of manually
 - don't have standard library function implementations duplicated in stage2 and kernel - maybe a #define for each function?
-- irq handlers should be as short as possible, try to make kbd::kbdhandler shorter - buffer kbd input
+- irq handlers should be as short as possible, try to make kbd::kbdhandler shorter
 - find CPU features
 - video mode
 - figure out what video modes are available

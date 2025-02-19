@@ -9,15 +9,22 @@ uint64_t timer_read(void) {
 	return timerget();
 }
 
+#define SYS_FUNC_LIST \
+	X(printf) \
+	X(puts) \
+	X(putchar) \
+	X(timer_read) \
+	X(fileopen) \
+	X(fileread) \
+	X(fileclose) \
+	X(filesize)
+
 // TODO: add more system functions
+// TODO: could use X macro here
 struct sysdef __sysdefs[] = {
-	{"printf", 		(uint32_t) printf},
-	{"puts",   		(uint32_t) puts},
-	{"putchar",		(uint32_t) putc},
-	{"timer",  		(uint32_t) timer_read},
-	{"fileopen", 	(uint32_t) fileopen},
-	{"fileread", 	(uint32_t) fileread},
-	{"fileclose",	(uint32_t) fileclose},
+#define X(N) {#N, (uint32_t) N},
+	SYS_FUNC_LIST
+#undef X
 };
 
 uint32_t sysfunc_get(const char *name) {

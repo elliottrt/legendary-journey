@@ -73,16 +73,16 @@ int shell(void) {
 			// null terminate the command, replacing the new line
 			// and finished getting input
 			cmd[cmd_idx] = '\0';
-			putc(ch);
+			putchar(ch);
 			break;
 		} else if (ch == '\b') {
 			if (cmd_idx > 0) {
 				cmd[--cmd_idx] = 0;
-				putc(ch);
+				putchar(ch);
 			}
 		} else {
 			cmd[cmd_idx++] = ch;
-			putc(ch);
+			putchar(ch);
 		}
 	}
 

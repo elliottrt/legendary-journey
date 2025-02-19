@@ -658,3 +658,17 @@ bool fileclose(struct file *file) {
 
 	return true;
 }
+
+uint32_t filesize(struct file *file) {
+	if (file == NULL) {
+		errno = EINVAL;
+		return 0;
+	}
+
+	if (file->opened == 0) {
+		errno = EBADF;
+		return 0;
+	}
+
+	return file->fsentry.filesize;
+}

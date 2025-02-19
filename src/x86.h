@@ -9,9 +9,9 @@
 #define asm __asm__ volatile
 #endif
 
-#define cli() asm("cli");
-#define sti() asm("sti");
-#define halt() asm("hlt");
+#define cli() asm("cli")
+#define sti() asm("sti")
+#define halt() do { cli(); asm("hlt"); } while (0)
 
 #define UNUSED_PORT 0x80
 #define iowait() outb(UNUSED_PORT, 0x00)

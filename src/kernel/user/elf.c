@@ -6,6 +6,8 @@
 
 #include "graphics/printf.h"
 
+// see http://web.mit.edu/freebsd/head/sys/i386/i386/elf_machdep.c
+
 bool elf_rel_patch(struct file *file, struct elf_sec_hdr *relhdr, struct elf_sym *symtab, const char *strtab) {
 
 	if (!symtab || !strtab)
@@ -22,12 +24,26 @@ bool elf_rel_patch(struct file *file, struct elf_sec_hdr *relhdr, struct elf_sym
 			return false;
 
 		uint32_t *loc = (void *) entry.r_offset;
+
 		struct elf_sym *sym = symtab + ELF32_R_SYM(entry.r_info);
 		const char *name = strtab + sym->st_name;
 
+		/*
+		printf("rel patching: offset=0x%8x, type=0x%2x, sym=0x%6x, addend=0x%8x\n",
+			entry.r_offset,
+			ELF32_R_TYPE(entry.r_info),
+			ELF32_R_SYM(entry.r_info),
+			*loc
+		);
+		*/
+
 		switch (ELF32_R_TYPE(entry.r_info)) {
 			case 1: { // R_386_32
-				*loc = sym->st_value;
+
+				// why do we ignore sym value? because the linker does this part for us
+				// TODO: IF the value isn't defined, this will be an issue
+				// *loc = sym->st_value;
+
 			} break;
 			case 2: { // R_386_PC32
 
@@ -46,11 +62,13 @@ bool elf_rel_patch(struct file *file, struct elf_sec_hdr *relhdr, struct elf_sym
 
 				// ??? why is it 4 off ???
 				// see https://stackoverflow.com/questions/50357270/elf-understanding-r-386-pc32-relocations
+				// TODO: it might not always be '-4', so try to figure out exactly what to do
 				*loc = sym->st_value - entry.r_offset - 4;
 			} break;
 			default: break;
 		}
 
+		// printf("    was patched to 0x%8x\n", *loc);
 	}
 
 	return true;

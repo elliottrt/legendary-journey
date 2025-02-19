@@ -97,7 +97,7 @@ struct elf_rel {
 	uint32_t r_info;
 } __attribute__ ((packed));
 
-#define ELF32_R_SYM(i)	(((i) >> 8) & 0xFF)
+#define ELF32_R_SYM(i)	((i) >> 8)
 #define ELF32_R_TYPE(i)   ((i) & 0xFF)
 
 struct elf_sym {

@@ -15,6 +15,7 @@
 #include "x86.h"
 #include "elf.h"
 #include "std.h"
+#include "user/shell.h"
 
 void main(void) {
 
@@ -34,8 +35,8 @@ void main(void) {
 	isrinit();
 	irqinit();
 
-//	kbdinit();
-//	timerinit();
+	kbdinit();
+	timerinit();
 
 	kallocexpand();
 
@@ -44,26 +45,13 @@ void main(void) {
 	// TODO: figure out how to tell the compiler that certain functions do exist - stub library?
 	// TODO: write user programs like ls, mkdir, etc.
 
-	struct file elf;
-	user_entry_t entry;
+	char str[] = "/print 5 6 'ab cd'";
+	char *buf = kalloc();
+	memcpy(buf, str, sizeof(str));
 
-	if (fileopen(&elf, "/print", 0)) {
-
-		if (elfread(&elf, (void *) USERBASE, &entry)) {
-			// TODO: will this work with interrupts?
-			printf("jumping to user code... ");
-			int result = entry(0, NULL);
-
-			if (result != 0) {
-				printf("\nbad exit code: %d\n", result);
-			}
-		} else {
-			printf("failed to read elf file: %s\n", strerror(errno));
-		}
-	} else {
-		printf("failed to open file '/print': %s\n", strerror(errno));
-		printf("this may be because you forgot to do 'make user' first\n");
-	}
+	errno = 0;
+	printf("shell -> %d\n", shell_exec(buf));
+	printf("error = %s\n", strerror(errno));
 
 	printf("initialization complete, halting.\n");
 

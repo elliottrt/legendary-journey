@@ -8,6 +8,7 @@ EMU=qemu-system-i386
 
 OS=os.img
 ROOT=root
+USER_PROGS=root/print
 
 SOURCE_DIR=src
 STAGE1_DIR=$(SOURCE_DIR)/boot/stage1
@@ -65,9 +66,8 @@ BOOTFLAGS=-defsym S2LOC=8 -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=24
 all: $(OS)
 
 USERFLAGS=-nostdlib -Wl,-emain,--warn-unresolved-symbols,-q
-user:
-	$(CC) $(USERFLAGS) -o root/print user/print.c
-	touch $(ROOT)
+$(ROOT)/%: user/%.c
+	$(CC) $(USERFLAGS) -o $@ $^
 
 $(STAGE1BIN): $(BIN) $(STAGE1SRC)
 	$(AS) -o $(STAGE1BIN).o $(STAGE1SRC) $(ASFLAGS) $(BOOTFLAGS)
@@ -103,6 +103,6 @@ clean:
 $(ROOT):
 	mkdir -p $(ROOT)
 
-$(OS): $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL)
+$(OS): $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) $(USER_PROGS)
 	./mkfat 32 $(OS) -S$(ROOT) -B$(STAGE1BIN) -R$(STAGE2BIN) -VLEGENDARY
 

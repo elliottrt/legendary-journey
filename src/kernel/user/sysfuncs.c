@@ -2,12 +2,18 @@
 #include "std.h"
 
 #include "graphics/printf.h"
+#include "drivers/timer.h"
+
+uint64_t timer_read(void) {
+	return timerget();
+}
 
 // TODO: add more system functions
 struct sysdef __sysdefs[] = {
-	{"printf", (uint32_t) printf},
-	{"puts",   (uint32_t) puts},
-	{"putc",   (uint32_t) putc}
+	{"printf", 	(uint32_t) printf},
+	{"puts",   	(uint32_t) puts},
+	{"putchar",	(uint32_t) putc},
+	{"timer",  	(uint32_t) timer_read}
 };
 
 uint32_t sysfunc_get(const char *name) {

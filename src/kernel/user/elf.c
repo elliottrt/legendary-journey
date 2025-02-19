@@ -40,9 +40,13 @@ bool elf_rel_patch(struct file *file, struct elf_sec_hdr *relhdr, struct elf_sym
 		switch (ELF32_R_TYPE(entry.r_info)) {
 			case 1: { // R_386_32
 
-				// why do we ignore sym value? because the linker does this part for us
-				// TODO: IF the value isn't defined, this will be an issue
-				// *loc = sym->st_value;
+				// because the linker fixes up defined symbols, all entries of this
+				// type SHOULD be defined. if they aren't, error
+				if (*loc == 0) {
+					printf("error: elf: undefined symbol '%s'\n", name);
+					errno = ENOSYS;
+					return false;
+				}
 
 			} break;
 			case 2: { // R_386_PC32

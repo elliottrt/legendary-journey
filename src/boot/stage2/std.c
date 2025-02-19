@@ -78,6 +78,11 @@ int32_t min(int32_t a, int32_t b)
 	return a > b ? b : a;
 }
 
+uint32_t umin(uint32_t a, uint32_t b)
+{
+	return a > b ? b : a;
+}
+
 char *strnchr(const char *str, char c, uint32_t n)
 {
 	for (; *str && n--; str++)

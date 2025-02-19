@@ -39,10 +39,6 @@ int shell_exec(char *command) {
 		else cmd_iter = NULL;
 	}
 
-	for (int i = 0; i < argc; i++) {
-		printf("arg %d: %s\n", i, argv[i]);
-	}
-
 	// make sure at least 1 arg
 	if (argc < 1) return SHELL_FAIL;
 

@@ -35,19 +35,19 @@ void main(void) {
 	isrinit();
 	irqinit();
 
+	kallocexpand();
+
 	kbdinit();
 	timerinit();
 
-	kallocexpand();
-
-	// TODO: write shell
+	// TODO: keyboard input for shell and user programs
 	// TODO: add more system functions
 	// TODO: figure out how to tell the compiler that certain functions do exist - stub library?
 	// TODO: write user programs like ls, mkdir, etc.
 
 	char str[] = "/print 5 6 'ab cd'";
-	char *buf = kalloc();
-	memcpy(buf, str, sizeof(str));
+	char buf[32] = {0};
+	memcpy(buf, str, sizeof(buf) - 1);
 
 	errno = 0;
 	printf("shell -> %d\n", shell_exec(buf));
@@ -55,5 +55,11 @@ void main(void) {
 
 	printf("initialization complete, halting.\n");
 
-	halt();
+	while (1) {
+		char ch = kbd_getc_blocking();
+		//printf("got key: '%c'\n", ch);
+		putc(ch);
+	}
+
+	cli(); halt();
 }

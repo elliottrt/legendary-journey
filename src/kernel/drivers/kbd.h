@@ -77,4 +77,9 @@ extern struct keyboard keyboard;
 
 void kbdinit(void);
 
+// returns char, or KEY_NULL on failure
+char kbd_getc(void);
+// will always return an ascii character, but blocks until it gets one
+char kbd_getc_blocking(void);
+
 #endif

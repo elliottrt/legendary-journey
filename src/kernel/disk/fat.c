@@ -66,7 +66,7 @@ bool fatcache(uint32_t fat, uint32_t offsetsector) {
 	fatcommit();
 
 	// sectors buffered is either the CACHE_SIZE or the number of sectors until the end of the fat
-	_fatcache.sectorsbuffered = min(FAT_CACHE_SIZE, _vbootsector->fatsize32 - offsetsector);
+	_fatcache.sectorsbuffered = umin(FAT_CACHE_SIZE, _vbootsector->fatsize32 - offsetsector);
 
 	uint32_t lba = _vbootsector->reservedsectors + (fat * _vbootsector->fatsize32) + offsetsector;
 
@@ -244,6 +244,6 @@ void fatformatfilename(const char *input, uint32_t inputlength, char *output) {
 		inputlength -= strlen(dotlocation);
 	}
 
-	_fatformatfilename(input, output, min(FAT_FILENAME_LEN, inputlength));
+	_fatformatfilename(input, output, umin(FAT_FILENAME_LEN, inputlength));
 
 }

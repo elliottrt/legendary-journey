@@ -29,10 +29,10 @@ bool elf_rel_patch(struct file *file, struct elf_sec_hdr *relhdr, struct elf_sym
 		const char *name = strtab + sym->st_name;
 
 		/*
-		printf("rel patching: offset=0x%8x, type=0x%2x, sym=0x%6x, addend=0x%8x\n",
+		printf("rel patching: offset=0x%8x, type=0x%2x, sym=%s, addend=0x%8x\n",
 			entry.r_offset,
 			ELF32_R_TYPE(entry.r_info),
-			ELF32_R_SYM(entry.r_info),
+			name,
 			*loc
 		);
 		*/
@@ -50,6 +50,8 @@ bool elf_rel_patch(struct file *file, struct elf_sec_hdr *relhdr, struct elf_sym
 
 			} break;
 			case 2: { // R_386_PC32
+
+				// TODO: we seem to be patching functions that don't need patching... but it works anyway, so maybe we can ignore this
 
 				// if symbol is undefined
 				if (sym->st_shndx == SHN_UNDEF) {

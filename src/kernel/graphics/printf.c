@@ -3,6 +3,7 @@
 #include "std.h"
 #include "mmu.h"
 
+// TODO: try to get these from video mode?
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
 
@@ -18,13 +19,17 @@ uint32_t cursor = 0;
 uint8_t color = 15;
 
 void scroll(void) {
-
 	uint16_t *line = screen_addr;
 
-	for (uint32_t row = 0; row < SCREEN_HEIGHT - 1; row++, line += SCREEN_WIDTH) {
-		memcpy(line, line + SCREEN_WIDTH, SCREEN_WIDTH * sizeof(uint16_t));
+	for (uint32_t row = 0; row < SCREEN_HEIGHT - 1; row++) {
+		memcpy(
+			line + row * SCREEN_WIDTH,
+			line + (row + 1) * SCREEN_WIDTH,
+			SCREEN_WIDTH * sizeof(uint16_t)
+		);
 	}
 
+	line = screen_addr + (SCREEN_HEIGHT - 1) * SCREEN_WIDTH;
 	for (uint32_t col = 0; col < SCREEN_WIDTH; col++)
 		line[col] = EMPTY_CHAR | (color << 8);
 }
@@ -36,20 +41,24 @@ int putc(char c) {
 			cursor -= cursor % SCREEN_WIDTH;
 			break;
 		case '\b':
-			// we need to go up a line
+			// if we need to go up a line
 			if (cursor % SCREEN_WIDTH == 0) {
-				// don't do anything if we are at the start
+				// don't do anything if we are at the top left
 				if (cursor == 0) return 0;
 
-				while ((screen_addr[--cursor] & 0xFF) == EMPTY_CHAR);
+				uint32_t prev_line_start = cursor - SCREEN_WIDTH;
+				while (cursor > prev_line_start && (screen_addr[--cursor] & 0xFF) == EMPTY_CHAR)
+
 				// fix the overshoot
 				cursor++;
 			}
 			screen_addr[--cursor] = EMPTY_CHAR | (color << 8);
 			break;
 		case '\t':
-			// TODO: this does not work
-			cursor += cursor % TAB_WIDTH;
+			cursor += TAB_WIDTH;
+			cursor -= cursor % TAB_WIDTH;
+			break;
+		case '\r':
 			cursor -= cursor % SCREEN_WIDTH;
 			break;
 		default:

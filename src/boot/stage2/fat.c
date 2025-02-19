@@ -136,7 +136,7 @@ void fatformatfilename(const char *input, uint32_t inputlength, char *output) {
 		inputlength -= strlen(dotlocation);
 	}
 
-	_fatformatfilename(input, output, min(FAT_FILENAME_LEN, inputlength));
+	_fatformatfilename(input, output, umin(FAT_FILENAME_LEN, inputlength));
 
 }
 

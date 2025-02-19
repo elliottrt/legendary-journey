@@ -2,8 +2,8 @@
 #include "std.h"
 #include "x86.h"
 
-struct idtentry entries[256];
-struct idtptr pointer;
+struct idtentry entries[256] = {0};
+struct idtptr pointer = {0};
 
 void idtset(uint8_t index, void (*base)(struct registers), uint16_t selector, enum idt_flags flags) {
     entries[index] = (struct idtentry) {

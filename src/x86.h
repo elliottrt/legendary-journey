@@ -11,7 +11,7 @@
 
 #define cli() asm("cli")
 #define sti() asm("sti")
-#define halt() do { cli(); asm("hlt"); } while (0)
+#define halt() asm("hlt")
 
 #define UNUSED_PORT 0x80
 #define iowait() outb(UNUSED_PORT, 0x00)

@@ -2,6 +2,9 @@
 #include "cpu/irq.h"
 #include "graphics/printf.h"
 #include "std.h"
+#include "memory/kalloc.h"
+#include "mmu.h"
+#include "util/ringbuf.h"
 
 uint8_t keyboard_us[2][128] = {
     {
@@ -25,7 +28,8 @@ uint8_t keyboard_us[2][128] = {
     }
 };
 
-struct keyboard keyboard;
+struct keyboard keyboard = {0};
+struct ringbuf key_input_buf = {0};
 
 char getkeychar(uint16_t scancode)
 {
@@ -64,11 +68,43 @@ static void kbdhandler(struct registers *regs) {
     keyboard.chars[(uint8_t) keychar] = KEY_PRESSED(scancode);
 
     if (KEY_PRESSED(scancode) && keychar != 0)
-        putc(keychar);
+        // TODO: check for overflow?
+        ringbuf_put(&key_input_buf, &keychar, sizeof(keychar));
 }
-
 
 void kbdinit(void) 
 {
+    if ((key_input_buf.buffer = kalloc()) == NULL) {
+        printf("kbd: error: unable to allocate memory: %s\n", strerror(errno));
+    }
+
+    key_input_buf.cap = PGSIZE;
+    key_input_buf.start = 0;
+    key_input_buf.end = 0;
+
 	irqinstall(1, kbdhandler);
+}
+
+char kbd_getc(void) {
+    char ch = KEY_NULL;
+
+    // might fail, in which case it won't modify ch
+    ringbuf_take(&key_input_buf, &ch, sizeof(ch));
+
+    return ch;
+}
+
+char kbd_getc_blocking(void) {
+    char ch = KEY_NULL;
+
+    while (ch == KEY_NULL) {
+        // halt until an interrupt, then try to get a key
+        // which would be populated by a keyboard interrupt
+
+        halt();
+
+        ch = kbd_getc();
+    }
+
+    return ch;
 }

@@ -8,8 +8,7 @@ enum staticfileid {
 	STATIC_SIZE = 2
 };
 
-// TODO: dynamically allocate this in fileinit
-static struct file _staticfiles[STATIC_SIZE];
+struct file _staticfiles[STATIC_SIZE] = {0};
 
 int32_t _fileread(struct file *file, void *buffer, uint32_t size);
 int32_t _filewrite(struct file *file, const void *buffer, uint32_t size);
@@ -402,9 +401,9 @@ int32_t _fileread(struct file *file, void *buffer, uint32_t size)
 	uint32_t filetotalbytes = file->totalclusters * _vbootsector->sectorspercluster * _vbootsector->bytespersector;
 
 	if (!fileisdir(file))
-		filetotalbytes = min(filetotalbytes, file->fsentry.filesize);
+		filetotalbytes = umin(filetotalbytes, file->fsentry.filesize);
 
-	size = min(size, filetotalbytes - file->position);
+	size = umin(size, filetotalbytes - file->position);
 	uint32_t bytesleft = size;
 
 	sectorpos = file->position % SECTOR_SIZE;
@@ -481,7 +480,7 @@ int32_t _filewrite(struct file *file, const void *buffer, uint32_t size) {
 	// TODO: is this right??? needs more comments.
 	// write to buffer
 	do {
-		uint32_t bytestowrite = min(bytesleft, SECTOR_SIZE - sectorpos);
+		uint32_t bytestowrite = umin(bytesleft, SECTOR_SIZE - sectorpos);
 
 		memcpy(file->buffer + sectorpos, bytebuffer, bytestowrite);
 		file->dirty = 1;

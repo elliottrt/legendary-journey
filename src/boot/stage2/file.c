@@ -109,9 +109,9 @@ int32_t _fileread(struct file *file, void *buffer, uint32_t size) {
 	uint32_t filetotalbytes = file->totalclusters * _bootsector->sectorspercluster * _bootsector->bytespersector;
 
 	if (!fileisdir(file))
-		filetotalbytes = min(filetotalbytes, file->fsentry.filesize);
+		filetotalbytes = umin(filetotalbytes, file->fsentry.filesize);
 
-	size = min(size, filetotalbytes - file->position);
+	size = umin(size, filetotalbytes - file->position);
 
 	sectorpos = file->position % SECTOR_SIZE;
 	newsectorstoread = (sectorpos + size) / SECTOR_SIZE;

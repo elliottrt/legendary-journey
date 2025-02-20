@@ -16,9 +16,9 @@
 
 uint16_t *screen_addr = (uint16_t *) P2V_WO(0xB8000);
 uint32_t cursor = 0;
-uint8_t color = 15;
+uint8_t color = COLOR(CLR_WHITE, CLR_BLACK);
 
-// TODO: cursor position should be different color
+#define CURSOR_COLOR CLR_CYAN
 
 void scroll(void) {
 	uint16_t *line = screen_addr;
@@ -36,11 +36,21 @@ void scroll(void) {
 		line[col] = EMPTY_CHAR | (color << 8);
 }
 
+void move_cursor(int32_t delta) {
+	char at_cursor = screen_addr[cursor] & 0xFF;
+	screen_addr[cursor] = at_cursor | color << 8;
+
+	cursor += delta;
+
+	at_cursor = screen_addr[cursor] & 0xFF;
+	screen_addr[cursor] = at_cursor | COLOR(0, CURSOR_COLOR) << 8;
+}
+
 int putchar(char c) {
 	switch (c) {
 		case '\n':
-			cursor += SCREEN_WIDTH;
-			cursor -= cursor % SCREEN_WIDTH;
+			move_cursor(SCREEN_WIDTH);
+			move_cursor(-(cursor % SCREEN_WIDTH));
 			break;
 		case '\b':
 			// if we need to go up a line
@@ -49,29 +59,33 @@ int putchar(char c) {
 				if (cursor == 0) return 0;
 
 				uint32_t prev_line_start = cursor - SCREEN_WIDTH;
-				while (cursor > prev_line_start && (screen_addr[--cursor] & 0xFF) == EMPTY_CHAR)
+				while (cursor > prev_line_start && (screen_addr[cursor - 1] & 0xFF) == EMPTY_CHAR)
+					move_cursor(-1);
 
 				// fix the overshoot
 				cursor++;
 			}
-			screen_addr[--cursor] = EMPTY_CHAR | (color << 8);
+
+			screen_addr[cursor - 1] = EMPTY_CHAR | (color << 8);
+			move_cursor(-1);
 			break;
 		case '\t':
-			cursor += TAB_WIDTH;
-			cursor -= cursor % TAB_WIDTH;
+			move_cursor(TAB_WIDTH);
+			move_cursor(-(cursor % TAB_WIDTH));
 			break;
 		case '\r':
-			cursor -= cursor % SCREEN_WIDTH;
+			move_cursor(-(cursor % SCREEN_WIDTH));
 			break;
 		default:
-			screen_addr[cursor++] = c | (color << 8);
+			screen_addr[cursor] = c | (color << 8);
+			move_cursor(1);
 			break;
 	}
 
 	// when we reach end of screen, scroll
 	if (cursor >= SCREEN_HEIGHT * SCREEN_WIDTH) {
 		scroll();
-		cursor = SCREEN_WIDTH * (SCREEN_HEIGHT - 1);
+		move_cursor(SCREEN_WIDTH * (SCREEN_HEIGHT - 1) - cursor);
 	}
 
 	return 0;
@@ -184,6 +198,6 @@ int printf(const char *format, ...) {
 	return 0;
 }
 
-void printfcolor(enum color fg, enum color bg) {
-	color = fg | bg << 4;
+void printfcolor(uint8_t _color) {
+	color = _color;
 }

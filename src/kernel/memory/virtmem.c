@@ -30,7 +30,6 @@ static struct kmap kmap[] = {
  	{ (uintptr_t) KERNBASE,    0,                    EXTMEM,                 PTE_W}, // I/O space + BIOS stuff
  	{ (uintptr_t) KERNLINK,    EXTMEM,               V2P(data),              0},     // kern text+rodata
  	{ (uintptr_t) data,        V2P(data),            0/*set by kpginit*/,    PTE_W}, // kern data+memory
-    { (uintptr_t) USERBASE,    0/*set by kpginit*/,  0/*set by kpginit*/,    PTE_W}, // user code location
 };
 
 uint32_t *kpgdir;
@@ -114,8 +113,6 @@ inline void kpgupdate(uint32_t *dir) {
 void kpginit(void) {
 
     kmap[2].phyend = KERNEL_MEM_END;
-    kmap[3].phystart = KERNEL_MEM_END;
-    kmap[3].phyend = PHYSTOP;
 
     kpgdir = (uint32_t *) kalloc();
     memset(kpgdir, 0, PGSIZE);
@@ -172,6 +169,8 @@ bool pg_map_range(uint32_t *pgdir, uintptr_t virt_addr, size_t page_count, int p
 
         if (!new_page || !pg_map(pgdir, V2P_WO(new_page), virt_addr + i * PGSIZE, perm)) 
             return false;
+
+        // printf("mapped page 0x%8x to virt 0x%8x\n", new_page, virt_addr + i * PGSIZE);
     }
 
     return true;
@@ -183,7 +182,11 @@ void pg_unmap_range(uint32_t *pgdir, uintptr_t virt_addr, size_t page_count) {
         uint32_t *pte = walkpgdir(pgdir, (void *)(virt_addr + i * PGSIZE), false);
 
         if (pte) {
-            kfree(P2V(PTE_ADDR(*pte)));
+            // free page that was previously here
+            void *page = (void *) PTE_ADDR(*pte);
+            kfree(P2V(page));
+
+            // printf("unmapped 0x%8x from virt 0x%8x\n", page, virt_addr + i * PGSIZE);
 
             // clear page address, permissions, and present
             *pte = 0;

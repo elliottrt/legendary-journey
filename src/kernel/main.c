@@ -40,13 +40,16 @@ void main(void) {
 	kbdinit();
 //	timerinit();
 
-	// TODO: more granular allocation and free (need for txed) - could try doing this by remapping pages to be contiguous
+	// TODO: more granular allocation and free (need for txed) - can do this with pg_map_range
 	// TODO: change file structure so it's opaque to the user
 	// TODO: figure out how to tell the compiler that certain functions do exist - stub library
 	// TODO: add more system functions - keyboard, stuff in std.h
 
 	// TODO: write user programs like cat, mkdir, etc.
 	// TODO: port txed to this
+
+	// give user programs a few pages to use
+	pg_map_range(kpgdir, USERBASE, 16, PTE_W);
 
 	while (1) {
 		shell();

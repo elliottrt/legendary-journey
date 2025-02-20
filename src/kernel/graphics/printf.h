@@ -22,12 +22,14 @@ enum color {
 	CLR_WHITE = 15
 };
 
+#define COLOR(FG, BG) ((FG) | (BG) << 4)
+
 int putchar(char ch);
 int puts(const char *str);
 int putsn(const char *str, uint32_t n);
 
 int printf(const char *format, ...);
 
-void printfcolor(enum color fg, enum color bg);
+void printfcolor(uint8_t color);
 
 #endif

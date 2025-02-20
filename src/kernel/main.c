@@ -38,7 +38,7 @@ void main(void) {
 	kallocexpand();
 
 	kbdinit();
-	timerinit();
+//	timerinit();
 
 	// TODO: more granular allocation and free (need for txed) - could try doing this by remapping pages to be contiguous
 	// TODO: change file structure so it's opaque to the user

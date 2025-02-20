@@ -100,6 +100,9 @@ bool read_elf_header(struct file *file, void *dest) {
 }
 
 bool load_program_header(struct file *file, struct elf_prog_hdr *header) {
+	// no point loading if there's nothing to load
+	if (header->p_memsz == 0) return true;
+
 	uint8_t *address = (uint8_t *) header->p_vaddr;
 	
 	if (!fileseek(file, header->p_offset))
@@ -107,8 +110,11 @@ bool load_program_header(struct file *file, struct elf_prog_hdr *header) {
 
 	if (fileread(file, address, header->p_filesz) != (int32_t) header->p_filesz)
 		return false;
+
 	if (header->p_filesz < header->p_memsz)
 		memset(address + header->p_filesz, 0x00, header->p_memsz - header->p_filesz);
+
+	printf("elf: load: %u bytes to 0x%8x\n", header->p_memsz, address);
 
 	return true;
 }

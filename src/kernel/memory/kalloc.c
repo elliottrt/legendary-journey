@@ -46,7 +46,7 @@ void kfree(void *address) {
         STOP();
     }
 
-    if (V2P(address) >= PHYSTOP) {
+    if (V2P(address) >= KERNEL_MEM_END) {
         printf("error: high invalid address %p to kfree\n", address);
         STOP();
     }

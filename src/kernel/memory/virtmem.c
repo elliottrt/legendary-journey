@@ -9,13 +9,13 @@
 // This table defines the kernel's mappings, which are present in
 // every process's page table.
 struct kmap {
-  void *virt;
-  uint32_t phystart;
-  uint32_t phyend;
+  uintptr_t virt;
+  uintptr_t phystart;
+  uintptr_t phyend;
   int perm;
 }; 
 
-/* MAP
+/* MEMORY MAP
 
 physical range                  -> virtual range                            <what's in this range>
 
@@ -27,10 +27,10 @@ PHYSTOP/2       - PHYSTOP       -> USERBASE         - <has no end?>         <use
 */
 
 static struct kmap kmap[] = {
- 	{ (void*)KERNBASE,    0,              EXTMEM,                 PTE_W}, // I/O space + BIOS stuff
- 	{ (void*)KERNLINK,    EXTMEM,         V2P(data),              0},     // kern text+rodata
- 	{ (void*)data,        V2P(data),      0/*set in kpginit*/,    PTE_W}, // kern data+memory
-    { (void*)USERBASE,    0,              0,                      PTE_W}, // user code location
+ 	{ (uintptr_t) KERNBASE,    0,                    EXTMEM,                 PTE_W}, // I/O space + BIOS stuff
+ 	{ (uintptr_t) KERNLINK,    EXTMEM,               V2P(data),              0},     // kern text+rodata
+ 	{ (uintptr_t) data,        V2P(data),            0/*set by kpginit*/,    PTE_W}, // kern data+memory
+    { (uintptr_t) USERBASE,    0/*set by kpginit*/,  0/*set by kpginit*/,    PTE_W}, // user code location
 };
 
 uint32_t *kpgdir;
@@ -58,10 +58,8 @@ static uint32_t *walkpgdir(uint32_t *pgdir, const void *va, int alloc) {
     } else {
 
         // we allocate a new page table if one isn't available
-        if(!alloc || (pgtab = (uint32_t *) kalloc()) == 0) {
-            errno = ENOMEM;
+        if(!alloc || (pgtab = (uint32_t *) kalloc()) == 0)
             return 0;
-        }
 
         // clear all present bits and make sure there's no interference
         memset(pgtab, 0, PGSIZE);
@@ -88,13 +86,12 @@ static int mappages(uint32_t *pgdir, void *va, uint32_t size, uint32_t pa, int p
     for(;;) {
 
         // get the address of the page table entry representing va
-        if ((pte = walkpgdir(pgdir, a, 1)) == 0)
+        if ((pte = walkpgdir(pgdir, a, true)) == 0)
             return -1;
 
         // if it's already present, something's gone wrong
         if (*pte & PTE_P) {
             printf("kmap: error: unable to remap pages: entry for 0x%8x already present\n", a);
-            return 0;
             STOP();
         }
 
@@ -128,7 +125,7 @@ void kpginit(void) {
 
         printf("kmap: 0x%8x - 0x%8x to 0x%8x - 0x%8x\n", k->phystart, k->phyend, k->virt, k->virt + region_size);
 
-        int success = mappages(kpgdir, k->virt, region_size, k->phystart, k->perm);
+        int success = mappages(kpgdir, (void *) k->virt, region_size, k->phystart, k->perm);
         if (success < 0) {
             printf("kmap: error: unable to map pgdir: %s\n", strerror(errno));
             STOP();
@@ -136,4 +133,60 @@ void kpginit(void) {
     }
 
     kpgupdate(kpgdir);
+}
+
+bool pg_is_present(uint32_t *pgdir, uintptr_t ptr) {
+    // get entry in the page table for this page
+    uint32_t *pte = walkpgdir(pgdir, (void *) PGROUNDDOWN(ptr), false);
+
+    // return whether the page table exists and the page is present
+    return pte && (*pte & PTE_P);
+}
+
+bool pg_map(uint32_t *pgdir, uintptr_t page_addr, uintptr_t virt_addr, int perm) {
+    // get entry in the page table for this virtual address
+    uint32_t *pte = walkpgdir(pgdir, (void *) PGROUNDDOWN(virt_addr), true);
+
+    // if virt_addr already taken, fail
+    if (page_addr != 0 && *pte & PTE_P) return false;
+
+    // insert page_addr at virt_addr
+    *pte = PGROUNDDOWN(page_addr) | perm | (page_addr != 0);
+
+    return true;
+}
+
+bool pg_map_range(uint32_t *pgdir, uintptr_t virt_addr, size_t page_count, int perm) {
+    uint32_t *pte;
+
+    // ensure that all virtual addresses are not present
+    for (size_t i = 0; i < page_count; i++) {
+        pte = walkpgdir(pgdir, (void *) PGROUNDDOWN(virt_addr + i * PGSIZE), true);
+
+        if (!pte || (*pte & PTE_P)) return false;
+    }
+
+    // allocate pages and map them
+    for (size_t i = 0; i < page_count; i++) {
+        uintptr_t new_page = (uintptr_t) kalloc();
+
+        if (!new_page || !pg_map(pgdir, V2P_WO(new_page), virt_addr + i * PGSIZE, perm)) 
+            return false;
+    }
+
+    return true;
+}
+
+void pg_unmap_range(uint32_t *pgdir, uintptr_t virt_addr, size_t page_count) {
+    // deallocate pages and demap them
+    for (size_t i = 0; i < page_count; i++) {
+        uint32_t *pte = walkpgdir(pgdir, (void *)(virt_addr + i * PGSIZE), false);
+
+        if (pte) {
+            kfree(P2V(PTE_ADDR(*pte)));
+
+            // clear page address, permissions, and present
+            *pte = 0;
+        }
+    }
 }

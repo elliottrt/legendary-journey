@@ -40,17 +40,21 @@ void main(void) {
 	kbdinit();
 //	timerinit();
 
+	// give user programs a few pages to use
+	pg_map_range(kpgdir, USERBASE, 16, PTE_W);
+
+	// TODO: allocate pages dynamically, so that each program gets only what it needs
+	//		create a struct containing program information - stuff like open files, pages used
+
+	// TODO: figure out how to tell the compiler that certain functions do exist - stub library
+	
 	// TODO: more granular allocation and free (need for txed) - can do this with pg_map_range
 	// TODO: change file structure so it's opaque to the user
-	// TODO: figure out how to tell the compiler that certain functions do exist - stub library
 	// TODO: add more system functions - keyboard, stuff in std.h
+	// TODO: split the Makefile? kernel, stage 1, and stage 2 could all have their own
 
 	// TODO: write user programs like cat, mkdir, etc.
 	// TODO: port txed to this
-
-	// give user programs a few pages to use
-	// TODO: allocate this dynamically, so that each program gets only what it needs
-	pg_map_range(kpgdir, USERBASE, 16, PTE_W);
 
 	while (1) {
 		shell();

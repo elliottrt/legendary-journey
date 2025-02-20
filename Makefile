@@ -3,6 +3,7 @@ PREFIX=i386-elf
 CC=$(PREFIX)-gcc
 LD=$(PREFIX)-ld
 AS=$(PREFIX)-as
+CPP=$(PREFIX)-cpp
 EMU=qemu-system-i386
 
 OS=os.img
@@ -40,7 +41,7 @@ STAGE2_OFFSET=0x7E00
 STAGE2_SIZE=24
 # kernel virtual memory location
 # NOTE: if this is changed, src/kernel/link.ld also needs to be changed
-KERNBASE=0x80000000
+KERNBASE=0xC0000000
 # place to load user code at (seems to be a linux default)
 USERBASE=0x08048000
 
@@ -91,8 +92,13 @@ $(KERNEL_DIR)/%.o: $(KERNEL_DIR)/%.c
 $(KERNEL_DIR)/%.o: $(KERNEL_DIR)/%.S
 	$(CC) -o $@ $^ $(KERNEL_CFLAGS)
 
-$(KERNEL): $(BIN) $(KERNELTARGETS) $(KERNEL_DIR)/link.ld
-	$(LD) -o $(KERNEL) $(KERNELTARGETS) -T$(KERNEL_DIR)/link.ld
+# this is needed to calculate the location counter based off of KERNBASE
+# otherwise KERNBASE wouldn't be constant, messing up a lot of code
+$(KERNEL_DIR)/link.ld.out: $(KERNEL_DIR)/link.ld
+	$(CPP) -P -DKERNBASE=$(KERNBASE) -o $@ $^
+
+$(KERNEL): $(BIN) $(KERNELTARGETS) $(KERNEL_DIR)/link.ld.out
+	$(LD) -o $(KERNEL) $(KERNELTARGETS) -T$(KERNEL_DIR)/link.ld.out
 
 run: $(OS)
 	$(EMU) -drive format=raw,file=$(OS) -m 128 -monitor stdio -action reboot=shutdown -action shutdown=pause -D trace.log -d int
@@ -100,7 +106,7 @@ run: $(OS)
 clean:
 	$(RM) $(OS)
 	$(RM) -r $(ROOT)
-	$(RM) $(KERNELTARGETS)
+	$(RM) $(KERNELTARGETS) $(KERNEL_DIR)/link.ld.out
 	$(RM) $(STAGE2TARGETS)
 
 $(ROOT):

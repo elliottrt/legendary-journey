@@ -1,9 +1,13 @@
 OUTPUT_FORMAT("elf32-i386")
 ENTRY(_start)
 
+#ifndef KERNBASE
+#error KERNBASE must be defined
+#endif
+
 SECTIONS
 {
-	. = 0x80100000;
+	. = KERNBASE + 0x100000;
 	
 	.text : AT (0x100000) { *(.text .text.*) }
 

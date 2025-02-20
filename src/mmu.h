@@ -27,10 +27,6 @@
 
 #define EXTMEM KERNEL_LOAD            // Start of extended memory
 
-#ifndef KERNBASE
-#define KERNBASE 0x80000000
-#endif
-
 #define KERNLINK (KERNBASE+EXTMEM)  // Address where kernel is linked
 
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

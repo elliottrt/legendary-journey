@@ -49,6 +49,7 @@ void main(void) {
 	// TODO: port txed to this
 
 	// give user programs a few pages to use
+	// TODO: allocate this dynamically, so that each program gets only what it needs
 	pg_map_range(kpgdir, USERBASE, 16, PTE_W);
 
 	while (1) {

@@ -3,7 +3,6 @@ PREFIX=i386-elf
 CC=$(PREFIX)-gcc
 LD=$(PREFIX)-ld
 AS=$(PREFIX)-as
-OBJDUMP=$(PREFIX)-objdump
 EMU=qemu-system-i386
 
 OS=os.img
@@ -40,6 +39,7 @@ STAGE2_OFFSET=0x7E00
 # size in sectors (512 bytes)
 STAGE2_SIZE=24
 # kernel virtual memory location
+# NOTE: if this is changed, src/kernel/link.ld also needs to be changed
 KERNBASE=0x80000000
 # place to load user code at (seems to be a linux default)
 USERBASE=0x08048000
@@ -47,47 +47,49 @@ USERBASE=0x08048000
 # width of tabs in terminal
 TAB_WIDTH=4
 
+BOOT_ASFLAGS=-defsym S2LOC=8 -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=24
+
 # See https://www.rapidtables.com/code/linux/gcc/gcc-o.html#optimization
-CFLAGS=-m32 -c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
-CFLAGS:=$(CFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
-CFLAGS:=$(CFLAGS) -DKERNEL_NAME='"/$(KERNELNAME)"' -Isrc/
-CFLAGS:=$(CFLAGS) -fno-pic -static -fno-strict-aliasing -no-pie
-CFLAGS:=$(CFLAGS) -fno-omit-frame-pointer -Wunused -O2
-LDFLAGS=-nostdlib -static -m elf_i386
-ASFLAGS=--32
-KERNELFLAGS=-c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
-KERNELFLAGS:=$(KERNELFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
-KERNELFLAGS:=$(KERNELFLAGS) -fno-pic -Wunused -O2 -DTAB_WIDTH=$(TAB_WIDTH) -DUSERBASE=$(USERBASE)
-KERNELFLAGS:=$(KERNELFLAGS) -DKERNBASE=$(KERNBASE) -I$(KERNEL_DIR) -Isrc/
+STAGE2_CFLAGS=-m32 -c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
+STAGE2_CFLAGS:=$(STAGE2_CFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
+STAGE2_CFLAGS:=$(STAGE2_CFLAGS) -DKERNEL_NAME='"/$(KERNELNAME)"' -Isrc/
+STAGE2_CFLAGS:=$(STAGE2_CFLAGS) -fno-pic -static -fno-strict-aliasing -no-pie
+STAGE2_CFLAGS:=$(STAGE2_CFLAGS) -fno-omit-frame-pointer -Wunused -O2
+STAGE2_LDFLAGS=-nostdlib -static -m elf_i386
 
-BOOTFLAGS=-defsym S2LOC=8 -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=24
+KERNEL_CFLAGS=-c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
+KERNEL_CFLAGS:=$(KERNEL_CFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
+KERNEL_CFLAGS:=$(KERNEL_CFLAGS) -fno-pic -Wunused -O2 -DTAB_WIDTH=$(TAB_WIDTH) -DUSERBASE=$(USERBASE)
+KERNEL_CFLAGS:=$(KERNEL_CFLAGS) -DKERNBASE=$(KERNBASE) -I$(KERNEL_DIR)/ -Isrc/
 
-.PHONY: all run clean user
+.PHONY: run clean
 
-all: $(OS)
+$(OS): $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) $(USER_PROGS)
+	./mkfat 32 $(OS) -S$(ROOT) -B$(STAGE1BIN) -R$(STAGE2BIN) -VLEGENDARY
 
+# compilation of user programs
 USERFLAGS=-nostdlib -Wl,-emain,--warn-unresolved-symbols,-q
 $(ROOT)/%: user/%.c
 	$(CC) $(USERFLAGS) -o $@ $^
 
 $(STAGE1BIN): $(BIN) $(STAGE1SRC)
-	$(AS) -o $(STAGE1BIN).o $(STAGE1SRC) $(ASFLAGS) $(BOOTFLAGS)
+	$(AS) --32 -o $(STAGE1BIN).o $(STAGE1SRC) $(BOOT_ASFLAGS)
 	$(LD) -o $(STAGE1BIN) $(STAGE1BIN).o -Ttext 0x7C00 --oformat binary -e _start
 
 $(STAGE2_DIR)/%.o: $(STAGE2_DIR)/%.S
-	$(AS) -o $@ $^ $(ASFLAGS)
+	$(AS) --32 -o $@ $^
 
 $(STAGE2_DIR)/%.o: $(STAGE2_DIR)/%.c
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CC) -o $@ $^ $(STAGE2_CFLAGS)
 
 $(STAGE2BIN): $(BIN) $(STAGE2TARGETS) $(STAGE2_DIR)/link.ld
 	$(LD) -o $(STAGE2BIN) $(STAGE2TARGETS) $(LDFLAGS) -T$(STAGE2_DIR)/link.ld
 
 $(KERNEL_DIR)/%.o: $(KERNEL_DIR)/%.c
-	$(CC) -o $@ $^ $(KERNELFLAGS)
+	$(CC) -o $@ $^ $(KERNEL_CFLAGS)
 
 $(KERNEL_DIR)/%.o: $(KERNEL_DIR)/%.S
-	$(CC) -o $@ $^ $(KERNELFLAGS)
+	$(CC) -o $@ $^ $(KERNEL_CFLAGS)
 
 $(KERNEL): $(BIN) $(KERNELTARGETS) $(KERNEL_DIR)/link.ld
 	$(LD) -o $(KERNEL) $(KERNELTARGETS) -T$(KERNEL_DIR)/link.ld
@@ -111,7 +113,3 @@ $(ROOT):
 	touch $(ROOT)/folder/thing.c
 	touch $(ROOT)/folder/test.txt
 	touch $(ROOT)/folder/dir/hi
-
-$(OS): $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) $(USER_PROGS)
-	./mkfat 32 $(OS) -S$(ROOT) -B$(STAGE1BIN) -R$(STAGE2BIN) -VLEGENDARY
-

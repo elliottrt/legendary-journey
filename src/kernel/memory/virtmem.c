@@ -120,7 +120,7 @@ void kpginit(void) {
     for (struct kmap *k = kmap; k < &kmap[NELEM(kmap)]; k++) {
         uint32_t region_size = k->phyend - k->phystart;
 
-        printf("kmap: 0x%8x - 0x%8x to 0x%8x - 0x%8x\n", k->phystart, k->phyend, k->virt, k->virt + region_size);
+        // printf("kmap: 0x%8x - 0x%8x to 0x%8x - 0x%8x\n", k->phystart, k->phyend, k->virt, k->virt + region_size);
 
         int success = mappages(kpgdir, (void *) k->virt, region_size, k->phystart, k->perm);
         if (success < 0) {

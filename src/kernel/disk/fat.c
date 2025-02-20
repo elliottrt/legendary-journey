@@ -23,12 +23,12 @@ void fatinit(void) {
 
 	if (_vbootsector->bytespersector * FAT_CACHE_SIZE > PGSIZE) {
 		printf("error: fatcache too large (%u bytes), must be <= to %u bytes\n", _vbootsector->bytespersector * FAT_CACHE_SIZE, PGSIZE);
-		while(1);
+		STOP();
 	}
 
 	if ((_fatcache.buffer = (fat_entry_t *) kalloc()) == NULL) {
 		printf("error: failed to allocate memory for fat cache\n");
-		while(1);
+		STOP();
 	}
 
 	// start searching after reserved clusters

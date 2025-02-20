@@ -5,7 +5,7 @@
 #define PGENTRIES 1024
 #define PGSIZE 4096
 
-#define STACK_SIZE PGSIZE
+#define STACK_SIZE (PGSIZE * 4)
 
 #define PGROUNDUP(a)  (((a)+PGSIZE-1) & ~(PGSIZE-1))
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE-1))
@@ -26,6 +26,10 @@
 #define KERNEL_LOAD 0x100000
 
 #define EXTMEM KERNEL_LOAD            // Start of extended memory
+
+#ifndef KERNBASE
+#define KERNBASE 0x80000000
+#endif
 
 #define KERNLINK (KERNBASE+EXTMEM)  // Address where kernel is linked
 

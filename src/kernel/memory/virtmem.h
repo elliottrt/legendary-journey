@@ -6,7 +6,7 @@
 // See https://wiki.osdev.org/Setting_Up_Paging
 // See https://wiki.osdev.org/Paging
 
-#define KERNEL_VEND (PHYSTOP / 2)
+#define KERNEL_MEM_END (PHYSTOP / 2)
 
 extern char etext[];
 extern char data[];

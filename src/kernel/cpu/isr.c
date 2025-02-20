@@ -2,6 +2,7 @@
 #include "graphics/printf.h"
 #include "idt.h"
 #include "isrstubs.h"
+#include "x86.h"
 
 static const char *exceptions[32] = {
     "division by zero",
@@ -55,7 +56,7 @@ static void exceptionhandler(struct registers *regs) {
     printf("exception: %s\n", exceptions[regs->int_no]);
     // TODO: should we try to recover (for the shell)?
     // TODO: page fault data -> print cr2 (which has accessed address that caused fault)?
-    while(1);
+    STOP();
 }
 
 void isrinit() {

@@ -15,9 +15,20 @@ struct kmap {
   int perm;
 }; 
 
+/* MAP
+
+physical range                  -> virtual range                            <what's in this range>
+
+0               - EXTMEM        -> KERNBASE         - KERNBASE+EXTMEM       <bios + io code>
+EXTMEM          - phys(data)    -> KERNBASE+EXTMEM  - data                  <kernel code + rodata>
+phys(data)      - PHYSTOP/2     -> data             - PHYSTOP/2             <kernel data + extra space>
+PHYSTOP/2       - PHYSTOP       -> USERBASE         - <has no end?>         <user program space>
+
+*/
+
 static struct kmap kmap[] = {
  	{ (void*)KERNBASE,    0,              EXTMEM,                 PTE_W}, // I/O space + BIOS stuff
- 	{ (void*)KERNLINK,    V2P(KERNLINK),  V2P(data),              0},     // kern text+rodata
+ 	{ (void*)KERNLINK,    EXTMEM,         V2P(data),              0},     // kern text+rodata
  	{ (void*)data,        V2P(data),      0/*set in kpginit*/,    PTE_W}, // kern data+memory
     { (void*)USERBASE,    0,              0,                      PTE_W}, // user code location
 };
@@ -47,8 +58,10 @@ static uint32_t *walkpgdir(uint32_t *pgdir, const void *va, int alloc) {
     } else {
 
         // we allocate a new page table if one isn't available
-        if(!alloc || (pgtab = (uint32_t *) kalloc()) == 0)
+        if(!alloc || (pgtab = (uint32_t *) kalloc()) == 0) {
+            errno = ENOMEM;
             return 0;
+        }
 
         // clear all present bits and make sure there's no interference
         memset(pgtab, 0, PGSIZE);
@@ -65,6 +78,7 @@ static uint32_t *walkpgdir(uint32_t *pgdir, const void *va, int alloc) {
 
 static int mappages(uint32_t *pgdir, void *va, uint32_t size, uint32_t pa, int perm) {
 
+    // get virtual addresses of first and last page to be mapped
     void *a = (void *) PGROUNDDOWN((uint32_t) va);
     void *last = (void *) PGROUNDDOWN(((uint32_t) va) + size - 1);
 
@@ -79,8 +93,9 @@ static int mappages(uint32_t *pgdir, void *va, uint32_t size, uint32_t pa, int p
 
         // if it's already present, something's gone wrong
         if (*pte & PTE_P) {
-            printf("error: unable to remap pages\n");
-            while(1);
+            printf("kmap: error: unable to remap pages: entry for 0x%8x already present\n", a);
+            return 0;
+            STOP();
         }
 
         // set its physical address, permissions, and present flag
@@ -95,28 +110,30 @@ static int mappages(uint32_t *pgdir, void *va, uint32_t size, uint32_t pa, int p
     return 0;
 }
 
+inline void kpgupdate(uint32_t *dir) {
+    lcr3(V2P(dir));
+}
+
 void kpginit(void) {
 
-    kmap[2].phyend = KERNEL_VEND;
-    kmap[3].phystart = KERNEL_VEND;
+    kmap[2].phyend = KERNEL_MEM_END;
+    kmap[3].phystart = KERNEL_MEM_END;
     kmap[3].phyend = PHYSTOP;
 
     kpgdir = (uint32_t *) kalloc();
-
     memset(kpgdir, 0, PGSIZE);
 
     for (struct kmap *k = kmap; k < &kmap[NELEM(kmap)]; k++) {
+        uint32_t region_size = k->phyend - k->phystart;
 
-        // printf("kmap elem: 0x%8p 0x%8p 0x%8p 0x%x\n", k->virt, k->phystart, k->phyend, k->perm);
+        printf("kmap: 0x%8x - 0x%8x to 0x%8x - 0x%8x\n", k->phystart, k->phyend, k->virt, k->virt + region_size);
 
-        int success = mappages(kpgdir, k->virt, k->phyend - k->phystart, (uint32_t) k->phystart, k->perm);
+        int success = mappages(kpgdir, k->virt, region_size, k->phystart, k->perm);
         if (success < 0) {
-            printf("error: unable to map pgdir\n");
-            while(1);
+            printf("kmap: error: unable to map pgdir: %s\n", strerror(errno));
+            STOP();
         }
-
     }
 
-    lcr3(V2P(kpgdir));
-
+    kpgupdate(kpgdir);
 }

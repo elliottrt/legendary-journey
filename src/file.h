@@ -7,7 +7,7 @@
 #define PATH_SEP '/'
 
 #define fileisdir(fp) ((fp->fsentry.attributes & DIRECTORY) != 0)
-#define entryisdir(ep) ((ep->attributes) != 0)
+#define entryisdir(ep) ((ep)->attributes & DIRECTORY)
 
 struct file {
 	
@@ -40,6 +40,7 @@ enum fflags {
 // etc. that file
 
 // TODO: fileremove(struct file *parent, const char *pathname); <- parent can be null
+// TODO: filerename?
 
 void fileinit(void);
 
@@ -56,5 +57,6 @@ bool fileseek(struct file *file, uint32_t seek);
 bool fileflush(struct file *file);
 bool fileclose(struct file *file);
 uint32_t filesize(struct file *file);
+uint32_t filetell(struct file *file);
 
 #endif

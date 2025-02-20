@@ -672,3 +672,17 @@ uint32_t filesize(struct file *file) {
 
 	return file->fsentry.filesize;
 }
+
+uint32_t filetell(struct file *file) {
+	if (file == NULL) {
+		errno = EINVAL;
+		return 0;
+	}
+
+	if (file->opened == 0) {
+		errno = EBADF;
+		return 0;
+	}
+
+	return file->position;
+}

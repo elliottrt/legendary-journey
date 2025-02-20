@@ -40,11 +40,13 @@ void main(void) {
 	kbdinit();
 	timerinit();
 
-	// TODO: add more system functions
+	// TODO: more granular allocation and free (need for txed) - could try doing this by remapping pages to be contiguous
+	// TODO: change file structure so it's opaque to the user
 	// TODO: figure out how to tell the compiler that certain functions do exist - stub library
+	// TODO: add more system functions - keyboard, stuff in std.h
+
 	// TODO: write user programs like cat, mkdir, etc.
 	// TODO: port txed to this
-	// TODO: change file structure so it's opaque to the user
 
 	while (1) {
 		shell();

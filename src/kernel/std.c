@@ -19,7 +19,8 @@ const char *strerror(enum errno _errno) {
 		"function not implemented",
 		"directory not empty",
 		"operation not permitted",
-		"file not executable"
+		"exec format error",
+		"argument list too long",
 	};
 	return strs[_errno];
 }

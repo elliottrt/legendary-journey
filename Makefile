@@ -93,7 +93,7 @@ $(KERNEL): $(BIN) $(KERNELTARGETS) $(KERNEL_DIR)/link.ld
 	$(LD) -o $(KERNEL) $(KERNELTARGETS) -T$(KERNEL_DIR)/link.ld
 
 run: $(OS)
-	$(EMU) -drive format=raw,file=$(OS) -m 64 -monitor stdio -action reboot=shutdown -action shutdown=pause -D trace.log -d int
+	$(EMU) -drive format=raw,file=$(OS) -m 128 -monitor stdio -action reboot=shutdown -action shutdown=pause -D trace.log -d int
 
 clean:
 	$(RM) $(OS)

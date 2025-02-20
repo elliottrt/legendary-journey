@@ -1,4 +1,5 @@
 #include "write.h"
+#include "x86.h"
 
 #define SCR_WIDTH 80
 #define SCR_HEIGHT 25
@@ -55,7 +56,7 @@ void puterr(const char *s, int recoverable)
 	/* print error message */
 	puts(s);
 	/* hang if not recoverable */
-	if (!recoverable) while(1);
+	if (!recoverable) STOP();
 	/* reset color */
 	_color = 0x0F << 8;
 }

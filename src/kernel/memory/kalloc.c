@@ -38,17 +38,17 @@ void kfree(void *address) {
 
     if ((uint32_t) address % PGSIZE) {
         printf("error: unaligned address %p to kfree\n", address);
-        while(1);
+        STOP();
     }
 
     if (address < (void *) end) {
         printf("error: low invalid address %p to kfree\n", address);
-        while(1);
+        STOP();
     }
 
     if (V2P(address) >= PHYSTOP) {
         printf("error: high invalid address %p to kfree\n", address);
-        while(1);
+        STOP();
     }
 
     memset(address, 0x00, PGSIZE);
@@ -77,7 +77,7 @@ void kallocinit(void) {
 }
 
 void kallocexpand(void) {
-    kfreerange(P2V(4*1024*1024), P2V(KERNEL_VEND));
+    kfreerange(P2V(4*1024*1024), P2V(KERNEL_MEM_END));
 }
 
 uint32_t kallocavailable(void) {
@@ -107,7 +107,7 @@ void read_memory_regions(void) {
 
     if (PHYSTOP == 0) {
         printf("unable to find region of memory beginning at 0x%x\n", KERNEL_LOAD);
-        while(1);
+        STOP();
     }
 
 }

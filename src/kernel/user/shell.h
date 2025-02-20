@@ -2,7 +2,7 @@
 #define _SHELL
 
 #define SHELL_FAIL (-1)
-#define SHELL_MAX_ARGS (16) // maximum function arguments
+#define SHELL_MAX_ARGS (32) // maximum function arguments
 #define SHELL_MAX_CMD_LEN (256) // maximum size of a shell command
 #define SHELL_PROMPT "$ "
 

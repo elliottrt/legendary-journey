@@ -36,8 +36,10 @@ int shell_exec(char *command) {
 		if (!end && target != ' ') return SHELL_FAIL;
 		else if (end) *end = '\0'; // set end to be \0, allowing for argv within command
 
-		if (argc == SHELL_MAX_ARGS)
+		if (argc >= SHELL_MAX_ARGS) {
+			errno = E2BIG;
 			return SHELL_FAIL;
+		}
 
 		// copy arg into argv
 		argv[argc++] = cmd_iter;

@@ -24,11 +24,11 @@ enum color {
 
 #define COLOR(FG, BG) ((FG) | (BG) << 4)
 
-int putchar(char ch);
-int puts(const char *str);
-int putsn(const char *str, uint32_t n);
+void putc(char ch);
+void puts(const char *str);
+void putsn(const char *str, uint32_t n);
 
-int printf(const char *format, ...);
+void printf(const char *format, ...);
 
 void printfcolor(uint8_t color);
 

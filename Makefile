@@ -8,7 +8,7 @@ EMU=qemu-system-i386
 
 OS=os.img
 ROOT=root
-USER_PROGS=echo ls
+USER_PROGS=echo ls cat
 USER_PROGS:=$(addprefix $(ROOT)/,$(USER_PROGS))
 
 SOURCE_DIR=src
@@ -32,6 +32,10 @@ KERNELCSRC=$(wildcard $(KERNEL_DIR)/*.c) $(wildcard $(KERNEL_DIR)/*/*.c)
 KERNELASMSRC=$(wildcard $(KERNEL_DIR)/*.S) $(wildcard $(KERNEL_DIR)/*/*.S)
 KERNELTARGETS=$(KERNELCSRC:.c=.o) $(KERNELASMSRC:.S=.o)
 KERNELDEP=$(KERNELTARGETS:.o=.d)
+
+# LG standard library
+STDDIR=std
+STDLIB=$(STDDIR)/liblgstd.so
 
 # LBA disk location
 STAGE2_LOCATION=8
@@ -74,9 +78,15 @@ $(OS): $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) $(USER_PROGS)
 -include $(KERNELDEP)
 
 # compilation of user programs
-USERFLAGS=-nostdlib -Wl,-emain,--warn-unresolved-symbols,-q
-$(ROOT)/%: user/%.c
-	$(CC) $(USERFLAGS) -o $@ $^
+USERFLAGS=-nostdlib -Wl,-emain,-q -llgstd -Lstd
+$(ROOT)/%: user/%.c $(STDLIB)
+	$(CC) $(USERFLAGS) -o $@ $<
+
+# generate standard library stub
+$(STDLIB): std/stdstub.c std/std.h Makefile
+	$(CC) -c -fPIC -Wall -Wextra -Wpedantic -o $<.o $< -Wno-builtin-declaration-mismatch -Wno-unused-parameter
+	$(CC) -shared -r -o $@ $<
+	$(RM) $<.o
 
 $(STAGE1BIN): $(BIN) $(STAGE1SRC)
 	$(AS) --32 -o $(STAGE1BIN).o $(STAGE1SRC) $(BOOT_ASFLAGS)
@@ -116,6 +126,7 @@ clean:
 	$(RM) $(KERNEL_DIR)/link.ld.out
 	$(RM) $(STAGE2TARGETS)
 	$(RM) $(STAGE2DEP)
+	$(RM) $(STDLIB)
 
 $(ROOT):
 	mkdir -p $(ROOT)
@@ -124,6 +135,6 @@ $(ROOT):
 	mkdir -p $(ROOT)/folder
 	mkdir -p $(ROOT)/folder/dir
 
-	touch $(ROOT)/folder/thing.c
-	touch $(ROOT)/folder/test.txt
-	touch $(ROOT)/folder/dir/hi
+	printf "#include <stdio.h>\n\nint main(void) {\n\tprintf(\"Hello, World!\\\\n\");\n\treturn 0;\n}\n" > $(ROOT)/folder/thing.c
+	printf "hello, world!\n" > $(ROOT)/folder/test.txt
+	printf "hi" > $(ROOT)/folder/dir/hi

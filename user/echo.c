@@ -1,5 +1,4 @@
-
-extern int printf(const char *format, ...);
+#include "std/std.h"
 
 int main(int argc, char **argv) {
 	for (int i = 1; i < argc; i++)

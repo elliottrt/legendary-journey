@@ -12,4 +12,6 @@ struct sysdef {
 
 uint32_t sysfunc_get(const char *name);
 
+bool sysfunc_exists(const char *name);
+
 #endif

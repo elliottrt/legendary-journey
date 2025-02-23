@@ -50,21 +50,17 @@ bool elf_rel_patch(struct file *file, struct elf_sec_hdr *relhdr, struct elf_sym
 			} break;
 			case 2: { // R_386_PC32
 
-				// TODO: we seem to be patching functions that don't need patching... but it works anyway, so maybe we can ignore this
+				uint32_t sysfunc_addr = sysfunc_get(name);
 
-				// if symbol is undefined
-				if (sym->st_shndx == SHN_UNDEF) {
-					// try to get a system function if symbol is 0
-					sym->st_value = sysfunc_get(name);
-					
-					// if couldn't get system func, then error
-					if (sym->st_value == 0) {
-						printf("error: elf: undefined symbol '%s'\n", name);
-						errno = ENOSYS;
-						return false;
-					}
+				if (sysfunc_addr) {
+					// try to get the system function if symbol is 0
+					sym->st_value = sysfunc_addr;
+				} else if (sym->st_shndx == SHN_UNDEF && sym->st_value == 0) {
+					// if symbol was undefined, error
+					printf("error: elf: undefined symbol '%s'\n", name);
+					errno = ENOSYS;
+					return false;
 				}
-
 				// ??? why is it 4 off ???
 				// see https://stackoverflow.com/questions/50357270/elf-understanding-r-386-pc32-relocations
 				// TODO: it might not always be '-4', so try to figure out exactly what to do

@@ -46,7 +46,7 @@ void move_cursor(int32_t delta) {
 	screen_addr[cursor] = at_cursor | COLOR(0, CURSOR_COLOR) << 8;
 }
 
-int putchar(char c) {
+void putc(char c) {
 	switch (c) {
 		case '\n':
 			move_cursor(SCREEN_WIDTH);
@@ -56,7 +56,7 @@ int putchar(char c) {
 			// if we need to go up a line
 			if (cursor % SCREEN_WIDTH == 0) {
 				// don't do anything if we are at the top left
-				if (cursor == 0) return 0;
+				if (cursor == 0) return;
 
 				uint32_t prev_line_start = cursor - SCREEN_WIDTH;
 				while (cursor > prev_line_start && (screen_addr[cursor - 1] & 0xFF) == EMPTY_CHAR)
@@ -87,21 +87,16 @@ int putchar(char c) {
 		scroll();
 		move_cursor(SCREEN_WIDTH * (SCREEN_HEIGHT - 1) - cursor);
 	}
-
-	return 0;
 }
 
-int puts(const char *str) {
-	while (*str) putchar(*(str++));
-	putchar('\n');
-	return 0;
+void puts(const char *str) {
+	while (*str) putc(*(str++));
+	putc('\n');
 }
 
-int putsn(const char *str, uint32_t n) {
+void putsn(const char *str, uint32_t n) {
 	for (uint32_t i = 0; i < n; i++)
-		putchar(str[i]);
-	
-	return 0;
+	putc(str[i]);
 }
 
 // some number significantly above log10(2^32)
@@ -129,10 +124,10 @@ void printint(uint32_t x, int base, int sign, int padding) {
 	}
 
 	while(i --> 0)
-		putchar(buffer[i]);
+		putc(buffer[i]);
 }
 
-int printf(const char *format, ...) {
+void printf(const char *format, ...) {
 	int padding;
 	bool islong;
 
@@ -140,7 +135,7 @@ int printf(const char *format, ...) {
 
 	for (int i = 0; format[i]; i++) {
 		if (format[i] != '%')
-			putchar(format[i]);
+			putc(format[i]);
 		else {
 			char next = format[++i];
 
@@ -159,7 +154,7 @@ int printf(const char *format, ...) {
 
 			switch (next) {
 				case '%': {
-					putchar('%');
+					putc('%');
 				} break;
 				case 'd': {
 					printint(*varargs, 10, 1, padding);
@@ -179,23 +174,21 @@ int printf(const char *format, ...) {
 					}
 				} break;
 				case 'c': {
-					putchar(*varargs);
+					putc(*varargs);
 					varargs++;
 				} break;
 				case 's': {
 					char *s = (char *) *varargs;
-					while (*s) putchar(*s++);
+					while (*s) putc(*s++);
 					varargs++;
 				} break;
 				default: {
-					putchar('%');
-					putchar(next);
+					putc('%');
+					putc(next);
 				} break;
 			}
 		}
 	}
-
-	return 0;
 }
 
 void printfcolor(uint8_t _color) {

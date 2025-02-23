@@ -383,15 +383,21 @@ bool fileopen(struct file *file, const char *pathname, int flags) {
 			return false;
 		}
 
+		// TODO: this is a terrible fix. do something better
+		// .. entries in folders in root have firstcluster = 0, so this patches that - terrible solution
+		if (file->firstcluster == 0 && fileisdir(file)) {
+			filenew(0, &rootentry, file);
+		}
 	}
-
-	// TODO: this is a terrible fix. do something better
-	// .. entries in folders in root have firstcluster = 0, so this patches that - terrible solution
-	if (file->firstcluster == 0)
-		filenew(0, &rootentry, file);
 
 	if ((flags & FDIRECTORY) && !fileisdir(file)) {
 		errno = ENOTDIR;
+		return false;
+	}
+
+	// if the file is a directory and the user didn't as for one, error
+	if (fileisdir(file) && !(flags & FDIRECTORY)) {
+		errno = EISDIR;
 		return false;
 	}
 

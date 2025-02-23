@@ -1,8 +1,8 @@
-#include "kalloc.h"
-#include "virtmem.h"
-#include "graphics/printf.h"
-#include "std.h"
-#include "mmu.h"
+#include "kernel/memory/kalloc.h"
+#include "kernel/memory/virtmem.h"
+#include "kernel/graphics/printf.h"
+#include "common/std.h"
+#include "common/mmu.h"
 
 uint32_t PHYSTOP = 0;
 

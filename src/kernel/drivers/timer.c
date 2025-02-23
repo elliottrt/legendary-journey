@@ -1,8 +1,8 @@
-#include "timer.h"
-#include "graphics/printf.h"
-#include "x86.h"
-#include "cpu/irq.h"
-#include "std.h"
+#include "kernel/drivers/timer.h"
+#include "kernel/graphics/printf.h"
+#include "kernel/cpu/irq.h"
+#include "common/x86.h"
+#include "common/std.h"
 
 uint64_t _timer_ticks = 0;
 

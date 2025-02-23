@@ -1,6 +1,6 @@
-#include "idt.h"
-#include "std.h"
-#include "x86.h"
+#include "kernel/cpu/idt.h"
+#include "common/std.h"
+#include "common/x86.h"
 
 struct idtentry entries[256] = {0};
 struct idtptr pointer = {0};

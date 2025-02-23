@@ -1,6 +1,6 @@
-#include "ata.h"
-#include "x86.h"
-#include "write.h"
+#include "common/ata.h"
+#include "common/x86.h"
+#include "boot/stage2/write.h"
 
 // UNUSED
 void atacacheflush(void);

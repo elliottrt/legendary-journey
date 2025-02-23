@@ -1,10 +1,10 @@
 #include "shell.h"
 
-#include "elf.h"
-#include "user/program.h"
-#include "std.h"
-#include "graphics/printf.h"
-#include "drivers/kbd.h"
+#include "common/elf.h"
+#include "common/std.h"
+#include "kernel/user/program.h"
+#include "kernel/graphics/printf.h"
+#include "kernel/drivers/kbd.h"
 
 int shell_exec(char *command) {
 	char *argv[SHELL_MAX_ARGS] = {0};

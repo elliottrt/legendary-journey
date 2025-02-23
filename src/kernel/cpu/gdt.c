@@ -1,5 +1,5 @@
-#include "gdt.h"
-#include "x86.h"
+#include "kernel/cpu/gdt.h"
+#include "common/x86.h"
 
 struct gdtentry gdt[GDT_SIZE] = {0};
 struct gdtdesc gdtdesc = {

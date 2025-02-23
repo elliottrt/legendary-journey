@@ -1,5 +1,5 @@
-#include "util/ringbuf.h"
-#include "std.h"
+#include "kernel/util/ringbuf.h"
+#include "common/std.h"
 
 uint32_t ringbuf_len(const struct ringbuf *buf) {
 	return buf->end >= buf->start ? buf->end - buf->start : buf->cap - (buf->start - buf->end);

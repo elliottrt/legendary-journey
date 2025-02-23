@@ -1,7 +1,7 @@
 #ifndef _KERNEL_VIRTUALMEMORY
 #define _KERNEL_VIRTUALMEMORY
 
-#include "types.h"
+#include "common/types.h"
 
 // See https://wiki.osdev.org/Setting_Up_Paging
 // See https://wiki.osdev.org/Paging

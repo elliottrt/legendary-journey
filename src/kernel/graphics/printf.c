@@ -1,7 +1,7 @@
-#include "printf.h"
-#include "types.h"
-#include "std.h"
-#include "mmu.h"
+#include "kernel/graphics/printf.h"
+#include "common/types.h"
+#include "common/std.h"
+#include "common/mmu.h"
 
 // TODO: try to get these from video mode?
 #define SCREEN_WIDTH 80

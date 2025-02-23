@@ -1,7 +1,7 @@
 #ifndef _RINGBUF
 #define _RINGBUF
 
-#include "types.h"
+#include "common/types.h"
 
 struct ringbuf {
 	void *buffer; // ptr to data block

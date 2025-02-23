@@ -1,9 +1,9 @@
-#include "sysfuncs.h"
-#include "std.h"
+#include "kernel/user/sysfuncs.h"
+#include "common/std.h"
 
-#include "graphics/printf.h"
-#include "drivers/timer.h"
-#include "file.h"
+#include "kernel/graphics/printf.h"
+#include "kernel/drivers/timer.h"
+#include "common/file.h"
 
 uint64_t timer_read(void) {
 	return timerget();

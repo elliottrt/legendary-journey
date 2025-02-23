@@ -1,7 +1,7 @@
 #ifndef _KERNEL_TIMER
 #define _KERNEL_TIMER
 
-#include "types.h"
+#include "common/types.h"
 
 // must be higher than 18
 #define TIMER_HZ 100

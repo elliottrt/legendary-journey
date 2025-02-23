@@ -1,7 +1,7 @@
 #ifndef _KERNEL_KEYBOARD
 #define _KERNEL_KEYBOARD
 
-#include "types.h"
+#include "common/types.h"
 
 #define KEY_NULL 0
 #define KEY_ESC 27

@@ -1,8 +1,8 @@
 #ifndef _KERNEL_IRQ
 #define _KERNEL_IRQ
 
-#include "types.h"
-#include "isr.h"
+#include "common/types.h"
+#include "kernel/cpu/isr.h"
 
 typedef void (*irqhandler_t)(struct registers *);
 

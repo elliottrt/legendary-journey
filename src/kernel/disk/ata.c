@@ -1,7 +1,7 @@
-#include "ata.h"
-#include "x86.h"
-#include "graphics/printf.h"
-#include "mmu.h"
+#include "common/ata.h"
+#include "common/x86.h"
+#include "common/mmu.h"
+#include "kernel/graphics/printf.h"
 
 // TODO: ata stuff is VERY slow - because we need to use port io for each word. try something else after we get the kernel loaded? would solve code duplication issue
 

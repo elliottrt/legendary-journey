@@ -1,6 +1,6 @@
-#include "file.h"
-#include "std.h"
-#include "write.h"
+#include "common/file.h"
+#include "common/std.h"
+#include "boot/stage2/write.h"
 
 struct file root;
 

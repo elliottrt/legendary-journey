@@ -1,7 +1,7 @@
 #ifndef _KERNEL_IDT
 #define _KERNEL_IDT
 
-#include "types.h"
+#include "common/types.h"
 
 enum idt_flags
 {

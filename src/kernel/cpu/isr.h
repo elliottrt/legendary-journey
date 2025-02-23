@@ -1,7 +1,7 @@
 #ifndef _KERNEL_ISR
 #define _KERNEL_ISR
 
-#include "types.h"
+#include "common/types.h"
 
 #define NUM_ISRS 256
 

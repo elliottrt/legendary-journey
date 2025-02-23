@@ -1,7 +1,7 @@
-#include "fat.h"
-#include "write.h"
-#include "ata.h"
-#include "std.h"
+#include "common/fat.h"
+#include "common/ata.h"
+#include "common/std.h"
+#include "boot/stage2/write.h"
 
 // UNUSED
 bool fatwritesector(fat_entry_t cluster, uint32_t sector, const void *data);

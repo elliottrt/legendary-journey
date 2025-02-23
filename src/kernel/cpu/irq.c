@@ -1,8 +1,8 @@
-#include "irq.h"
-#include "idt.h"
-#include "isr.h"
-#include "graphics/printf.h"
-#include "x86.h"
+#include "kernel/cpu/irq.h"
+#include "kernel/cpu/idt.h"
+#include "kernel/cpu/isr.h"
+#include "kernel/graphics/printf.h"
+#include "common/x86.h"
 
 // PIC constants
 #define PIC1_COMMAND 0x20

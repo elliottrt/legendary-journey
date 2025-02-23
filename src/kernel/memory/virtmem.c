@@ -1,10 +1,10 @@
-#include "virtmem.h"
-#include "types.h"
-#include "x86.h"
-#include "graphics/printf.h"
-#include "std.h"
-#include "kalloc.h"
-#include "mmu.h"
+#include "kernel/memory/virtmem.h"
+#include "common/types.h"
+#include "common/x86.h"
+#include "common/std.h"
+#include "common/mmu.h"
+#include "kernel/memory/kalloc.h"
+#include "kernel/graphics/printf.h"
 
 // This table defines the kernel's mappings, which are present in
 // every process's page table.
@@ -21,9 +21,15 @@ physical range                  -> virtual range                            <wha
 
 0               - EXTMEM        -> KERNBASE         - KERNBASE+EXTMEM       <bios + io code>
 EXTMEM          - phys(data)    -> KERNBASE+EXTMEM  - data                  <kernel code + rodata>
-phys(data)      - PHYSTOP/2     -> data             - PHYSTOP/2             <kernel data + extra space>
-PHYSTOP/2       - PHYSTOP       -> USERBASE         - <has no end?>         <user program space>
+phys(data)      - PHYSTOP       -> data             - virt(PHYSTOP)         <kernel data + extra space>
 
+leftover virtual space:
+    0 - KERNBASE
+        would need to keep track of allocations, but that's pretty easy. more space than high ram
+        would require trying to avoid program location - could grow down from KERNBASE
+    virt(PHYSTOP) - UINT32_MAX
+        if the kernel is loaded at 8, that's a lot of extra address space
+        start of usable addrs: P2V(PHYSTOP)
 */
 
 static struct kmap kmap[] = {
@@ -34,6 +40,7 @@ static struct kmap kmap[] = {
 
 uint32_t *kpgdir;
 
+// TODO: could we send entrypgdir to kalloc() once we are done with it?
 uint32_t entrypgdir[PDENTRIES] __attribute__ ((aligned(PGSIZE))) = {
   // Map VA's [0, 4MB) to PA's [0, 4MB)
   [0] = (0) | PTE_P | PTE_W | PTE_PS,
@@ -114,13 +121,20 @@ void kpginit(void) {
 
     kmap[2].phyend = KERNEL_MEM_END;
 
+    // if KERNEL_MEM_END + KERNBASE would overflow
+    if (KERNBASE > ((uintptr_t)~0) - kmap[2].phyend) {
+        printf("kmap: warning: more memory than address space\n");
+        // set phyend to max, which means it will use the rest of the available memory
+        kmap[2].phyend = ~0;
+    }
+
     kpgdir = (uint32_t *) kalloc();
     memset(kpgdir, 0, PGSIZE);
 
     for (struct kmap *k = kmap; k < &kmap[NELEM(kmap)]; k++) {
         uint32_t region_size = k->phyend - k->phystart;
 
-        // printf("kmap: 0x%8x - 0x%8x to 0x%8x - 0x%8x\n", k->phystart, k->phyend, k->virt, k->virt + region_size);
+        printf("kmap: 0x%8x - 0x%8x to 0x%8x - 0x%8x\n", k->phystart, k->phyend, k->virt, k->virt + region_size);
 
         int success = mappages(kpgdir, (void *) k->virt, region_size, k->phystart, k->perm);
         if (success < 0) {

@@ -1,6 +1,6 @@
 #include "program.h"
 
-#include "file.h"
+#include "common/file.h"
 
 user_entry_t program_load(const char *filename) {
 	struct file program_file;

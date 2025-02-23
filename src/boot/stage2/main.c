@@ -1,8 +1,8 @@
-#include "fat.h"
-#include "ata.h"
-#include "file.h"
-#include "elf.h"
-#include "write.h"
+#include "common/fat.h"
+#include "common/ata.h"
+#include "common/file.h"
+#include "common/elf.h"
+#include "boot/stage2/write.h"
 
 extern uint16_t _memregioncount;
 extern struct memregion _memregions[];

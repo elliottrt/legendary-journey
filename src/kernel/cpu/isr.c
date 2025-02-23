@@ -1,8 +1,8 @@
-#include "isr.h"
-#include "graphics/printf.h"
-#include "idt.h"
-#include "isrstubs.h"
-#include "x86.h"
+#include "kernel/cpu/isr.h"
+#include "kernel/cpu/idt.h"
+#include "kernel/cpu/isrstubs.h"
+#include "kernel/graphics/printf.h"
+#include "common/x86.h"
 
 static const char *exceptions[32] = {
     "division by zero",

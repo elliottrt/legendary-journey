@@ -41,7 +41,7 @@ STAGE2_OFFSET=0x7E00
 STAGE2_SIZE=24
 # kernel virtual memory location
 # NOTE: if this is changed, src/kernel/link.ld also needs to be changed
-KERNBASE=0xC0000000
+KERNBASE=0x80000000
 # place to load user code at (seems to be a linux default)
 USERBASE=0x08048000
 
@@ -53,7 +53,7 @@ BOOT_ASFLAGS=-defsym S2LOC=8 -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=24
 # See https://www.rapidtables.com/code/linux/gcc/gcc-o.html#optimization
 STAGE2_CFLAGS=-m32 -c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
 STAGE2_CFLAGS:=$(STAGE2_CFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
-STAGE2_CFLAGS:=$(STAGE2_CFLAGS) -DKERNEL_NAME='"/$(KERNELNAME)"' -Isrc/
+STAGE2_CFLAGS:=$(STAGE2_CFLAGS) -DKERNEL_NAME='"/$(KERNELNAME)"' -I$(SOURCE_DIR)/
 STAGE2_CFLAGS:=$(STAGE2_CFLAGS) -fno-pic -static -fno-strict-aliasing -no-pie
 STAGE2_CFLAGS:=$(STAGE2_CFLAGS) -fno-omit-frame-pointer -Wunused -O2
 STAGE2_LDFLAGS=-nostdlib -static -m elf_i386
@@ -61,7 +61,7 @@ STAGE2_LDFLAGS=-nostdlib -static -m elf_i386
 KERNEL_CFLAGS=-c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
 KERNEL_CFLAGS:=$(KERNEL_CFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
 KERNEL_CFLAGS:=$(KERNEL_CFLAGS) -fno-pic -Wunused -O2 -DTAB_WIDTH=$(TAB_WIDTH) -DUSERBASE=$(USERBASE)
-KERNEL_CFLAGS:=$(KERNEL_CFLAGS) -DKERNBASE=$(KERNBASE) -I$(KERNEL_DIR)/ -Isrc/
+KERNEL_CFLAGS:=$(KERNEL_CFLAGS) -DKERNBASE=$(KERNBASE) -I$(SOURCE_DIR)/
 
 .PHONY: run clean
 

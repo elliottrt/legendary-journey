@@ -1,7 +1,7 @@
 #ifndef _SYSFUNCS
 #define _SYSFUNCS
 
-#include "types.h"
+#include "common/types.h"
 
 #define SYSDEF_MAX_LEN (16)
 

@@ -1,7 +1,7 @@
-#include "elf.h"
-#include "write.h"
-#include "std.h"
-#include "file.h"
+#include "common/elf.h"
+#include "common/std.h"
+#include "common/file.h"
+#include "boot/stage2/write.h"
 
 bool stage2_elfread(struct file *file, void *dest, void (**entry)()) {
 

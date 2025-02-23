@@ -1,7 +1,7 @@
 #ifndef _KERNEL_PRINTF
 #define _KERNEL_PRINTF
 
-#include "types.h"
+#include "common/types.h"
 
 enum color {
 	CLR_BLACK = 0,

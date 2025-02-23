@@ -1,10 +1,10 @@
-#include "kbd.h"
-#include "cpu/irq.h"
-#include "graphics/printf.h"
-#include "std.h"
-#include "memory/kalloc.h"
-#include "mmu.h"
-#include "util/ringbuf.h"
+#include "kernel/drivers/kbd.h"
+#include "kernel/cpu/irq.h"
+#include "kernel/graphics/printf.h"
+#include "kernel/memory/kalloc.h"
+#include "kernel/util/ringbuf.h"
+#include "common/mmu.h"
+#include "common/std.h"
 
 uint8_t keyboard_us[2][128] = {
     {

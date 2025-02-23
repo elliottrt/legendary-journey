@@ -1,4 +1,4 @@
-#include "mmu.h"
+#include "common/mmu.h"
 
 .code32
 

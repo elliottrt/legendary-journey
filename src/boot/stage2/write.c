@@ -1,5 +1,5 @@
-#include "write.h"
-#include "x86.h"
+#include "boot/stage2/write.h"
+#include "common/x86.h"
 
 #define SCR_WIDTH 80
 #define SCR_HEIGHT 25

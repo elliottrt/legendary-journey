@@ -1,8 +1,6 @@
 #ifndef _STAGE2_WRITE
 #define _STAGE2_WRITE
 
-#include "types.h"
-
 /* put character 'c' at next position and update position */
 void putc(char c);
 /* put null terminated string 's' at next position and update position */

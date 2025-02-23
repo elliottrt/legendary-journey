@@ -1,7 +1,7 @@
 #ifndef _KERNEL_KALLOC
 #define _KERNEL_KALLOC
 
-#include "types.h"
+#include "common/types.h"
 
 extern uint32_t PHYSTOP;
 

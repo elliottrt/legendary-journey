@@ -23,6 +23,7 @@ STAGE2BIN=$(STAGE2_DIR)/stage2.bin
 STAGE2CSRC=$(wildcard $(STAGE2_DIR)/*.c) $(wildcard $(STAGE2_DIR)/disk/*.c)
 STAGE2ASMSRC=$(wildcard $(STAGE2_DIR)/*.S)
 STAGE2TARGETS=$(STAGE2ASMSRC:.S=.o) $(STAGE2CSRC:.c=.o)
+STAGE2DEP=$(STAGE2TARGETS:.o=.d)
 
 # name of the kernel file
 KERNELNAME=kernel
@@ -30,6 +31,7 @@ KERNEL=$(ROOT)/$(KERNELNAME)
 KERNELCSRC=$(wildcard $(KERNEL_DIR)/*.c) $(wildcard $(KERNEL_DIR)/*/*.c)
 KERNELASMSRC=$(wildcard $(KERNEL_DIR)/*.S) $(wildcard $(KERNEL_DIR)/*/*.S)
 KERNELTARGETS=$(KERNELCSRC:.c=.o) $(KERNELASMSRC:.S=.o)
+KERNELDEP=$(KERNELTARGETS:.o=.d)
 
 # LBA disk location
 STAGE2_LOCATION=8
@@ -55,18 +57,21 @@ STAGE2_CFLAGS=-m32 -c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-poi
 STAGE2_CFLAGS:=$(STAGE2_CFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
 STAGE2_CFLAGS:=$(STAGE2_CFLAGS) -DKERNEL_NAME='"/$(KERNELNAME)"' -I$(SOURCE_DIR)/
 STAGE2_CFLAGS:=$(STAGE2_CFLAGS) -fno-pic -static -fno-strict-aliasing -no-pie
-STAGE2_CFLAGS:=$(STAGE2_CFLAGS) -fno-omit-frame-pointer -Wunused -O2
+STAGE2_CFLAGS:=$(STAGE2_CFLAGS) -fno-omit-frame-pointer -Wunused -O2 -MMD -MP
 STAGE2_LDFLAGS=-nostdlib -static -m elf_i386
 
 KERNEL_CFLAGS=-c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
 KERNEL_CFLAGS:=$(KERNEL_CFLAGS) -fno-pie -fno-stack-protector -fno-builtin -fno-builtin-function
 KERNEL_CFLAGS:=$(KERNEL_CFLAGS) -fno-pic -Wunused -O2 -DTAB_WIDTH=$(TAB_WIDTH) -DUSERBASE=$(USERBASE)
-KERNEL_CFLAGS:=$(KERNEL_CFLAGS) -DKERNBASE=$(KERNBASE) -I$(SOURCE_DIR)/
+KERNEL_CFLAGS:=$(KERNEL_CFLAGS) -DKERNBASE=$(KERNBASE) -I$(SOURCE_DIR)/ -MMD -MP
 
 .PHONY: run clean
 
 $(OS): $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) $(USER_PROGS)
 	./mkfat 32 $(OS) -S$(ROOT) -B$(STAGE1BIN) -R$(STAGE2BIN) -VLEGENDARY
+
+-include $(STAGE2DEP)
+-include $(KERNELDEP)
 
 # compilation of user programs
 USERFLAGS=-nostdlib -Wl,-emain,--warn-unresolved-symbols,-q
@@ -78,19 +83,19 @@ $(STAGE1BIN): $(BIN) $(STAGE1SRC)
 	$(LD) -o $(STAGE1BIN) $(STAGE1BIN).o -Ttext 0x7C00 --oformat binary -e _start
 
 $(STAGE2_DIR)/%.o: $(STAGE2_DIR)/%.S
-	$(AS) --32 -o $@ $^
+	$(AS) --32 -o $@ $<
 
 $(STAGE2_DIR)/%.o: $(STAGE2_DIR)/%.c
-	$(CC) -o $@ $^ $(STAGE2_CFLAGS)
+	$(CC) -o $@ $< $(STAGE2_CFLAGS)
 
 $(STAGE2BIN): $(BIN) $(STAGE2TARGETS) $(STAGE2_DIR)/link.ld
 	$(LD) -o $(STAGE2BIN) $(STAGE2TARGETS) $(LDFLAGS) -T$(STAGE2_DIR)/link.ld
 
 $(KERNEL_DIR)/%.o: $(KERNEL_DIR)/%.c
-	$(CC) -o $@ $^ $(KERNEL_CFLAGS)
+	$(CC) -o $@ $< $(KERNEL_CFLAGS)
 
 $(KERNEL_DIR)/%.o: $(KERNEL_DIR)/%.S
-	$(CC) -o $@ $^ $(KERNEL_CFLAGS)
+	$(CC) -o $@ $< $(KERNEL_CFLAGS)
 
 # this is needed to calculate the location counter based off of KERNBASE
 # otherwise KERNBASE wouldn't be constant, messing up a lot of code
@@ -106,8 +111,11 @@ run: $(OS)
 clean:
 	$(RM) $(OS)
 	$(RM) -r $(ROOT)
-	$(RM) $(KERNELTARGETS) $(KERNEL_DIR)/link.ld.out
+	$(RM) $(KERNELTARGETS)
+	$(RM) $(KERNELDEP)
+	$(RM) $(KERNEL_DIR)/link.ld.out
 	$(RM) $(STAGE2TARGETS)
+	$(RM) $(STAGE2DEP)
 
 $(ROOT):
 	mkdir -p $(ROOT)

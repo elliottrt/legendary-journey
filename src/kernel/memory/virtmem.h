@@ -2,6 +2,7 @@
 #define _KERNEL_VIRTUALMEMORY
 
 #include "common/types.h"
+#include "kernel/memory/mman.h"
 
 // See https://wiki.osdev.org/Setting_Up_Paging
 // See https://wiki.osdev.org/Paging

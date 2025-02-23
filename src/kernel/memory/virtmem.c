@@ -40,7 +40,7 @@ static struct kmap kmap[] = {
 
 uint32_t *kpgdir;
 
-// TODO: could we send entrypgdir to kalloc() once we are done with it?
+// TODO: could we send entrypgdir to kfree() once we are done with it?
 uint32_t entrypgdir[PDENTRIES] __attribute__ ((aligned(PGSIZE))) = {
   // Map VA's [0, 4MB) to PA's [0, 4MB)
   [0] = (0) | PTE_P | PTE_W | PTE_PS,

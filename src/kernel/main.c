@@ -47,6 +47,7 @@ void main(void) {
 	//		create a struct containing program information - stuff like open files, pages used
 
 	// TODO: figure out how to tell the compiler that certain functions do exist - stub library
+	// TODO: consider making user code relocatable with -fPIC for more address space control
 	
 	// TODO: more granular allocation and free (need for txed) - can do this with pg_map_range
 	// TODO: change file structure so it's opaque to the user

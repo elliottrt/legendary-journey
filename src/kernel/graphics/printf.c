@@ -2,6 +2,7 @@
 #include "common/types.h"
 #include "common/std.h"
 #include "common/mmu.h"
+#include "common/std.h"
 
 // TODO: try to get these from video mode?
 #define SCREEN_WIDTH 80
@@ -176,6 +177,10 @@ void printf(const char *format, ...) {
 				case 'c': {
 					putc(*varargs);
 					varargs++;
+				} break;
+				case 'm': {
+					const char *err = strerror(errno);
+					while (*err) putc(*err++);
 				} break;
 				case 's': {
 					char *s = (char *) *varargs;

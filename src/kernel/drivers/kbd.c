@@ -74,7 +74,7 @@ static void kbdhandler(struct registers *regs) {
 void kbdinit(void) 
 {
     if ((key_input_buf.buffer = kalloc()) == NULL) {
-        printf("kbd: error: unable to allocate memory: %s\n", strerror(errno));
+        printf("kbd: error: unable to allocate memory: %m\n");
     }
 
     key_input_buf.cap = PGSIZE;

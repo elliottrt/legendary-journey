@@ -41,7 +41,7 @@ void main(void) {
 //	timerinit();
 
 	// give user programs a few pages to use
-	pg_map_range(kpgdir, USERBASE, 16, PTE_W);
+	pg_map_range(kpgdir, USERBASE, 0x100, PTE_W);
 
 	// TODO: allocate pages dynamically, so that each program gets only what it needs
 	//		create a struct containing program information - stuff like open files, pages used

@@ -138,7 +138,7 @@ void kpginit(void) {
 
         int success = mappages(kpgdir, (void *) k->virt, region_size, k->phystart, k->perm);
         if (success < 0) {
-            printf("kmap: error: unable to map pgdir: %s\n", strerror(errno));
+            printf("kmap: error: unable to map pgdir: %m\n");
             STOP();
         }
     }

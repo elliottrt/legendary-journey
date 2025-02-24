@@ -94,7 +94,7 @@ int shell(void) {
 
 	// if there's an error, display it
 	if (result == SHELL_FAIL) {
-		printf("shell: error: %s\n", strerror(errno));
+		printf("shell: error: %m\n");
 	}
 
 	return result;

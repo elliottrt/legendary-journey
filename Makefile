@@ -81,6 +81,8 @@ $(OS): $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) $(USER_PROGS)
 USERFLAGS=-nostdlib -Wl,-emain,-q -llgstd -Lstd
 $(ROOT)/%: user/%.c $(STDLIB)
 	$(CC) $(USERFLAGS) -o $@ $<
+# touch root so that the filesystem will be regenerated
+	touch $(ROOT)
 
 # generate standard library stub
 $(STDLIB): std/stdstub.c std/std.h Makefile

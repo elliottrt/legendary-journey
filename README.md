@@ -9,7 +9,7 @@ I am not at all qualified to do this. The [posted warnings](https://wiki.osdev.o
 - i386-elf-as
 - qemu-system-i386
 - make
-- mkfat (elliottrt/mkfat)
+- [mkfat](https://github.com/elliottrt/mkfat/)
 
 ## user space model
 - there is only a single running process

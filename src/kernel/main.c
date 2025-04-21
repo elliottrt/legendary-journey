@@ -15,6 +15,7 @@
 #include "kernel/drivers/kbd.h"
 #include "kernel/memory/virtmem.h"
 #include "kernel/memory/kalloc.h"
+#include "kernel/memory/general_alloc.h"
 #include "kernel/user/shell.h"
 
 void main(void) {
@@ -35,14 +36,10 @@ void main(void) {
 	isrinit();
 	irqinit();
 
-	printf("pages available: %u/%u\n", kallocavailable(), kalloctotal());
-
 	kallocexpand();
 
 	kbdinit();
 //	timerinit();
-
-	printf("pages available: %u/%u\n", kallocavailable(), kalloctotal());
 
 	// give user programs a few pages to use
 	pg_map_range(kpgdir, USERBASE, 0x100, PTE_W);
@@ -52,13 +49,14 @@ void main(void) {
 
 	// TODO: consider making user code relocatable with -fPIC for more address space control
 	
-	// TODO: more granular allocation and free (need for txed) - can do this with pg_map_range
 	// TODO: change file structure so it's opaque to the user
 	// TODO: add more system functions - keyboard, stuff in std.h
 	// TODO: split the Makefile? kernel, stage 1, and stage 2 could all have their own
 
 	// TODO: write user programs like mkdir, touch, etc.
 	// TODO: port txed to this
+
+	gen_debug();
 
 	while (1) {
 		shell();

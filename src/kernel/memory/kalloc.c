@@ -1,5 +1,6 @@
 #include "kernel/memory/kalloc.h"
 #include "kernel/memory/virtmem.h"
+#include "kernel/memory/general_alloc.h"
 #include "kernel/graphics/printf.h"
 #include "common/std.h"
 #include "common/mmu.h"
@@ -78,6 +79,33 @@ void kallocinit(void) {
 
 void kallocexpand(void) {
     kfreerange(P2V(4*1024*1024), P2V(KERNEL_MEM_END));
+
+    // give the general allocator its some of pages
+
+    const size_t block_size = GEN_ALLOC_SIZE * PGSIZE;
+    void *block_end = (uint8_t *) KERNBASE - PGSIZE;
+    void *block_start = (uint8_t *) block_end - block_size;
+
+    // we should end the allocation block at KERNBASE
+    // but we don't want the risk of overwriting bios info
+    // so we stick a non-writable page at the end
+
+    pg_map_range(
+        kpgdir,
+        (uintptr_t) (block_start),
+        GEN_ALLOC_SIZE,
+        PTE_W
+    );
+
+    pg_map_range(
+        kpgdir,
+        (uintptr_t) (KERNBASE - 1 * PGSIZE),
+        1,
+        0
+    );
+
+    gen_alloc_init(block_start, block_size);
+
 }
 
 uint32_t kallocavailable(void) {

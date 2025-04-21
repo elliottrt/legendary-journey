@@ -1,7 +1,5 @@
 #include "std/std.h"
 
-// TODO: don't use -Wno-unused-parameter in compilation and instead silence those manually
-
 #define UNUSED(V) ((void) V)
 
 void printf(const char *format, ...) {

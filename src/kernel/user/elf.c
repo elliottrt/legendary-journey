@@ -109,7 +109,7 @@ bool load_program_header(struct file *file, struct elf_prog_hdr *header) {
 	if (header->p_filesz < header->p_memsz)
 		memset(address + header->p_filesz, 0x00, header->p_memsz - header->p_filesz);
 
-	printf("elf: load: %u bytes to 0x%8x\n", header->p_memsz, address);
+	// printf("elf: load: %u bytes to 0x%8x\n", header->p_memsz, address);
 
 	return true;
 }

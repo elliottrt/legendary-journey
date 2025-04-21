@@ -35,10 +35,14 @@ void main(void) {
 	isrinit();
 	irqinit();
 
+	printf("pages available: %u/%u\n", kallocavailable(), kalloctotal());
+
 	kallocexpand();
 
 	kbdinit();
 //	timerinit();
+
+	printf("pages available: %u/%u\n", kallocavailable(), kalloctotal());
 
 	// give user programs a few pages to use
 	pg_map_range(kpgdir, USERBASE, 0x100, PTE_W);
@@ -53,7 +57,7 @@ void main(void) {
 	// TODO: add more system functions - keyboard, stuff in std.h
 	// TODO: split the Makefile? kernel, stage 1, and stage 2 could all have their own
 
-	// TODO: write user programs like cat, mkdir, etc.
+	// TODO: write user programs like mkdir, touch, etc.
 	// TODO: port txed to this
 
 	while (1) {

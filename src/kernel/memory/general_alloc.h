@@ -1,12 +1,12 @@
 #ifndef _KERNEL_GENERAL_ALLOC
 #define _KERNEL_GENERAL_ALLOC
 
+#include "common/types.h"
+
 #define GEN_ALLOC_DEBUG
 
 // size of the allocation block in pages
 #define GEN_ALLOC_SIZE (0x1000)
-
-#include "common/types.h"
 
 void gen_alloc_init(void *ptr, size_t size);
 

@@ -15,7 +15,6 @@
 #include "kernel/drivers/kbd.h"
 #include "kernel/memory/virtmem.h"
 #include "kernel/memory/kalloc.h"
-#include "kernel/memory/general_alloc.h"
 #include "kernel/user/shell.h"
 
 void main(void) {
@@ -56,7 +55,7 @@ void main(void) {
 	// TODO: write user programs like mkdir, touch, etc.
 	// TODO: port txed to this
 
-	gen_debug();
+	rm_debug(rm_global_ctx);
 
 	while (1) {
 		shell();

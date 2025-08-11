@@ -1,6 +1,6 @@
 #include "kernel/memory/kalloc.h"
 #include "kernel/memory/virtmem.h"
-#include "kernel/memory/general_alloc.h"
+#include "kernel/memory/malloc.h"
 #include "kernel/graphics/printf.h"
 #include "common/std.h"
 #include "common/mmu.h"
@@ -19,6 +19,8 @@ struct run {
 static struct run *freemem;
 static uint32_t available;
 static uint32_t total;
+
+rm_ctx_t *rm_global_ctx = NULL;
 
 void *kalloc(void) {
     if (freemem == NULL) {
@@ -82,7 +84,7 @@ void kallocexpand(void) {
 
     // give the general allocator its some of pages
 
-    const size_t block_size = GEN_ALLOC_SIZE * PGSIZE;
+    const size_t block_size = MALLOC_ALLOC_PAGES * PGSIZE;
     void *block_end = (uint8_t *) KERNBASE - PGSIZE;
     void *block_start = (uint8_t *) block_end - block_size;
 
@@ -92,8 +94,8 @@ void kallocexpand(void) {
 
     pg_map_range(
         kpgdir,
-        (uintptr_t) (block_start),
-        GEN_ALLOC_SIZE,
+        (uintptr_t) block_start,
+        MALLOC_ALLOC_PAGES,
         PTE_W
     );
 
@@ -104,7 +106,7 @@ void kallocexpand(void) {
         0
     );
 
-    gen_alloc_init(block_start, block_size);
+    rm_global_ctx = rm_init_block(block_start, block_size);
 
 }
 

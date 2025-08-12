@@ -1,4 +1,4 @@
-#include "kernel/user/sysfuncs.h"
+#include "kernel/user/user_functions.h"
 #include "common/std.h"
 
 #include "kernel/graphics/printf.h"

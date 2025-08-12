@@ -2,7 +2,7 @@
 #include "common/std.h"
 #include "common/file.h"
 #include "kernel/memory/kalloc.h"
-#include "kernel/user/sysfuncs.h"
+#include "kernel/user/user_functions.h"
 #include "kernel/graphics/printf.h"
 
 // see http://web.mit.edu/freebsd/head/sys/i386/i386/elf_machdep.c

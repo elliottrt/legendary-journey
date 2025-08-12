@@ -13,6 +13,10 @@
 // note: command MUST be in modifiable memory or a pagefault will occur
 int shell_exec(char *command);
 
+// returns either the result of the command on success
+// or SHELL_FAIL on failure
+int shell_exec_args(int argc, char **argv);
+
 // run the shell - gets input then executes input
 int shell(void);
 

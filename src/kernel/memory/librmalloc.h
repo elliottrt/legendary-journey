@@ -17,9 +17,6 @@ extern "C" {
  * DEFINITIONS
 */
 
-// TODO: tests?
-// TODO: option for nostdlib that removes LIBC_MALLOC alloc_type
-
 typedef struct rm_context rm_ctx_t;
 
 /*
@@ -112,8 +109,6 @@ enum rm_alloc_type {
 };
 typedef enum rm_alloc_type rm_alloc_t;
 
-// TODO: poison values in the block on each side to detect memory overruns?
-// TODO: we *could* add a size_t holding the requested allocation size. could be useful for dynamic memory size checks
 struct rm_block {
 	struct rm_block *next;
 	size_t size;
@@ -152,7 +147,6 @@ static int rm_try_split_block(rm_block_t *block, size_t size) {
 
 	// check if there is enough space for a new block in the leftover space
 	// we add the ALIGNMENT value so any new block will have a size of at least ALIGNMENT
-	// TODO: there is a case where the block after 'block' is free in which case the condition could just be 'block->size >= size'
 	if (block->size >= size + sizeof(rm_block_t) + ALIGNMENT) {
 		// get location of the new block
 		rm_block_t *new_block = (rm_block_t *) ((uint8_t *)block + sizeof(rm_block_t) + size);
@@ -305,6 +299,7 @@ void *rm_alloc(rm_ctx_t *ctx, size_t size) {
 		return block + 1;
 	} else {
 		// out of memory
+		errno = ENOMEM;
 		return NULL;
 	}
 
@@ -313,7 +308,10 @@ void *rm_alloc(rm_ctx_t *ctx, size_t size) {
 void rm_free(rm_ctx_t *ctx, void *ptr)  {
 	assert(ctx != NULL);
 	if (ptr) {
-		assert(rm_is_ptr_valid(ctx, ptr));
+		if (!rm_is_ptr_valid(ctx, ptr)) {
+			printf("warning: invalid pointer %p\n", ptr);
+			return;
+		}
 
 		GET_BLOCK(ptr)->free = 1;
 		// note: we can't just do the same thing we did in rm_try_split_block
@@ -379,14 +377,14 @@ void rm_debug(rm_ctx_t *ctx) {
 	if (ctx) {
 		size_t ctx_overhead = sizeof(rm_ctx_t) - sizeof(rm_block_t);
 		printf(
-			"m_debug: 0x%p - 0x%p (ctx ) (%d bytes)\n",
+			"rm_debug: 0x%p - 0x%p (ctx ) (%d bytes)\n",
 			ctx,
 			ctx + ctx_overhead,
 			ctx_overhead
 		);
 		for (rm_block_t *iter = &ctx->first_block; iter; iter = iter->next) {
 			printf(
-				"m_debug: 0x%p - 0x%p (%s) (%d + %d bytes)\n",
+				"rm_debug: 0x%p - 0x%p (%s) (%d + %d bytes)\n",
 				iter,
 				iter + iter->size + sizeof(rm_block_t),
 				iter->free ? "free" : "used",

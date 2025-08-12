@@ -12,4 +12,6 @@
 #define RMALLOC_NO_STRING
 #include "kernel/memory/librmalloc.h"
 
+extern rm_ctx_t *rm_global_ctx;
+
 #endif

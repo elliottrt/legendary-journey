@@ -5,6 +5,7 @@
 #include "kernel/user/program.h"
 #include "kernel/graphics/printf.h"
 #include "kernel/drivers/kbd.h"
+#include "kernel/memory/malloc.h"
 
 int shell_exec(char *command) {
 	char *argv[SHELL_MAX_ARGS] = {0};
@@ -50,11 +51,24 @@ int shell_exec(char *command) {
 		else cmd_iter = NULL;
 	}
 
+	return shell_exec_args(argc, argv);
+}
+
+int shell_exec_args(int argc, char **argv) {
 	// make sure at least 1 arg
 	if (argc < 1) return SHELL_FAIL;
 
-	user_entry_t entry = program_load(argv[0]);
-	return entry ? entry(argc, argv) : SHELL_FAIL;
+	// TODO: sysfuncs.c NEEDS to know about data so we can use it for user io and malloc/free
+	struct program_data *data = user_mode_start(argv[0]);
+
+	if (data) {
+		int retval = data->entry(argc, argv);
+		user_mode_end(data);
+
+		return retval;
+	} else {
+		return SHELL_FAIL;
+	}
 }
 
 int shell(void) {

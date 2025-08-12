@@ -15,6 +15,7 @@
 #include "kernel/drivers/kbd.h"
 #include "kernel/memory/virtmem.h"
 #include "kernel/memory/kalloc.h"
+#include "kernel/memory/malloc.h"
 #include "kernel/user/shell.h"
 
 void main(void) {
@@ -44,7 +45,7 @@ void main(void) {
 	pg_map_range(kpgdir, USERBASE, 0x100, PTE_W);
 
 	// TODO: allocate pages dynamically, so that each program gets only what it needs
-	//		create a struct containing program information - stuff like open files, pages used
+	// TODO: create a struct containing program information - stuff like open files, pages used
 
 	// TODO: consider making user code relocatable with -fPIC for more address space control
 	
@@ -59,6 +60,7 @@ void main(void) {
 
 	while (1) {
 		shell();
+		rm_debug(rm_global_ctx);
 	}
 
 	printf("initialization complete, halting.\n");

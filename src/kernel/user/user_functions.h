@@ -2,16 +2,12 @@
 #define _SYSFUNCS
 
 #include "common/types.h"
+#include "kernel/user/program.h"
 
-#define SYSDEF_MAX_LEN (16)
+uintptr_t user_function_ptr(const char *name);
 
-struct sysdef {
-	char name[SYSDEF_MAX_LEN];
-	uint32_t func;
-};
+bool user_function_exists(const char *name);
 
-uint32_t sysfunc_get(const char *name);
-
-bool sysfunc_exists(const char *name);
+void user_function_data_block(struct program_data *data);
 
 #endif

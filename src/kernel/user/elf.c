@@ -50,7 +50,7 @@ bool elf_rel_patch(struct file *file, struct elf_sec_hdr *relhdr, struct elf_sym
 			} break;
 			case 2: { // R_386_PC32
 
-				uint32_t sysfunc_addr = sysfunc_get(name);
+				uint32_t sysfunc_addr = user_function_ptr(name);
 
 				if (sysfunc_addr) {
 					// try to get the system function if symbol is 0

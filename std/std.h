@@ -111,5 +111,7 @@ extern uint32_t filetell(struct file *file);
 extern bool fileflush(struct file *file);
 extern bool fileclose(struct file *file);
 
+extern void *malloc(size_t size);
+extern void free(void *ptr);
 
 #endif

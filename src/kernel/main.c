@@ -45,7 +45,6 @@ void main(void) {
 	pg_map_range(kpgdir, USERBASE, 0x100, PTE_W);
 
 	// TODO: allocate pages dynamically, so that each program gets only what it needs
-	// TODO: create a struct containing program information - stuff like open files, pages used
 
 	// TODO: consider making user code relocatable with -fPIC for more address space control
 	
@@ -53,6 +52,7 @@ void main(void) {
 	// TODO: add more system functions - keyboard, stuff in std.h
 	// TODO: split the Makefile? kernel, stage 1, and stage 2 could all have their own
 
+	// TODO: shell directory, ability to change it (pwd, cd, etc.)
 	// TODO: write user programs like mkdir, touch, etc.
 	// TODO: port txed to this
 

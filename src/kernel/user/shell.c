@@ -58,7 +58,6 @@ int shell_exec_args(int argc, char **argv) {
 	// make sure at least 1 arg
 	if (argc < 1) return SHELL_FAIL;
 
-	// TODO: sysfuncs.c NEEDS to know about data so we can use it for user io and malloc/free
 	struct program_data *data = user_mode_start(argv[0]);
 
 	if (data) {

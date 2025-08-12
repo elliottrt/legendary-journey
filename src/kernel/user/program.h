@@ -5,7 +5,6 @@
 #include "common/file.h"
 #include "kernel/memory/malloc.h"
 
-// TODO: is this the solution?
 #define PROGRAM_MAX_FILES (4)
 #define PROGRAM_MALLOC_SIZE (0x1000)
 
@@ -16,7 +15,7 @@ struct program_data {
 	// main() function of the user program
 	user_entry_t entry;
 
-	// TODO: should have own rmalloc context
+	// user program's memory allocation space
 	rm_ctx_t *malloc_context;
 };
 

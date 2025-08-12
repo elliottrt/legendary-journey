@@ -79,3 +79,13 @@ bool fileclose(struct file *file) {
 
 	return false;
 }
+
+void *malloc(size_t size) {
+	UNUSED(size);
+
+	return NULL;
+}
+
+void free(void *ptr) {
+	UNUSED(ptr);
+}

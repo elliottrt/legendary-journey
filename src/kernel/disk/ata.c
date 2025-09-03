@@ -29,7 +29,10 @@ void atareset(void)
 	uint8_t control = inb(0x03F6);
 	/* send it back with software reset bit set */
 	outb(0x03F6, control | 0x04);
-	// TODO: it says to wait 5us between setting and clearing... are we doing that?
+	
+	// just in case
+	iowait();
+
 	/* set it back to off */
 	outb(0x03F6, control);
 
@@ -72,19 +75,21 @@ bool ataread(uint32_t lba, uint8_t sectors, void *dst)
 	/* command: read w/ retry */
 	outb(0x01F7, 0x20);
 
-	// TODO: it says to poll after each sector. will this fail with >1 sector?
+	for (int i = 0; i < sectors; i++) {
 
-	/* wait until ready to read */
-	while ((status & 8) == 0)
-		status = inb(0x01F7);
+		/* wait until ready to read */
+		while ((status & 8) == 0)
+			status = inb(0x01F7);
 
-	/* read the data from ATA */
-	for (int reads = 0; reads < sectors * 256; reads++)
-		data[reads] = inw(0x01F0);
+		/* read the data from ATA */
+		for (int reads = 0; reads < 256; reads++, data++) {
+			*data = inw(0x01F0);
+		}
 
-	if (atacheckerror()) {
-		ataerror();
-		return false;
+		if (atacheckerror()) {
+			ataerror();
+			return false;
+		}
 	}
 
 	return true;
@@ -114,30 +119,32 @@ bool atawrite(uint32_t lba, uint8_t sectors, const void *src)
 	/* sectors to write */
 	outb(0x01F2, sectors);
 	/* lba bits 0-7 */
-	outb(0x01F3, lba);
+	outb(0x01F3, (lba >>  0) & 0xFF);
 	/* lba bits 8-15 */
-	outb(0x01F4, lba >> 8);
+	outb(0x01F4, (lba >>  8) & 0xFF);
 	/* lba bits 16-23 */
-	outb(0x01F5, lba >> 16);
+	outb(0x01F5, (lba >> 16) & 0xFF);
 	/* command: write w/ retry */
 	outb(0x01F7, 0x30);
 
-	// TODO: it says to poll after each sector. will this fail with >1 sector?
+	for (int i = 0; i < sectors; i++) {
+		/* wait until ready to write */
+		while ((status & 8) == 0)
+			status = inb(0x01F7);
 
-	/* wait until ready to write */
-	while ((status & 8) == 0)
-		status = inb(0x01F7);
+		/* read 256 2byte blocks of data */
+		for (int writes = 0; writes < 256; writes++, data++) {
+			outw(0x01F0, *data);
+		}
 
-	for (int writes = 0; writes < sectors * 256; writes++)	
-		outw(0x01F0, data[writes]);
+		if (atacheckerror()) {
+			ataerror();
+			return false;
+		}
 
-	if (atacheckerror()) {
-		ataerror();
-		return false;
+		/* need to do this to prevent issues */
+		atacacheflush();
 	}
-
-	/* need to do this to prevent issues */
-	atacacheflush();
 
 	return true;
 

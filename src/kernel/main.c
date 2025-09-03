@@ -51,6 +51,7 @@ void main(void) {
 	// TODO: change file structure so it's opaque to the user
 	// TODO: add more system functions - keyboard, stuff in std.h
 	// TODO: split the Makefile? kernel, stage 1, and stage 2 could all have their own
+	// TODO: use cmake? or something that allows more IDE integration
 
 	// TODO: shell directory, ability to change it (pwd, cd, etc.)
 	// TODO: write user programs like mkdir, touch, etc.

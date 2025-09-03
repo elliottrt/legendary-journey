@@ -3,11 +3,12 @@
 #include "kernel/graphics/printf.h"
 
 enum staticfileid {
-	STATIC_FCREAT0 = 0,
-	STATIC_FCREAT1 = 1,
+	STATIC_FCREATE_PARENT = 0,
+	STATIC_FCREATE_CHILD = 1,
 	STATIC_SIZE = 2
 };
 
+// TODO: dynamically allocate with kalloc?
 struct file _staticfiles[STATIC_SIZE] = {0};
 
 int32_t _fileread(struct file *file, void *buffer, uint32_t size);
@@ -88,7 +89,7 @@ int32_t dirfindentry(struct file *dir, const char *name, struct fatdirentry *ent
 
 	// if user provided a null pointer, 
 	// we use a dummy entry as storage
-	struct fatdirentry dummyentry;
+	struct fatdirentry dummyentry = {0};
 	if (entry == NULL) entry = &dummyentry;
 
 	if (dir->position != 0)
@@ -233,6 +234,8 @@ int dircreatefile(struct file *dir, struct file *fileout, const char *filename, 
 	if (isdirectory) newentry.attributes |= DIRECTORY;
 	fatformatfilename(filename, strlen(filename), (char *) newentry.filename);
 
+	// TODO: this assigns each new file a cluster, but we don't want to do this. empty files should have size 0 and 0 clusters allocated
+
 	uint32_t filefirstcluster = fatfindfreecluster();
 	if (filefirstcluster == 0)
 		return -1;
@@ -248,7 +251,7 @@ int dircreatefile(struct file *dir, struct file *fileout, const char *filename, 
 	if (isdirectory) {
 
 		// open child dir
-		filenew(dir->firstcluster, &newentry, &_staticfiles[STATIC_FCREAT1]);
+		filenew(dir->firstcluster, &newentry, &_staticfiles[STATIC_FCREATE_CHILD]);
 
 		// TODO: change access/modify dates
 		struct fatdirentry dot = {0};
@@ -261,11 +264,11 @@ int dircreatefile(struct file *dir, struct file *fileout, const char *filename, 
 		dotdot.firstclusterlo = dir->firstcluster & 0xFFFF;
 		dotdot.firstclusterhi = dir->firstcluster >> 16;
 
-		if (diraddentry(&_staticfiles[STATIC_FCREAT1], &dot) < 0 || 
-			diraddentry(&_staticfiles[STATIC_FCREAT1], &dotdot) < 0)
+		if (diraddentry(&_staticfiles[STATIC_FCREATE_CHILD], &dot) < 0 || 
+			diraddentry(&_staticfiles[STATIC_FCREATE_CHILD], &dotdot) < 0)
 			return -1;
 
-		fileflush(&_staticfiles[STATIC_FCREAT1]);
+		fileflush(&_staticfiles[STATIC_FCREATE_CHILD]);
 	}
 
 	if (fileout) {
@@ -361,9 +364,9 @@ bool fileopen(struct file *file, const char *pathname, int flags) {
 			// create file
 			if ((flags & FCREATE) && pathnext(&tempstart) == 0) {
 				// TODO: try to not open a new file here
-				memcpy(&_staticfiles[STATIC_FCREAT0], file, sizeof(struct file));
-				int res = dircreatefile(&_staticfiles[STATIC_FCREAT0], file, filename, flags & FDIRECTORY);
-				fileclose(&_staticfiles[STATIC_FCREAT0]);
+				memcpy(&_staticfiles[STATIC_FCREATE_PARENT], file, sizeof(struct file));
+				int res = dircreatefile(&_staticfiles[STATIC_FCREATE_PARENT], file, filename, flags & FDIRECTORY);
+				fileclose(&_staticfiles[STATIC_FCREATE_PARENT]);
 				if (res < 0) {
 					memset(file, 0, sizeof(struct file));
 					errno = EIO;

@@ -23,6 +23,7 @@ enum errno {
 	EPERM, 			/* operation not permitted */
 	ENOEXEC,		/* exec format error */
 	E2BIG,			/* argument list too long */
+	ENOSPC,			/* no space left on device */
 };
 
 extern enum errno errno;

@@ -39,7 +39,7 @@ enum fflags {
 // if so, user shouldn't be able to edit/rename/delete
 // etc. that file
 
-// TODO: fileremove(struct file *parent, const char *pathname); <- parent can be null
+// TODO: fileremove(struct file *parent, const char *pathname); <- search starts at parent, null = root
 // TODO: filerename?
 
 void fileinit(void);

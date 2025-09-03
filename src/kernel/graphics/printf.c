@@ -148,6 +148,7 @@ void printf(const char *format, ...) {
 			}
 
 			// TODO: padding only affects integers. it should also affect %c and %s
+			// TODO: printing sized string with %.<size>s (and %.*s)
 
 			islong = next == 'l';
 			if (islong)

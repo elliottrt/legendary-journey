@@ -8,8 +8,10 @@ int main(int argc, const char **argv) {
 	}
 
 	struct file file;
-	if (!fileopen(&file, argv[1], 0))
-		return -1;
+	if (!fileopen(&file, argv[1], 0)) {
+		printf("error: unable to open %s: %m\n", argv[1]);
+		return 1;
+	}
 
 	char buffer[32];
 	size_t buf_size = 0;

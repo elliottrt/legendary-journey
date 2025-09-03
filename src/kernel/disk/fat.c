@@ -34,7 +34,10 @@ void fatinit(void) {
 	// start searching after reserved clusters
 	_fatsearch.start = 2;
 
-	fatcache(0, 0);
+	if (!fatcache(0, 0)) {
+		printf("error: failed to cache the FAT\n");
+		STOP();
+	}
 
 }
 
@@ -70,7 +73,8 @@ bool fatcache(uint32_t fat, uint32_t offsetsector) {
 
 	uint32_t lba = _vbootsector->reservedsectors + (fat * _vbootsector->fatsize32) + offsetsector;
 
-	ataread(lba, _fatcache.sectorsbuffered, _fatcache.buffer);
+	if (!ataread(lba, _fatcache.sectorsbuffered, _fatcache.buffer))
+		return false;
 
 	_fatcache.dirty = false;
 	_fatcache.firstentry = offsetsector * ENTRIES_PER_SECTOR;
@@ -137,10 +141,10 @@ uint32_t fatfindfreecluster(void) {
 		current++;
 	}
 
-	printf("run out of disk space");
-
 	_fatsearch.start = _vbootsector->fatsize32 * _vbootsector->bytespersector / sizeof(fat_entry_t);
 
+	// out of disk space
+	errno = ENOSPC;
 	return 0;
 }
 

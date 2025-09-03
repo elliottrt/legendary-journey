@@ -8,7 +8,7 @@ EMU=qemu-system-i386
 
 OS=os.img
 ROOT=root
-USER_PROGS=echo ls cat
+USER_PROGS=echo ls cat mkdir
 USER_PROGS:=$(addprefix $(ROOT)/,$(USER_PROGS))
 
 SOURCE_DIR=src
@@ -35,7 +35,8 @@ KERNELDEP=$(KERNELTARGETS:.o=.d)
 
 # LG standard library
 STDDIR=std
-STDLIB=$(STDDIR)/liblgstd.so
+STDLIB=lj
+STDLIB_PATH=$(STDDIR)/lib$(STDLIB).so
 
 # LBA disk location
 STAGE2_LOCATION=8
@@ -78,14 +79,14 @@ $(OS): $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) $(USER_PROGS)
 -include $(KERNELDEP)
 
 # compilation of user programs
-USERFLAGS=-nostdlib -Wl,-emain,-q -llgstd -Lstd -I. -Wno-builtin-declaration-mismatch
-$(ROOT)/%: user/%.c $(STDLIB)
+USERFLAGS=-nostdlib -Wl,-emain,-q -l$(STDLIB) -Lstd -I. -Wno-builtin-declaration-mismatch
+$(ROOT)/%: user/%.c $(STDLIB_PATH)
 	$(CC) $(USERFLAGS) -o $@ $<
 # touch root so that the filesystem will be regenerated
 	touch $(ROOT)
 
 # generate standard library stub
-$(STDLIB): std/stdstub.c std/std.h Makefile
+$(STDLIB_PATH): std/stdstub.c std/std.h Makefile
 	$(CC) -c -fPIC -Wall -Wextra -Wpedantic -I. -o $<.o $< -Wno-builtin-declaration-mismatch
 	$(CC) -shared -r -o $@ $<.o
 	$(RM) $<.o

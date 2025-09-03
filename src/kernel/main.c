@@ -39,7 +39,7 @@ void main(void) {
 	kallocexpand();
 
 	kbdinit();
-//	timerinit();
+	timerinit();
 
 	// give user programs a few pages to use
 	pg_map_range(kpgdir, USERBASE, 0x100, PTE_W);
@@ -54,7 +54,7 @@ void main(void) {
 	// TODO: use cmake? or something that allows more IDE integration
 
 	// TODO: shell directory, ability to change it (pwd, cd, etc.)
-	// TODO: write user programs like mkdir, touch, etc.
+	// TODO: write user programs
 	// TODO: port txed to this
 
 	rm_debug(rm_global_ctx);

@@ -4,15 +4,17 @@
 #include "common/types.h"
 
 // must be higher than 18
-#define TIMER_HZ 100
+#define TIMER_HZ 1000
 
 void timerinit(void);
 
-extern uint64_t _timer_ticks;
+extern uint32_t _timer_ticks;
 #define timerget() (_timer_ticks)
 
-// TODO: do these actually work???
-#define timeruntil(t)   while (_timer_ticks < t) {}
-#define timerwait(t)    do { uint64_t _finish_time = _timer_ticks + t; timeruntil(_finish_time); } while (0)
+// wait until timerget() is at least time
+void timer_wait_until(uint32_t time);
+
+// wait for a number of milliseconds
+void timer_wait(uint32_t ms);
 
 #endif

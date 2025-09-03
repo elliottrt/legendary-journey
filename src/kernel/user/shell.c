@@ -59,15 +59,12 @@ int shell_exec_args(int argc, char **argv) {
 	if (argc < 1) return SHELL_FAIL;
 
 	struct program_data *data = user_mode_start(argv[0]);
+	if (data == NULL) return SHELL_FAIL;
 
-	if (data) {
-		int retval = data->entry(argc, argv);
-		user_mode_end(data);
+	int retval = data->entry(argc, argv);
+	user_mode_end(data);
 
-		return retval;
-	} else {
-		return SHELL_FAIL;
-	}
+	return retval;
 }
 
 int shell(void) {

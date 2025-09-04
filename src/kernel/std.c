@@ -27,8 +27,6 @@ const char *strerror(enum errno _errno) {
 
 	_Static_assert(sizeof(strs) / sizeof(*strs) == ERRNO_COUNT, "must have a string for each errno");
 
-	// TODO: static assert there are enough strings
-
 	return strs[_errno];
 }
 

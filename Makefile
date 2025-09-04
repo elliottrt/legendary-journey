@@ -79,15 +79,15 @@ $(OS): $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) $(USER_PROGS)
 -include $(KERNELDEP)
 
 # compilation of user programs
-USERFLAGS=-nostdlib -Wl,-emain,--emit-relocs -l$(STDLIB) -Lstd -I. -Wno-builtin-declaration-mismatch
+USERFLAGS=-nostdlib -Wl,--emit-relocs -l$(STDLIB) -Lstd -isystem std
 $(ROOT)/%: user/%.c $(STDLIB_PATH)
 	$(CC) $(USERFLAGS) -o $@ $<
 # touch root so that the filesystem will be regenerated
 	touch $(ROOT)
 
 # generate standard library stub
-$(STDLIB_PATH): std/stdstub.c std/std.h Makefile
-	$(CC) -c -fPIC -Wall -Wextra -Wpedantic -I. -o $<.o $< -Wno-builtin-declaration-mismatch
+$(STDLIB_PATH): std/stdstub.c std/stdlib.h Makefile
+	$(CC) -c -fPIC -Wall -Wextra -Wpedantic -isystem std -o $<.o $< -Wno-builtin-declaration-mismatch
 	$(CC) -shared -r -o $@ $<.o
 	$(RM) $<.o
 

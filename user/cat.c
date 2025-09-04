@@ -1,4 +1,4 @@
-#include "std/std.h"
+#include <stdlib.h>
 
 int main(int argc, const char **argv) {
 
@@ -18,7 +18,7 @@ int main(int argc, const char **argv) {
 
 	while ((buf_size = fread(buffer, 1, sizeof(buffer), file)) > 0) {
 		for (size_t i = 0; i < buf_size; i++)
-			putc(buffer[i]);
+			putchar(buffer[i]);
 	}
 
 	fclose(file);

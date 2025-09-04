@@ -42,9 +42,9 @@ enum fflags {
 };
 typedef void FILE;
 
-extern void printf(const char *format, ...);
-extern void putc(char ch);
-extern void puts(const char *str);
+extern int printf(const char *format, ...);
+extern int putchar(int ch);
+extern int puts(const char *str);
 
 extern uint32_t timer_read(void);
 

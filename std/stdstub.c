@@ -1,17 +1,25 @@
-#include "std/std.h"
+#include <stdlib.h>
 
 #define UNUSED(V) ((void) V)
 
-void printf(const char *format, ...) {
+int _start(int argc, char **argv) {
+	extern int main(int, char**);
+	return main(argc, argv);
+}
+
+int printf(const char *format, ...) {
 	UNUSED(format);
+	return -1;
 }
 
-void putc(char ch) {
+int putchar(int ch) {
 	UNUSED(ch);
+	return -1;
 }
 
-void puts(const char *str) {
+int puts(const char *str) {
 	UNUSED(str);
+	return -1;
 }
 
 uint32_t timer_read(void) {

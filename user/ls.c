@@ -1,4 +1,4 @@
-#include "std/std.h"
+#include <stdlib.h>
 
 #define FAT_FILENAME_LEN 8
 #define FAT_FILEEXT_LEN 3
@@ -32,18 +32,18 @@ int main(int argc, char **argv) {
 	while (fread(&child, sizeof(child), 1, dir) == 1) {
 		if (child.filename[0]) {
 			for (int i = 0; i < FAT_FILENAME_LEN; i++)
-				putc(child.filename[i]);
+				putchar(child.filename[i]);
 
-			if (child.fileext[0] && child.fileext[0] != ' ') putc('.');
-			else putc(' ');
+			if (child.fileext[0] && child.fileext[0] != ' ') putchar('.');
+			else putchar(' ');
 
 			for (int i = 0; i < FAT_FILEEXT_LEN; i++)
-				putc(child.fileext[i]);
+				putchar(child.fileext[i]);
 
 			if (child.attributes & FAT_FLAG_ISDIR)
 				printf("  (DIR)");
 			
-			putc('\n');
+			putchar('\n');
 		}
 	}
 

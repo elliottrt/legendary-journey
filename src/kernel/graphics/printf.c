@@ -47,7 +47,7 @@ void move_cursor(int32_t delta) {
 	screen_addr[cursor] = at_cursor | COLOR(0, CURSOR_COLOR) << 8;
 }
 
-void putc(char c) {
+int putc(char c) {
 	switch (c) {
 		case '\n':
 			move_cursor(SCREEN_WIDTH);
@@ -57,7 +57,7 @@ void putc(char c) {
 			// if we need to go up a line
 			if (cursor % SCREEN_WIDTH == 0) {
 				// don't do anything if we are at the top left
-				if (cursor == 0) return;
+				if (cursor == 0) return 0;
 
 				uint32_t prev_line_start = cursor - SCREEN_WIDTH;
 				while (cursor > prev_line_start && (screen_addr[cursor - 1] & 0xFF) == EMPTY_CHAR)
@@ -88,16 +88,20 @@ void putc(char c) {
 		scroll();
 		move_cursor(SCREEN_WIDTH * (SCREEN_HEIGHT - 1) - cursor);
 	}
+
+	return 0;
 }
 
-void puts(const char *str) {
+int puts(const char *str) {
 	while (*str) putc(*(str++));
 	putc('\n');
+	return 0;
 }
 
-void putsn(const char *str, uint32_t n) {
+int putsn(const char *str, uint32_t n) {
 	for (uint32_t i = 0; i < n; i++)
-	putc(str[i]);
+		putc(str[i]);
+	return 0;
 }
 
 // some number significantly above log10(2^32)
@@ -128,7 +132,7 @@ void printint(uint32_t x, int base, int sign, int padding) {
 		putc(buffer[i]);
 }
 
-void printf(const char *format, ...) {
+int printf(const char *format, ...) {
 	int padding;
 	bool islong;
 
@@ -195,6 +199,9 @@ void printf(const char *format, ...) {
 			}
 		}
 	}
+
+	// TODO: this should return the number of characters written
+	return 0;
 }
 
 void printfcolor(uint8_t _color) {

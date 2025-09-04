@@ -14,6 +14,10 @@ struct user_function_def {
 
 static struct program_data *user_data;
 
+static int putchar(int ch) {
+	return putc((char) ch);
+}
+
 static uint32_t timer_read(void) {
 	return timerget();
 }
@@ -106,7 +110,7 @@ static uint32_t fsize(void *fp) {
 #define SYS_FUNC_LIST \
 	X(printf) \
 	X(puts) \
-	X(putc) \
+	X(putchar) \
 	X(timer_read) \
 	X(fopen) \
 	X(fread) \

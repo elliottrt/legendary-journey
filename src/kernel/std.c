@@ -21,7 +21,14 @@ const char *strerror(enum errno _errno) {
 		"operation not permitted",
 		"exec format error",
 		"argument list too long",
+		"no space left on device",
+		"too many open files",
 	};
+
+	_Static_assert(sizeof(strs) / sizeof(*strs) == ERRNO_COUNT, "must have a string for each errno");
+
+	// TODO: static assert there are enough strings
+
 	return strs[_errno];
 }
 

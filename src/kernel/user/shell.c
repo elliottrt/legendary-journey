@@ -6,6 +6,7 @@
 #include "kernel/graphics/printf.h"
 #include "kernel/drivers/kbd.h"
 #include "kernel/memory/malloc.h"
+#include "kernel/user/user_functions.h"
 
 int shell_exec(char *command) {
 	char *argv[SHELL_MAX_ARGS] = {0};
@@ -60,6 +61,9 @@ int shell_exec_args(int argc, char **argv) {
 
 	struct program_data *data = user_mode_start(argv[0]);
 	if (data == NULL) return SHELL_FAIL;
+
+	// set the context for user functions
+	user_function_data_block(data);
 
 	int retval = data->entry(argc, argv);
 	user_mode_end(data);

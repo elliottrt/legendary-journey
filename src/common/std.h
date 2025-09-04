@@ -24,6 +24,9 @@ enum errno {
 	ENOEXEC,		/* exec format error */
 	E2BIG,			/* argument list too long */
 	ENOSPC,			/* no space left on device */
+	EMFILE,			/* too many files open */
+
+	ERRNO_COUNT		/* errno values defined */
 };
 
 extern enum errno errno;

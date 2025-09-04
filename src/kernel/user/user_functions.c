@@ -14,7 +14,7 @@ struct user_function_def {
 
 static struct program_data *user_data;
 
-static uint64_t timer_read(void) {
+static uint32_t timer_read(void) {
 	return timerget();
 }
 
@@ -26,22 +26,98 @@ static void free(void *ptr) {
 	rm_free(user_data->malloc_context, ptr);
 }
 
-// TODO: file io with either 'int fd' (posix) or 'FILE *p' (libc)
+static void *fopen(const char *path, int flags) {
+	int fd = -1;
+
+	// find the available fd
+	for (int possible_fd = 0; possible_fd < PROGRAM_MAX_FILES; possible_fd++) {
+		if (user_data->files[possible_fd].opened == false) {
+			fd = possible_fd;
+		}
+	}
+
+	if (fd == -1) {
+		errno = EMFILE;
+		return NULL;
+	}
+
+	if (fileopen(&user_data->files[fd], path, flags)) {
+		return &user_data->files[fd];
+	} else {
+		return NULL;
+	}
+}
+
+static int fclose(void *fp) {
+	return fileclose(fp) ? 0 : -1;
+} 
+
+static size_t fread(void *buffer, size_t size, size_t count, void *fp) {
+	int read_result = fileread(fp, buffer, size * count);
+
+	if (read_result > 0) {
+		return read_result / size;
+	} else {
+		return 0;
+	}
+}
+
+static size_t fwrite(const void *buffer, size_t size, size_t count, void *fp) {
+	int read_result = filewrite(fp, buffer, size * count);
+
+	if (read_result > 0) {
+		return read_result / size;
+	} else {
+		return 0;
+	}
+}
+
+static long ftell(void *fp) {
+	if (fp) {
+		return filetell(fp);
+	} else {
+		return -1;
+	}
+}
+
+static int fseek(void *fp, uint32_t offset) {
+	return fileseek(fp, offset) ? 0 : -1;
+}
+
+static int fflush(void *fp) {
+	return fileflush(fp) ? 0 : -1;
+}
+
+static void frewind(void *fp) {
+	filereset(fp);
+}
+
+static int fresize(void *fp, uint32_t size) {
+	return fileresize(fp, size) ? 0 : -1;
+}
+
+static uint32_t fsize(void *fp) {
+	return filesize(fp);
+}
 
 // TODO: add more system functions
+// TODO: timer_wait[_until]
+// TODO: memset, memcpy, etc. (and other stdlib functions)
 #define SYS_FUNC_LIST \
 	X(printf) \
 	X(puts) \
 	X(putc) \
 	X(timer_read) \
-	X(fileopen) \
-	X(fileread) \
-	X(fileclose) \
-	X(filesize) \
-	X(fileresize) \
-	X(fileseek) \
-	X(fileflush) \
-	X(filetell) \
+	X(fopen) \
+	X(fread) \
+	X(fwrite) \
+	X(fclose) \
+	X(fsize) \
+	X(fresize) \
+	X(fseek) \
+	X(fflush) \
+	X(ftell) \
+	X(frewind) \
 	X(malloc) \
 	X(free)
 

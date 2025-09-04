@@ -7,14 +7,13 @@ int main(int argc, const char **argv) {
 		return 1;
 	}
 
-	struct file file;
-
+	FILE *file = NULL;
 	for (int i = 1; i < argc; i++) {
-		if (!fileopen(&file, argv[i], FCREATE)) {
+		if ((file = fopen(argv[i], FCREATE)) == NULL) {
 			printf("error: unable to create %s: %m\n", argv[i]);
 			return 1;
 		}
-		fileclose(&file);
+		fclose(file);
 	}
 	
 	return 0;

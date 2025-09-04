@@ -14,70 +14,75 @@ void puts(const char *str) {
 	UNUSED(str);
 }
 
-uint64_t timer_read(void) {
+uint32_t timer_read(void) {
 	return 0;
 }
 
-bool fileopen(struct file *file, const char *pathname, int flags) {
-	UNUSED(file);
-	UNUSED(pathname);
+FILE *fopen(const char *path, int flags) {
+	UNUSED(path);
 	UNUSED(flags);
 
-	return false;
+	return NULL;
 }
 
-int32_t fileread(struct file *file, void *buffer, uint32_t size) {
-	UNUSED(file);
+int fclose(FILE *fp) {
+	UNUSED(fp);
+
+	return -1;
+} 
+
+size_t fread(void *buffer, size_t size, size_t count, FILE *fp) {
 	UNUSED(buffer);
 	UNUSED(size);
+	UNUSED(count);
+	UNUSED(fp);
 
 	return 0;
 }
 
-int32_t filewrite(struct file *file, const void *buffer, uint32_t size) {
-	UNUSED(file);
+size_t fwrite(const void *buffer, size_t size, size_t count, FILE *fp) {
 	UNUSED(buffer);
 	UNUSED(size);
+	UNUSED(count);
+	UNUSED(fp);
 
 	return 0;
 }
 
-uint32_t filesize(struct file *file) {
-	UNUSED(file);
+long ftell(FILE *fp) {
+	UNUSED(fp);
 
-	return 0;
+	return -1;
 }
 
-bool fileresize(struct file *file, uint32_t size) {
-	UNUSED(file);
+int fseek(FILE *fp, uint32_t offset) {
+	UNUSED(fp);
+	UNUSED(offset);
+
+	return -1;
+}
+
+int fflush(FILE *fp) {
+	UNUSED(fp);
+
+	return -1;
+}
+
+void frewind(FILE *fp) {
+	UNUSED(fp);
+}
+
+int fresize(FILE *fp, uint32_t size) {
+	UNUSED(fp);
 	UNUSED(size);
 
-	return false;
+	return -1;
 }
 
-bool fileseek(struct file *file, uint32_t seek) {
-	UNUSED(file);
-	UNUSED(seek);
-
-	return false;
-}
-
-uint32_t filetell(struct file *file) {
-	UNUSED(file);
+uint32_t fsize(FILE *fp) {
+	UNUSED(fp);
 
 	return 0;
-}
-
-bool fileflush(struct file *file) {
-	UNUSED(file);
-
-	return false;
-}
-
-bool fileclose(struct file *file) {
-	UNUSED(file);
-
-	return false;
 }
 
 void *malloc(size_t size) {

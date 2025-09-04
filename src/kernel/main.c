@@ -48,7 +48,8 @@ void main(void) {
 
 	// TODO: consider making user code relocatable with -fPIC for more address space control
 	
-	// TODO: change file structure so it's opaque to the user
+	// TODO: floating point support, see https://wiki.osdev.org/FPU
+
 	// TODO: add more system functions - keyboard, stuff in std.h
 	// TODO: split the Makefile? kernel, stage 1, and stage 2 could all have their own
 	// TODO: use cmake? or something that allows more IDE integration

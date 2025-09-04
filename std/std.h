@@ -2,7 +2,7 @@
 #define LEGENDARY_JOURNEY_STDLIB
 
 // TODO: documentation
-// TODO: don't expose struct fatdirentry or struct file, use opaque pointers instead
+// TODO: way to iterate over a directory's children
 
 #define NULL ((void*)0)
 
@@ -34,82 +34,39 @@ typedef unsigned int bool;
 #define true (1)
 #define false (0)
 
-#define FAT_FILENAME_LEN 8
-#define FAT_FILEEXT_LEN 3
-
-struct fatdirentry {
-	uint8_t filename[FAT_FILENAME_LEN];
-	uint8_t fileext[FAT_FILEEXT_LEN];
-	uint8_t attributes;
-	uint8_t reserved;
-	uint8_t creationtimetenths;
-    uint16_t creationtime;
-    uint16_t creationdate;
-    uint16_t accessdate;
-    uint16_t firstclusterhi;
-    uint16_t modifytime;
-    uint16_t modifydate;
-    uint16_t firstclusterlo;
-    uint32_t filesize;
-} __attribute__ ((packed));
-
-struct file {
-	
-	struct fatdirentry fsentry;
-
-	bool opened;
-	bool dirty;
-
-	uint32_t position;
-	uint8_t buffer[512];
-
-	uint32_t totalclusters;
-	uint32_t firstcluster;
-	uint32_t lastcluster;
-    uint32_t currentcluster;
-	uint32_t parentdircluster;
-    uint32_t sectorincluster;
-
-};
-
 enum fflags {
 	FTRUNC = 1 << 0, /* open file at start */
 	FAPPEND = 1 << 1, /* open file at end */
 	FCREATE = 1 << 2, /* create a file if none exists */
 	FDIRECTORY = 1 << 3, /* open a dir, or create a dir if FCREATE set */
 };
-
-enum fatdirattributes {
-	READ_ONLY = 0x01,
-	HIDDEN = 0x02,
-	SYSTEM = 0x04,
-	VOLUME_ID = 0x08,
-	DIRECTORY = 0x10,
-	ARCHIVE = 0x20,
-	DEVICE = 0x40,
-	UNUSED = 0x80,
-	LFN = READ_ONLY | HIDDEN | SYSTEM | VOLUME_ID 
-};
+typedef void FILE;
 
 extern void printf(const char *format, ...);
 extern void putc(char ch);
 extern void puts(const char *str);
 
-extern uint64_t timer_read(void);
+extern uint32_t timer_read(void);
 
-extern bool fileopen(struct file *file, const char *pathname, int flags);
+extern FILE *fopen(const char *path, int flags);
 
-extern int32_t fileread(struct file *file, void *buffer, uint32_t size);
-extern int32_t filewrite(struct file *file, const void *buffer, uint32_t size);
+extern int fclose(FILE *fp);
 
-extern uint32_t filesize(struct file *file);
-extern bool fileresize(struct file *file, uint32_t size);
+extern size_t fread(void *buffer, size_t size, size_t count, FILE *fp);
 
-extern bool fileseek(struct file *file, uint32_t seek);
-extern uint32_t filetell(struct file *file);
+extern size_t fwrite(const void *buffer, size_t size, size_t count, FILE *fp);
 
-extern bool fileflush(struct file *file);
-extern bool fileclose(struct file *file);
+extern long ftell(FILE *fp);
+
+extern int fseek(FILE *fp, uint32_t offset);
+
+extern int fflush(FILE *fp);
+
+extern void frewind(FILE *fp);
+
+extern int fresize(FILE *fp, uint32_t size);
+
+extern uint32_t fsize(FILE *fp);
 
 extern void *malloc(size_t size);
 extern void free(void *ptr);

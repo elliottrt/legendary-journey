@@ -15,7 +15,7 @@ I am not at all qualified to do this. The [posted warnings](https://wiki.osdev.o
 - there is only a single running process
 - when a system call is issued, control jumps to the operating system then back to the program
 - the kernel acts as the shell
-- user programs must be compiled with the flags `-nostdlib -Wl,-emain,-q` and link with `liblgstd.so`
+- user programs must be compiled with the flags `-nostdlib -Wl,--emit-relocs` and link with `liblj.so`
 
 ## todo/ideas (in no particular order)
 - change STAGE2_x in Makefile to be dynamically calculated instead of manually

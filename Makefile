@@ -79,7 +79,7 @@ $(OS): $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) $(USER_PROGS)
 -include $(KERNELDEP)
 
 # compilation of user programs
-USERFLAGS=-nostdlib -Wl,-emain,-q -l$(STDLIB) -Lstd -I. -Wno-builtin-declaration-mismatch
+USERFLAGS=-nostdlib -Wl,-emain,--emit-relocs -l$(STDLIB) -Lstd -I. -Wno-builtin-declaration-mismatch
 $(ROOT)/%: user/%.c $(STDLIB_PATH)
 	$(CC) $(USERFLAGS) -o $@ $<
 # touch root so that the filesystem will be regenerated
@@ -129,7 +129,7 @@ clean:
 	$(RM) $(KERNEL_DIR)/link.ld.out
 	$(RM) $(STAGE2TARGETS)
 	$(RM) $(STAGE2DEP)
-	$(RM) $(STDLIB)
+	$(RM) $(STDLIB_PATH)
 
 $(ROOT):
 	mkdir -p $(ROOT)

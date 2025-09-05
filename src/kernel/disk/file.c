@@ -1,6 +1,6 @@
 #include "common/file.h"
 #include "common/std.h"
-#include "kernel/graphics/printf.h"
+#include "kernel/disk/path.h"
 
 enum staticfileid {
 	STATIC_FCREATE_PARENT = 0,
@@ -301,29 +301,6 @@ int filefromentry(struct file *directory, const char *name, struct file *fileout
 	return 0;
 }
 
-uint32_t pathnext(char **start) {
-	char *cursor = *start;
-	uint32_t size = 0;
-	// move past current path
-	while (*cursor != PATH_SEP && *cursor) {
-		(*start)++;
-		cursor++;
-	}
-	// ignore multiple path sep
-	while (*cursor == PATH_SEP) {	
-		(*start)++;
-		cursor++;
-	}
-	// *start is where is should be, continue to
-	// find the size of the path
-	while ( *cursor != PATH_SEP && *cursor) {
-		size++;
-		cursor++;
-	}
-	return size;
-}
-
-
 void fileinit(void) {
 	/* intentionally left empty */
 }
@@ -347,7 +324,7 @@ bool fileopen(struct file *file, const char *pathname, int flags) {
 		return false;
 	}
 
-	while ((pathnextsize = pathnext(&start)) > 0) {
+	while ((pathnextsize = path_next(&start)) > 0) {
 
 		fatformatfilename(start, pathnextsize, fatformattedname);
 
@@ -362,7 +339,7 @@ bool fileopen(struct file *file, const char *pathname, int flags) {
 			char *filename = start;
 
 			// create file
-			if ((flags & FCREATE) && pathnext(&tempstart) == 0) {
+			if ((flags & FCREATE) && path_next(&tempstart) == 0) {
 				// TODO: try to not open a new file here
 				memcpy(&_staticfiles[STATIC_FCREATE_PARENT], file, sizeof(struct file));
 				int res = dircreatefile(&_staticfiles[STATIC_FCREATE_PARENT], file, filename, flags & FDIRECTORY);
@@ -378,7 +355,7 @@ bool fileopen(struct file *file, const char *pathname, int flags) {
 			errno = ENOENT;
 			return false;
 		
-		} else if ((flags & FCREATE) && pathnext(&tempstart) == 0) {
+		} else if ((flags & FCREATE) && path_next(&tempstart) == 0) {
 			// if we find the last part of the filepath and it's the same name
 			// and we're trying to create a file, we error
 			memset(file, 0, sizeof(struct file));

@@ -65,7 +65,7 @@ void *memset(void *dst, uint8_t c, uint32_t n) {
 // implementation referenced from https://github.com/drh/lcc/blob/2b5cf358d9aa6759923dd7461f2df7f7f2a28471/cpp/unix.c#L96
 void *memmove(void *_dst, const void *_src, uint32_t n) {
 	uint8_t *dst = _dst;
-	uint8_t *src = _src;
+	const uint8_t *src = _src;
 
 	if (dst < src) {
 		do {

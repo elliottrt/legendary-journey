@@ -45,6 +45,9 @@ void *memcpy(void *dst, const void *src, uint32_t n);
 /* Sets n bytes of dst to a value c. */
 void *memset(void *dst, uint8_t c, uint32_t n);
 
+/* Copies n bytes of src to dest, safe for overlapping blocks. */
+void *memmove(void *dst, const void *src, uint32_t n);
+
 /* Locates the first occurrence of c in str. */
 char *strchr(const char *str, char c);
 

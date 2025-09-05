@@ -25,7 +25,8 @@ int path_copy(const char *source, char *dest, size_t dest_size);
 //		<0 on failure (sets errno)
 int path_simplify(const char *path, char *dest, size_t dest_size);
 
-// checks whether the given path exists
+// checks whether the given path exists. this path is always
+// considered to be absolute.
 // returns:
 // 		>0 if the path exists,
 // 		=0 if the path does not exist,
@@ -35,6 +36,6 @@ int path_exists(const char *path);
 // updates *start, which points to the path,
 // to point to the next path component left to right
 // returns the size of the current path component
-uint32_t path_next(char **start);
+uint32_t path_next(const char **start);
 
 #endif

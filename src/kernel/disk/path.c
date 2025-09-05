@@ -167,15 +167,17 @@ int path_simplify(const char *path, char *dest, size_t dest_size) {
 }
 
 int path_exists(const char *path) {
-	// READ https://man7.org/linux/man-pages/man7/path_resolution.7.html
-
-	(void) path;
-	errno = ENOSYS;
-	return -1;
+	errno = 0;
+	if (fileopen(NULL, path, FEXISTS))
+		return 1;
+	else if (errno == ENOENT)
+		return 0;
+	else
+		return -1;
 }
 
-uint32_t path_next(char **start) {
-	char *cursor = *start;
+uint32_t path_next(const char **start) {
+	const char *cursor = *start;
 	uint32_t size = 0;
 	// move past current path
 	while (*cursor != PATH_SEP && *cursor) {

@@ -306,6 +306,11 @@ void fileinit(void) {
 }
 
 bool fileopen(struct file *file, const char *pathname, int flags) {
+	if (file == NULL && (flags & FEXISTS)) {
+		// this function call is solely to check if the file exists
+		flags = FEXISTS;
+		file = &_staticfiles[STATIC_FCREATE_PARENT];
+	}
 
 	if (flags == 0)
 		flags = FTRUNC;
@@ -316,7 +321,7 @@ bool fileopen(struct file *file, const char *pathname, int flags) {
 
 	int pathnextsize = 0;
 
-	char *start = (char *) pathname;
+	const char *start = pathname;
 	char fatformattedname[FAT_FILETOTAL_LEN];
 
 	if (pathname == NULL || pathname[0] != PATH_SEP) {
@@ -328,7 +333,7 @@ bool fileopen(struct file *file, const char *pathname, int flags) {
 
 		fatformatfilename(start, pathnextsize, fatformattedname);
 
-		char *tempstart = start;
+		const char *tempstart = start;
 
 		if (filefromentry(file, fatformattedname, file) < 0) {
 
@@ -336,7 +341,7 @@ bool fileopen(struct file *file, const char *pathname, int flags) {
 			// part of the filepath, either:
 			// create a new file if FCREATE
 			// or return an error
-			char *filename = start;
+			const char *filename = start;
 
 			// create file
 			if ((flags & FCREATE) && path_next(&tempstart) == 0) {
@@ -370,12 +375,18 @@ bool fileopen(struct file *file, const char *pathname, int flags) {
 		}
 	}
 
+	if (flags & FEXISTS) {
+		// don't open the file, we found out that it exists
+		// and that's all we need
+		return true;
+	}
+
 	if ((flags & FDIRECTORY) && !fileisdir(file)) {
 		errno = ENOTDIR;
 		return false;
 	}
 
-	// if the file is a directory and the user didn't as for one, error
+	// if the file is a directory and the user didn't ask for one, error
 	if (fileisdir(file) && !(flags & FDIRECTORY)) {
 		errno = EISDIR;
 		return false;
@@ -390,8 +401,7 @@ bool fileopen(struct file *file, const char *pathname, int flags) {
 
 }
 
-int32_t _fileread(struct file *file, void *buffer, uint32_t size)
-{
+int32_t _fileread(struct file *file, void *buffer, uint32_t size) {
 	uint32_t sectorpos, newsectorstoread;
 	uint8_t *bytebuffer = (uint8_t *) buffer;
 	uint32_t filetotalbytes = file->totalclusters * _vbootsector->sectorspercluster * _vbootsector->bytespersector;
@@ -502,17 +512,20 @@ int32_t _filewrite(struct file *file, const void *buffer, uint32_t size) {
 int32_t filewrite(struct file *file, const void *buffer, uint32_t size) {
 	if (file == NULL || buffer == NULL) {
 		errno = EINVAL;
-		return false;
+		return -1;
 	}
 
 	if (file->opened == 0){
 		errno = EBADF;
-		return false;
+		return -1;
 	}
 
 	if (size == 0) return true;
 
-	// TODO: we're not checking if file is read-only...
+	if (file->fsentry.attributes & READ_ONLY) {
+		errno = EACCES;
+		return -1;
+	}
 
 	return _filewrite(file, buffer, size);
 }

@@ -29,10 +29,11 @@ struct file {
 };
 
 enum fflags {
-	FTRUNC = BIT(0), /* open file at start */
-	FAPPEND = BIT(1), /* open file at end */
-	FCREATE = BIT(2), /* create a file if none exists */
-	FDIRECTORY = BIT(3), /* open a dir, or create a dir if FCREATE set */
+	FTRUNC = BIT(0), 		/* open file at start */
+	FAPPEND = BIT(1), 		/* open file at end */
+	FCREATE = BIT(2), 		/* create a file if none exists */
+	FDIRECTORY = BIT(3), 	/* open a dir, or create a dir if FCREATE set */
+	FEXISTS = BIT(4),		/* check if the file exists, but don't open it */
 };
 
 // TODO: flag in direntry: is file open already

@@ -166,9 +166,9 @@ int path_simplify(const char *path, char *dest, size_t dest_size) {
 	return chars_used ? chars_used : 1;
 }
 
-int path_exists(const char *path) {
+int path_exists(const char *path, bool require_dir) {
 	errno = 0;
-	if (fileopen(NULL, path, FEXISTS))
+	if (fileopen(NULL, path, FEXISTS | (require_dir ? FDIRECTORY : 0)))
 		return 1;
 	else if (errno == ENOENT)
 		return 0;

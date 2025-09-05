@@ -27,11 +27,13 @@ int path_simplify(const char *path, char *dest, size_t dest_size);
 
 // checks whether the given path exists. this path is always
 // considered to be absolute.
+// if require_dir is set, the function will check that a directory exists at that path.
+// if it is not a directory, returns <0
 // returns:
 // 		>0 if the path exists,
 // 		=0 if the path does not exist,
 //		<0 if there was an error, sets errno
-int path_exists(const char *path);
+int path_exists(const char *path, bool require_dir);
 
 // updates *start, which points to the path,
 // to point to the next path component left to right

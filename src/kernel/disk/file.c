@@ -308,7 +308,6 @@ void fileinit(void) {
 bool fileopen(struct file *file, const char *pathname, int flags) {
 	if (file == NULL && (flags & FEXISTS)) {
 		// this function call is solely to check if the file exists
-		flags = FEXISTS;
 		file = &_staticfiles[STATIC_FCREATE_PARENT];
 	}
 
@@ -375,15 +374,15 @@ bool fileopen(struct file *file, const char *pathname, int flags) {
 		}
 	}
 
+	if ((flags & FDIRECTORY) && !fileisdir(file)) {
+		errno = ENOTDIR;
+		return false;
+	}
+
 	if (flags & FEXISTS) {
 		// don't open the file, we found out that it exists
 		// and that's all we need
 		return true;
-	}
-
-	if ((flags & FDIRECTORY) && !fileisdir(file)) {
-		errno = ENOTDIR;
-		return false;
 	}
 
 	// if the file is a directory and the user didn't ask for one, error

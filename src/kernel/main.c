@@ -65,5 +65,5 @@ void main(void) {
 	}
 
 	printf("initialization complete, halting.\n");
-	cli(); halt();
+	STOP();
 }

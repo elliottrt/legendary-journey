@@ -80,7 +80,7 @@ $(OS): $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) $(USER_PROGS)
 
 # compilation of user programs
 USERFLAGS=-nostdlib -Wl,--emit-relocs -l$(STDLIB) -Lstd -isystem std
-$(ROOT)/%: user/%.c $(STDLIB_PATH)
+$(ROOT)/%: user/%.c $(STDLIB_PATH) $(ROOT)
 	$(CC) $(USERFLAGS) -o $@ $<
 # touch root so that the filesystem will be regenerated
 	touch $(ROOT)

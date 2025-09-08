@@ -153,13 +153,13 @@ int printf(const char *format, ...) {
 			char next = format[++i];
 
 			// calculate how much padding
+			// TODO: padding with * for user provided
 			padding = 0;
 			while (isdigit(next)) {
 				padding = padding * 10 + (next - '0');
 				next = format[++i];
 			}
 
-			// TODO: padding only affects integers. it should also affect %c and %s
 			// TODO: printing sized string with %.<size>s (and %.*s)
 
 			islong = next == 'l';
@@ -188,6 +188,10 @@ int printf(const char *format, ...) {
 					}
 				} break;
 				case 'c': {
+					// insert padding
+					for (int i = 0; i < padding - 1; i++)
+						putc(' ');
+
 					putc(*varargs);
 					varargs++;
 				} break;
@@ -197,6 +201,15 @@ int printf(const char *format, ...) {
 				} break;
 				case 's': {
 					char *s = (char *) *varargs;
+
+					if (padding > 0) {
+						padding -= strlen(s);
+
+						// insert padding
+						for (int i = 0; i < padding; i++)
+							putc(' ');
+					}
+
 					while (*s) putc(*s++);
 					varargs++;
 				} break;

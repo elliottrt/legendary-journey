@@ -9,6 +9,7 @@
 #include "kernel/user/user_functions.h"
 
 // TODO: keep list of paths to search for executables like ls, mkdir, etc. and put all of the user executables into /bin
+// TODO: stdin, stdout, stderr FILE* in stdlib that are checked for in user_functions.c. stderr = stdout, use kbd_getc for stdin
 
 // shell state
 char dir[PATH_MAX] = DEFAULT_PATH;

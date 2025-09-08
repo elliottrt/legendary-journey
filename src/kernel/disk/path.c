@@ -209,7 +209,8 @@ int path_load(const char *parent, const char *child, char *dest, size_t dest_siz
 	if (*child == '/') {
 		// load straight into temp_path
 		// TODO: do we need to simplify this path?
-		return path_copy(child, dest, dest_size);
+		if (path_copy(child, dest, dest_size) < 0) return -1;
+		return path_simplify(dest, dest, dest_size);
 	} else {
 		// relative path, concat with user path
 		// TODO: does this work?

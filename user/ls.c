@@ -24,7 +24,7 @@ struct fatdirentry {
 int main(int argc, char **argv) {
 	FILE *dir = NULL;
 
-	if ((dir = fopen(argc >= 2 ? argv[1] : "/", FDIRECTORY)) == NULL)
+	if ((dir = fopen(argc >= 2 ? argv[1] : "", FDIRECTORY)) == NULL)
 		return -1;
 
 	struct fatdirentry child;

@@ -6,6 +6,8 @@
 // maximum size of a file path including null terminator
 #define PATH_MAX (256)
 
+#define DEFAULT_PATH {'/', 0}
+
 // concatenates two paths and stores the result in dest
 // returns:
 // 		number of chars in dest on success including null terminator,

@@ -8,7 +8,7 @@ EMU=qemu-system-i386
 
 OS=os.img
 ROOT=root
-USER_PROGS=echo ls cat mkdir touch foo
+USER_PROGS=echo ls cat mkdir touch
 USER_PROGS:=$(addprefix $(ROOT)/,$(USER_PROGS))
 
 SOURCE_DIR=src
@@ -129,6 +129,9 @@ clean:
 	$(RM) $(KERNEL_DIR)/link.ld.out
 	$(RM) $(STAGE2TARGETS)
 	$(RM) $(STAGE2DEP)
+	$(RM) $(STAGE2BIN)
+	$(RM) $(STAGE1BIN).o
+	$(RM) $(STAGE1BIN)
 	$(RM) $(STDLIB_PATH)
 
 $(ROOT):

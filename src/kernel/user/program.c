@@ -5,7 +5,7 @@
 #include "kernel/graphics/printf.h"
 
 // path used in loading programs
-char program_path[PATH_MAX] = {0};
+char program_path[PATH_MAX] = DEFAULT_PATH;
 
 user_entry_t program_load(const char *filename) {
 	struct file program_file;

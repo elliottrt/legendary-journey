@@ -9,7 +9,7 @@
 #include "kernel/user/user_functions.h"
 
 // shell state
-char dir[PATH_MAX] = {'/', 0};
+char dir[PATH_MAX] = DEFAULT_PATH;
 
 // load a path into temp_path, using user_data->dir if path is not absolute
 static int load_path(const char *path) {

@@ -13,7 +13,7 @@ struct user_function_def {
 };
 
 static struct program_data *user_data;
-char temp_path[PATH_MAX];
+char temp_path[PATH_MAX] = DEFAULT_PATH;
 
 // load a path into temp_path, using user_data->dir if path is not absolute
 static int load_path(const char *path) {
@@ -82,6 +82,8 @@ static void *fopen(const char *path, int flags) {
 	if (load_path(path) < 0) {
 		return NULL;
 	}
+
+	printf("temp_path = '%s'\n", temp_path);
 
 	if (fileopen(&user_data->files[fd], temp_path, flags)) {
 		return &user_data->files[fd];

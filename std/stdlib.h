@@ -54,6 +54,10 @@ extern int puts(const char *str);
 
 extern uint32_t timer_read(void);
 
+extern void timer_wait_until(uint32_t time);
+
+extern void timer_wait(uint32_t ms);
+
 extern FILE *fopen(const char *path, int flags);
 
 extern int fclose(FILE *fp);

@@ -118,7 +118,6 @@ int shell_exec_args(int argc, char **argv) {
 	// set the context for user functions
 	user_function_data_block(data);
 
-	// TODO: this will call with argv[0] equal to the relative path used. I think we just want the basename
 	int retval = data->entry(argc, argv);
 	user_mode_end(data);
 

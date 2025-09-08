@@ -36,6 +36,14 @@ uint32_t timer_read(void) {
 	return 0;
 }
 
+extern void timer_wait_until(uint32_t time) {
+	UNUSED(time);
+}
+
+extern void timer_wait(uint32_t ms) {
+	UNUSED(ms);
+}
+
 FILE *fopen(const char *path, int flags) {
 	UNUSED(path);
 	UNUSED(flags);

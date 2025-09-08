@@ -129,7 +129,6 @@ static uint32_t fsize(void *fp) {
 }
 
 // TODO: add more system functions
-// TODO: timer_wait[_until]
 // TODO: memset, memcpy, etc. (and other stdlib functions)
 #define SYS_FUNC_LIST \
 	X(getcwd) \
@@ -138,6 +137,8 @@ static uint32_t fsize(void *fp) {
 	X(puts) \
 	X(putchar) \
 	X(timer_read) \
+	X(timer_wait_until) \
+	X(timer_wait) \
 	X(fopen) \
 	X(fread) \
 	X(fwrite) \

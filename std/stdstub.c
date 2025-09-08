@@ -2,9 +2,19 @@
 
 #define UNUSED(V) ((void) V)
 
+// entry point of program, otherwise need a linker flag
 int _start(int argc, char **argv) {
 	extern int main(int, char**);
 	return main(argc, argv);
+}
+
+extern const char *getcwd(void) {
+	return NULL;
+}
+
+extern int setcwd(const char *path) {
+	UNUSED(path);
+	return -1;
 }
 
 int printf(const char *format, ...) {

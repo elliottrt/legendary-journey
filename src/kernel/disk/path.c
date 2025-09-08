@@ -152,6 +152,7 @@ int path_simplify(const char *path, char *dest, size_t dest_size) {
 
 	// because we start working at the end of dest,
 	// we need to shift the whole path up to the start of dest.
+	// TODO: use memmove?
 	size_t shift = d - dest + 1;
 	for (size_t i = 0; i < dest_size - shift; i++) {
 		dest[i] = dest[i + shift];

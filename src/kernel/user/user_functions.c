@@ -13,6 +13,40 @@ struct user_function_def {
 };
 
 static struct program_data *user_data;
+char temp_path[PATH_MAX];
+
+// load a path into temp_path, using user_data->dir if path is not absolute
+static int load_path(const char *path) {
+	if (!path) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	// check if absolute path
+	if (*path == '/') {
+		// load straight into temp_path
+		// TODO: do we need to simplify this path?
+		return path_copy(path, temp_path, PATH_MAX);
+	} else {
+		// relative path, concat with user path
+		return path_concat(user_data->dir, path, temp_path, PATH_MAX);
+	}
+}
+
+static const char *getcwd(void) {
+	return user_data->dir;
+}
+
+static int setcwd(const char *path) {
+	// put the path into temp
+	if (load_path(path) < 0) return -1;
+
+	// make sure the new path exists, is a directory, etc.
+	if (path_exists(temp_path, 1) <= 0) return -1;
+
+	// put new path into user_data
+	return path_copy(temp_path, user_data->dir, PATH_MAX);
+}
 
 static int putchar(int ch) {
 	return putc((char) ch);
@@ -45,7 +79,11 @@ static void *fopen(const char *path, int flags) {
 		return NULL;
 	}
 
-	if (fileopen(&user_data->files[fd], path, flags)) {
+	if (load_path(path) < 0) {
+		return NULL;
+	}
+
+	if (fileopen(&user_data->files[fd], temp_path, flags)) {
 		return &user_data->files[fd];
 	} else {
 		return NULL;
@@ -108,6 +146,8 @@ static uint32_t fsize(void *fp) {
 // TODO: timer_wait[_until]
 // TODO: memset, memcpy, etc. (and other stdlib functions)
 #define SYS_FUNC_LIST \
+	X(getcwd) \
+	X(setcwd) \
 	X(printf) \
 	X(puts) \
 	X(putchar) \

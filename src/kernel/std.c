@@ -98,6 +98,14 @@ uint32_t strlen(const char *str) {
 	return len - 1;
 }
 
+// TODO: test
+int strcmp(const char *str1, const char *str2) {
+	for (; *str1 && *str2; str1++, str2++) {
+		if (*str1 != *str2) return (int) *str2 - (int) *str1;
+	}
+	return (int) *str2 - (int) *str1;
+}
+
 int strncmp(const char *str1, const char *str2, uint32_t n) {
 	while(*str1 && *str2 && *str1 == *str2 && --n)
 	{

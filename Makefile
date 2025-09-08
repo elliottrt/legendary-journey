@@ -8,7 +8,7 @@ EMU=qemu-system-i386
 
 OS=os.img
 ROOT=root
-USER_PROGS=echo ls cat mkdir touch
+USER_PROGS=echo ls cat mkdir touch foo
 USER_PROGS:=$(addprefix $(ROOT)/,$(USER_PROGS))
 
 SOURCE_DIR=src

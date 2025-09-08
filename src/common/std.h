@@ -54,6 +54,9 @@ char *strchr(const char *str, char c);
 /* Calculates the length of str. */
 uint32_t strlen(const char *str);
 
+/* Lexicographically compares str1 and str2 */
+int strcmp(const char *str1, const char *str2);
+
 /* Compares up to n characters of str1 and str2. */
 int strncmp(const char *str1, const char *str2, uint32_t n);
 

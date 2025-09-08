@@ -34,6 +34,9 @@ typedef unsigned int bool;
 #define true (1)
 #define false (0)
 
+#define EXIT_SUCCESS 0
+#define EXIT_FAILURE 1
+
 enum fflags {
 	FTRUNC = 1 << 0, /* open file at start */
 	FAPPEND = 1 << 1, /* open file at end */
@@ -41,6 +44,9 @@ enum fflags {
 	FDIRECTORY = 1 << 3, /* open a dir, or create a dir if FCREATE set */
 };
 typedef void FILE;
+
+extern const char *getcwd(void);
+extern int setcwd(const char *path);
 
 extern int printf(const char *format, ...);
 extern int putchar(int ch);

@@ -8,6 +8,70 @@
 #include "kernel/memory/malloc.h"
 #include "kernel/user/user_functions.h"
 
+// shell state
+char dir[PATH_MAX] = {'/', 0};
+
+// load a path into temp_path, using user_data->dir if path is not absolute
+static int load_path(const char *path) {
+	if (!path) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	// check if absolute path
+	if (*path == '/') {
+		// load straight into temp_path
+		// TODO: do we need to simplify this path?
+		return path_copy(path, dir, PATH_MAX);
+	} else {
+		// relative path, concat with user path
+		// TODO: does this work?
+		return path_concat(dir, path, dir, PATH_MAX);
+	}
+}
+
+// shell builtin definitions
+
+static int shell_cd_usage(int retval, const char *message) {
+
+	printf("usage: cd <path>\n");
+
+	if (message) printf("error: %s\n", message);
+
+	return retval;
+}
+
+static int shell_cd(int argc, char **argv) {
+	if (argc != 2) {
+		return shell_cd_usage(1, "no argument provided");
+	}
+
+	if (load_path(argv[1]) < 0) {
+		return shell_cd_usage(1, strerror(errno));
+	} else {
+		return 0;
+	}
+}
+
+// builtin function list
+typedef int (*shell_builtin_t)(int, char**);
+struct {
+	const char name[8];
+	shell_builtin_t func;
+} shell_builtins[] = {
+	{"cd", shell_cd}
+};
+
+// checks if a given function is builtin. if it is,
+// returns its pointer, otherwise null
+shell_builtin_t shell_check_builtin(const char *name) {
+	for (size_t i = 0; i < sizeof(shell_builtins) / sizeof(*shell_builtins); i++) {
+		if (strcmp(name, shell_builtins[i].name) == 0)
+			return shell_builtins[i].func;
+	}
+	return NULL;
+}
+
 int shell_exec(char *command) {
 	char *argv[SHELL_MAX_ARGS] = {0};
 	int argc = 0;
@@ -59,12 +123,18 @@ int shell_exec_args(int argc, char **argv) {
 	// make sure at least 1 arg
 	if (argc < 1) return SHELL_FAIL;
 
-	struct program_data *data = user_mode_start(argv[0]);
+	shell_builtin_t maybe_builtin = shell_check_builtin(argv[0]);
+	if (maybe_builtin != NULL) {
+		return maybe_builtin(argc, argv);
+	}
+
+	struct program_data *data = user_mode_start(dir, argv[0]);
 	if (data == NULL) return SHELL_FAIL;
 
 	// set the context for user functions
 	user_function_data_block(data);
 
+	// TODO: this will call with argv[0] equal to the relative path used. I think we just want the basename
 	int retval = data->entry(argc, argv);
 	user_mode_end(data);
 
@@ -72,7 +142,7 @@ int shell_exec_args(int argc, char **argv) {
 }
 
 int shell(void) {
-	printf(SHELL_PROMPT);
+	printf("%s%s", dir, SHELL_PROMPT);
 
 	char cmd[SHELL_MAX_CMD_LEN] = {0};
 	uint32_t cmd_idx = 0;

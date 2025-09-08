@@ -22,11 +22,22 @@ int shell_builtin_cd(int argc, char **argv, struct shell_state *state) {
 	}
 }
 
+int shell_builtin_clear(int argc, char **argv, struct shell_state *state) {
+	UNUSED(argc);
+	UNUSED(argv);
+	UNUSED(state);
+
+	printf_clear();
+
+	return 0;
+}
+
 struct {
 	const char name[8];
 	shell_builtin_t func;
 } shell_builtins[] = {
-	{"cd", shell_builtin_cd}
+	{"cd", shell_builtin_cd},
+	{"clear", shell_builtin_clear},
 };
 
 // checks if a given function is builtin. if it is,

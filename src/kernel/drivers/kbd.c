@@ -65,7 +65,7 @@ static void kbdhandler(struct registers *regs) {
     char keychar = getkeychar(scancode);
 
     keyboard.keys[KEY_SCANCODE(scancode)] = KEY_PRESSED(scancode);
-    keyboard.chars[keychar] = KEY_PRESSED(scancode);
+    keyboard.chars[(int) keychar] = KEY_PRESSED(scancode);
 
     // TODO: putting in keychar means we lose information about the scancode itself. maybe switch to putting in scancode instead? it's only a 2byte, could easily make key_input_buf bigger.
     if (KEY_PRESSED(scancode) && keychar != 0) {

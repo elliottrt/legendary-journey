@@ -47,6 +47,14 @@ void move_cursor(int32_t delta) {
 	screen_addr[cursor] = at_cursor | COLOR(0, CURSOR_COLOR) << 8;
 }
 
+void printf_clear(void) {
+	uint16_t clear = (uint16_t) color << 8;
+	for (size_t i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++) {
+		screen_addr[i] = clear;
+	}
+	cursor = 0;
+}
+
 int putc(char c) {
 	switch (c) {
 		case '\n':

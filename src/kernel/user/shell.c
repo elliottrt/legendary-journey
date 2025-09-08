@@ -9,29 +9,9 @@
 #include "kernel/user/user_functions.h"
 
 // TODO: keep list of paths to search for executables like ls, mkdir, etc. and put all of the user executables into /bin
-// TODO: cd folder then /ls results in no such file or directory error. happens before ls calls fopen
 
 // shell state
 char dir[PATH_MAX] = DEFAULT_PATH;
-
-// load a path into temp_path, using user_data->dir if path is not absolute
-static int load_path(const char *path) {
-	if (!path) {
-		errno = EINVAL;
-		return -1;
-	}
-
-	// check if absolute path
-	if (*path == '/') {
-		// load straight into temp_path
-		// TODO: do we need to simplify this path?
-		return path_copy(path, dir, PATH_MAX);
-	} else {
-		// relative path, concat with user path
-		// TODO: does this work?
-		return path_concat(dir, path, dir, PATH_MAX);
-	}
-}
 
 // shell builtin definitions
 
@@ -49,7 +29,7 @@ static int shell_cd(int argc, char **argv) {
 		return shell_cd_usage(1, "no argument provided");
 	}
 
-	if (load_path(argv[1]) < 0) {
+	if (path_load(dir, argv[1], dir, sizeof(dir)) < 0) {
 		return shell_cd_usage(1, strerror(errno));
 	} else {
 		return 0;

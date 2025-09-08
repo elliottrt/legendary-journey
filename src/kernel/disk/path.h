@@ -42,4 +42,11 @@ int path_exists(const char *path, bool require_dir);
 // returns the size of the current path component
 uint32_t path_next(const char **start);
 
+// if child is absolute: copied child to dest
+// else: concatenates parent and child into dest
+// returns:
+//		>=0 on success
+//		<0 on failure
+int path_load(const char *parent, const char *child, char *dest, size_t dest_size);
+
 #endif

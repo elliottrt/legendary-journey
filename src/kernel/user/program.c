@@ -29,11 +29,13 @@ struct program_data *user_mode_start(const char *path, const char *filename) {
 		return NULL;
 	}
 
-	// try loading program
-	if (path_concat(path, filename, program_path, sizeof(program_path)) < 0) {
+	// get the new path
+	if (path_load(path, filename, program_path, sizeof(program_path)) < 0) {
 		rm_free(rm_global_ctx, data);
 		return NULL;
 	}
+
+	// try loading program
 
 	data->entry = program_load(program_path);
 	if (!data->entry) {

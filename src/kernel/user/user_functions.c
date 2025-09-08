@@ -15,23 +15,8 @@ struct user_function_def {
 static struct program_data *user_data;
 char temp_path[PATH_MAX] = DEFAULT_PATH;
 
-// load a path into temp_path, using user_data->dir if path is not absolute
-static int load_path(const char *path) {
-	if (!path) {
-		errno = EINVAL;
-		return -1;
-	}
-
-	// check if absolute path
-	if (*path == '/') {
-		// load straight into temp_path
-		// TODO: do we need to simplify this path?
-		return path_copy(path, temp_path, PATH_MAX);
-	} else {
-		// relative path, concat with user path
-		return path_concat(user_data->dir, path, temp_path, PATH_MAX);
-	}
-}
+// convenience macro for this. it may be used a lot
+#define LOAD_PATH(P) path_load(user_data->dir, P, temp_path, sizeof(temp_path))
 
 static const char *getcwd(void) {
 	return user_data->dir;
@@ -39,7 +24,8 @@ static const char *getcwd(void) {
 
 static int setcwd(const char *path) {
 	// put the path into temp
-	if (load_path(path) < 0) return -1;
+	if (path_load(user_data->dir, path, temp_path, sizeof(temp_path)) < 0)
+		return -1;
 
 	// make sure the new path exists, is a directory, etc.
 	if (path_exists(temp_path, 1) <= 0) return -1;
@@ -79,7 +65,7 @@ static void *fopen(const char *path, int flags) {
 		return NULL;
 	}
 
-	if (load_path(path) < 0) {
+	if (LOAD_PATH(path) < 0) {
 		return NULL;
 	}
 

@@ -198,3 +198,21 @@ uint32_t path_next(const char **start) {
 	}
 	return size;
 }
+
+int path_load(const char *parent, const char *child, char *dest, size_t dest_size) {
+	if (!parent || !child || !dest) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	// check if absolute path
+	if (*child == '/') {
+		// load straight into temp_path
+		// TODO: do we need to simplify this path?
+		return path_copy(child, dest, dest_size);
+	} else {
+		// relative path, concat with user path
+		// TODO: does this work?
+		return path_concat(parent, child, dest, dest_size);
+	}
+}

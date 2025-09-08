@@ -1,12 +1,20 @@
 #ifndef _SHELL
 #define _SHELL
 
+#include "kernel/disk/path.h"
+
 #define SHELL_FAIL (-1)
 #define SHELL_MAX_ARGS (32) // maximum function arguments
 #define SHELL_MAX_CMD_LEN (256) // maximum size of a shell command
 #define SHELL_PROMPT "$ "
 
 // TODO: shell_exec shouldn't modify the command string
+
+// state of the running shell,
+// passed to builtin functions
+struct shell_state {
+	char dir[PATH_MAX];
+};
 
 // returns either the result of the command on success
 // or SHELL_FAIL on failure

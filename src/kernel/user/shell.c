@@ -7,54 +7,15 @@
 #include "kernel/drivers/kbd.h"
 #include "kernel/memory/malloc.h"
 #include "kernel/user/user_functions.h"
+#include "kernel/user/shell_builtins.h"
 
 // TODO: keep list of paths to search for executables like ls, mkdir, etc. and put all of the user executables into /bin
 // TODO: stdin, stdout, stderr FILE* in stdlib that are checked for in user_functions.c. stderr = stdout, use kbd_getc for stdin
 
 // shell state
-char dir[PATH_MAX] = DEFAULT_PATH;
-
-// shell builtin definitions
-
-static int shell_cd_usage(int retval, const char *message) {
-
-	printf("usage: cd <path>\n");
-
-	if (message) printf("error: %s\n", message);
-
-	return retval;
-}
-
-static int shell_cd(int argc, char **argv) {
-	if (argc != 2) {
-		return shell_cd_usage(1, "no argument provided");
-	}
-
-	if (path_load(dir, argv[1], dir, sizeof(dir)) < 0) {
-		return shell_cd_usage(1, strerror(errno));
-	} else {
-		return 0;
-	}
-}
-
-// builtin function list
-typedef int (*shell_builtin_t)(int, char**);
-struct {
-	const char name[8];
-	shell_builtin_t func;
-} shell_builtins[] = {
-	{"cd", shell_cd}
+struct shell_state state = {
+	.dir = DEFAULT_PATH
 };
-
-// checks if a given function is builtin. if it is,
-// returns its pointer, otherwise null
-shell_builtin_t shell_check_builtin(const char *name) {
-	for (size_t i = 0; i < sizeof(shell_builtins) / sizeof(*shell_builtins); i++) {
-		if (strcmp(name, shell_builtins[i].name) == 0)
-			return shell_builtins[i].func;
-	}
-	return NULL;
-}
 
 int shell_exec(char *command) {
 	char *argv[SHELL_MAX_ARGS] = {0};
@@ -109,10 +70,10 @@ int shell_exec_args(int argc, char **argv) {
 
 	shell_builtin_t maybe_builtin = shell_check_builtin(argv[0]);
 	if (maybe_builtin != NULL) {
-		return maybe_builtin(argc, argv);
+		return maybe_builtin(argc, argv, &state);
 	}
 
-	struct program_data *data = user_mode_start(dir, argv[0]);
+	struct program_data *data = user_mode_start(state.dir, argv[0]);
 	if (data == NULL) return SHELL_FAIL;
 
 	// set the context for user functions
@@ -125,7 +86,7 @@ int shell_exec_args(int argc, char **argv) {
 }
 
 int shell(void) {
-	printf("%s%s", dir, SHELL_PROMPT);
+	printf("%s%s", state.dir, SHELL_PROMPT);
 
 	char cmd[SHELL_MAX_CMD_LEN] = {0};
 	uint32_t cmd_idx = 0;

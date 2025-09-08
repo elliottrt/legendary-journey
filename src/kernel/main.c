@@ -54,7 +54,6 @@ void main(void) {
 	// TODO: split the Makefile? kernel, stage 1, and stage 2 could all have their own
 	// TODO: use cmake? or something that allows more IDE integration
 
-	// TODO: shell directory, ability to change it (pwd, cd, etc.)
 	// TODO: write user programs
 	// TODO: port txed to this
 

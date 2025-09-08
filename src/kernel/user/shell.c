@@ -8,6 +8,9 @@
 #include "kernel/memory/malloc.h"
 #include "kernel/user/user_functions.h"
 
+// TODO: keep list of paths to search for executables like ls, mkdir, etc. and put all of the user executables into /bin
+// TODO: cd folder then /ls results in no such file or directory error. happens before ls calls fopen
+
 // shell state
 char dir[PATH_MAX] = DEFAULT_PATH;
 

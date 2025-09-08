@@ -83,8 +83,6 @@ static void *fopen(const char *path, int flags) {
 		return NULL;
 	}
 
-	printf("temp_path = '%s'\n", temp_path);
-
 	if (fileopen(&user_data->files[fd], temp_path, flags)) {
 		return &user_data->files[fd];
 	} else {

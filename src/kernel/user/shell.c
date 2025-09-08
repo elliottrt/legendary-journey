@@ -13,9 +13,7 @@
 // TODO: stdin, stdout, stderr FILE* in stdlib that are checked for in user_functions.c. stderr = stdout, use kbd_getc for stdin
 
 // shell state
-struct shell_state state = {
-	.dir = DEFAULT_PATH
-};
+struct shell_state state = {0};
 
 int shell_exec(char *command) {
 	char *argv[SHELL_MAX_ARGS] = {0};

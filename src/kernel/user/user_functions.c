@@ -13,7 +13,7 @@ struct user_function_def {
 };
 
 static struct program_data *user_data;
-char temp_path[PATH_MAX] = DEFAULT_PATH;
+char temp_path[PATH_MAX];
 
 // convenience macro for this. it may be used a lot
 #define LOAD_PATH(P) path_load(user_data->dir, P, temp_path, sizeof(temp_path))

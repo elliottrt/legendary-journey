@@ -3,6 +3,8 @@
 
 #include "kernel/user/shell.h"
 
+// TODO: clear screen builtin
+
 typedef int (*shell_builtin_t)(int, char **, struct shell_state *);
 
 // checks if a given function is builtin. if it is,

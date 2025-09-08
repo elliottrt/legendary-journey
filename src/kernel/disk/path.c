@@ -77,6 +77,11 @@ int path_simplify(const char *path, char *dest, size_t dest_size) {
 		s--;
 	}
 
+	// reduce leading PATH_SEP to at most 1
+	while (s >= path + 1 && path[0] == PATH_SEP && path[1] == PATH_SEP) {
+		path++;
+	}
+
 	int dot_dot_count = 0; // for ..
 	int should_drop_sep = 0; // for .
 	

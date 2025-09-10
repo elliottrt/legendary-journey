@@ -6,13 +6,12 @@ struct idtentry entries[256] = {0};
 struct idtptr pointer = {0};
 
 void idtset(uint8_t index, void (*base)(struct registers), uint16_t selector, enum idt_flags flags) {
-    entries[index] = (struct idtentry) {
-        .offset_lo = ((uint32_t) base) & 0xFFFF,
-        .offset_hi = (((uint32_t) base) >> 16) & 0xFFFF,
-        .selector = selector,
-        .flags = flags,
-        .reserved = 0
-    };
+    struct idtentry *entry = &entries[index];
+
+    entry->offset_lo = ((uint32_t) base) & 0xFFFF;
+    entry->offset_hi = (((uint32_t) base) >> 16) & 0xFFFF;
+    entry->selector = selector;
+    entry->flags = flags;
 }
 
 void idtenable(uint8_t index) {

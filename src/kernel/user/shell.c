@@ -11,6 +11,8 @@
 
 // TODO: keep list of paths to search for executables like ls, mkdir, etc. and put all of the user executables into /bin
 // TODO: stdin, stdout, stderr FILE* in stdlib that are checked for in user_functions.c. stderr = stdout, use kbd_getc for stdin
+// TODO: arrow keys + insert + delete in shell command
+// TODO: shell history
 
 // shell state
 struct shell_state state = {0};

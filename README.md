@@ -25,7 +25,6 @@ I am not at all qualified to do this. The [posted warnings](https://wiki.osdev.o
 - video mode
 - figure out what video modes are available
 - actually learn what I'm doing
-- printf %_ should clear the screen? maybe %e for error and %s for normal colors?
 - in(b|w)/out(b|w) might need the whole ebp/esp thing
 
 (list partly from [here](https://wiki.osdev.org/Rolling_Your_Own_Bootloader))

@@ -47,7 +47,6 @@ STAGE2_OFFSET=0x7E00
 # size in sectors (512 bytes)
 STAGE2_SIZE=24
 # kernel virtual memory location
-# NOTE: if this is changed, src/kernel/link.ld also needs to be changed
 KERNBASE=0x80000000
 # place to load user code at (seems to be a linux default)
 USERBASE=0x08048000

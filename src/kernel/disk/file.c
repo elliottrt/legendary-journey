@@ -1,6 +1,8 @@
 #include "common/file.h"
 #include "common/std.h"
 #include "kernel/disk/path.h"
+#include "kernel/memory/kalloc.h"
+#include "kernel/graphics/printf.h"
 
 enum staticfileid {
 	STATIC_FCREATE_PARENT = 0,
@@ -8,8 +10,9 @@ enum staticfileid {
 	STATIC_SIZE = 2
 };
 
-// TODO: dynamically allocate with kalloc?
-struct file _staticfiles[STATIC_SIZE] = {0};
+// STATIC_SIZE files for functions to use as scratch space
+struct file *_staticfiles;
+_Static_assert(STATIC_SIZE * sizeof(struct file) <= PGSIZE, "_staticfiles must fit in a page");
 
 int32_t _fileread(struct file *file, void *buffer, uint32_t size);
 int32_t _filewrite(struct file *file, const void *buffer, uint32_t size);
@@ -302,7 +305,10 @@ int filefromentry(struct file *directory, const char *name, struct file *fileout
 }
 
 void fileinit(void) {
-	/* intentionally left empty */
+	if ((_staticfiles = (void *) kalloc()) == NULL) {
+		printf("error: unable to allocate memory for static files\n");
+		STOP();
+	}
 }
 
 bool fileopen(struct file *file, const char *pathname, int flags) {

@@ -36,16 +36,10 @@ enum fflags {
 	FEXISTS = BIT(4),		/* check if the file exists, but don't open it */
 };
 
-// TODO: flag in direntry: is file open already
-// if so, user shouldn't be able to edit/rename/delete
-// etc. that file
-
 // TODO: fileremove(struct file *parent, const char *pathname); <- search starts at parent, null = root
 // TODO: filerename?
 
 void fileinit(void);
-
-// TODO: definitions in kernel's file.c don't match... also I should probably write documentations
 
 bool fileresize(struct file *file, uint32_t size);
 bool fileopen(struct file *file, const char *pathname, int flags);

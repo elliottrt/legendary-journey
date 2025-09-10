@@ -6,6 +6,8 @@
 
 #define NULL ((void*)0)
 
+// standard sized integer types (stdint.h)
+
 typedef char int8_t;
 typedef unsigned char uint8_t;
 typedef short int16_t;
@@ -30,12 +32,35 @@ _Static_assert(sizeof(uint64_t) == 8, "uint64_t must be 8 bytes");
 
 _Static_assert(sizeof(uintptr_t) == sizeof(void *), "uintptr_t must the same size of a void *");
 
+// standard boolean definitions (stdbool.h)
+
 typedef unsigned int bool;
 #define true (1)
 #define false (0)
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
+
+// program current directory interface
+
+extern const char *getcwd(void);
+extern int setcwd(const char *path);
+
+// stdio access
+
+extern int printf(const char *format, ...);
+extern int putchar(int ch);
+extern int puts(const char *str);
+
+// timer interface
+
+extern uint32_t timer_read(void);
+
+extern void timer_wait_until(uint32_t time);
+
+extern void timer_wait(uint32_t ms);
+
+// file access interface
 
 enum fflags {
 	FTRUNC = 1 << 0, /* open file at start */
@@ -44,19 +69,6 @@ enum fflags {
 	FDIRECTORY = 1 << 3, /* open a dir, or create a dir if FCREATE set */
 };
 typedef void FILE;
-
-extern const char *getcwd(void);
-extern int setcwd(const char *path);
-
-extern int printf(const char *format, ...);
-extern int putchar(int ch);
-extern int puts(const char *str);
-
-extern uint32_t timer_read(void);
-
-extern void timer_wait_until(uint32_t time);
-
-extern void timer_wait(uint32_t ms);
 
 extern FILE *fopen(const char *path, int flags);
 
@@ -78,7 +90,10 @@ extern int fresize(FILE *fp, uint32_t size);
 
 extern uint32_t fsize(FILE *fp);
 
+// memory allocation interface
+
 extern void *malloc(size_t size);
+
 extern void free(void *ptr);
 
 #endif

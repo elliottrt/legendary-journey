@@ -108,6 +108,12 @@ int shell(void) {
 				cmd[--cmd_idx] = 0;
 				putc(ch);
 			}
+		} else if (ch == '\t') {
+			// we just insert a space here
+			// because tab is should be autocomplete
+			// and we don't have that
+			cmd[cmd_idx++] = ' ';
+			putc(' ');
 		} else {
 			cmd[cmd_idx++] = ch;
 			putc(ch);

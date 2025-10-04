@@ -79,7 +79,7 @@ $(OS): $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) $(USER_PROGS)
 
 # compilation of user programs
 USERFLAGS=-nostdlib -Wl,--emit-relocs -l$(STDLIB) -Lstd -isystem std
-$(ROOT)/%: user/%.c $(STDLIB_PATH) $(ROOT)
+$(ROOT)/%: user/%.c $(STDLIB_PATH)
 	$(CC) $(USERFLAGS) -o $@ $<
 
 # generate standard library stub

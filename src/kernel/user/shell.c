@@ -93,35 +93,46 @@ int shell(void) {
 
 	while (1) {
 		if (cmd_idx >= SHELL_MAX_CMD_LEN) {
+			printf("\nshell: error: command too long\n");
 			errno = ENOMEM;
 			return SHELL_FAIL;
 		}
 
 		char ch = kbd_getc_blocking();
 
-		if (ch == '\n') {
+		switch (ch) {
+		case '\n': {
 			// null terminate the command, replacing the new line
 			// and finished getting input
 			cmd[cmd_idx] = '\0';
 			putc(ch);
-			break;
-		} else if (ch == '\b') {
+			goto command_ready;
+		} break;
+		case '\b': {
 			if (cmd_idx > 0) {
 				cmd[--cmd_idx] = 0;
 				putc(ch);
 			}
-		} else if (ch == '\t') {
+		} break;
+		case '\t': {
 			// we just insert a space here
 			// because tab is should be autocomplete
 			// and we don't have that
 			cmd[cmd_idx++] = ' ';
 			putc(' ');
-		} else {
-			cmd[cmd_idx++] = ch;
-			putc(ch);
+		} break;
+		default: {
+			// otherwise just print it
+			// TODO: should use isprint instead
+			if (isascii(ch)) {
+				cmd[cmd_idx++] = ch;
+				putc(ch);
+			}
+		} break;
 		}
 	}
 
+command_ready:
 	// reset errno and execute command
 	errno = 0;
 	int result = shell_exec(cmd);

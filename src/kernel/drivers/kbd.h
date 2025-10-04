@@ -3,6 +3,8 @@
 
 #include "common/types.h"
 
+#define SPECIAL(K) (K | 0x80)
+
 #define KEY_NULL 0
 #define KEY_ESC 27
 #define KEY_BACKSPACE '\b'
@@ -16,10 +18,10 @@
 #define KEY_END 0x93
 #define KEY_PAGE_UP 0x94
 #define KEY_PAGE_DOWN 0x95
-#define KEY_LEFT 0x4B
-#define KEY_UP 0x48
-#define KEY_RIGHT 0x4D
-#define KEY_DOWN 0x50
+#define KEY_LEFT SPECIAL(0x4B)
+#define KEY_UP SPECIAL(0x48)
+#define KEY_RIGHT SPECIAL(0x4D)
+#define KEY_DOWN SPECIAL(0x50)
 
 #define KEY_F1 0x80
 #define KEY_F2 (KEY_F1 + 1)

@@ -57,6 +57,7 @@ void main(void) {
 
 	// TODO: write user programs
 	// TODO: port txed to this
+	// TODO: that shell feature where if a program didn't end with a new line it'll print a weird char and go to new line
 
 	// TODO: interrupts for kernel function calls instead of standard library dynamic linking. use some interrupt number and calling conventions to have a function like https://man7.org/linux/man-pages/man2/syscall.2.html
 

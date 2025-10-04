@@ -54,7 +54,7 @@ USERBASE=0x08048000
 # width of tabs in terminal
 TAB_WIDTH=4
 
-BOOT_ASFLAGS=-defsym S2LOC=8 -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=24
+BOOT_ASFLAGS=-defsym S2LOC=$(STAGE2_LOCATION) -defsym S2OFF=$(STAGE2_OFFSET) -defsym S2SIZ=$(STAGE2_SIZE)
 
 # See https://www.rapidtables.com/code/linux/gcc/gcc-o.html#optimization
 STAGE2_CFLAGS=-m32 -c -Wall -Wextra -Wpedantic -ffreestanding -nostdlib -Wno-pointer-arith
@@ -81,14 +81,11 @@ $(OS): $(ROOT) $(STAGE1BIN) $(STAGE2BIN) $(KERNEL) $(USER_PROGS)
 USERFLAGS=-nostdlib -Wl,--emit-relocs -l$(STDLIB) -Lstd -isystem std
 $(ROOT)/%: user/%.c $(STDLIB_PATH) $(ROOT)
 	$(CC) $(USERFLAGS) -o $@ $<
-# touch root so that the filesystem will be regenerated
-	touch $(ROOT)
 
 # generate standard library stub
-$(STDLIB_PATH): std/stdstub.c std/stdlib.h Makefile
+$(STDLIB_PATH): std/stdstub.c std/stdlib.h
 	$(CC) -c -fPIC -Wall -Wextra -Wpedantic -isystem std -o $<.o $< -Wno-builtin-declaration-mismatch
 	$(CC) -shared -r -o $@ $<.o
-	$(RM) $<.o
 
 $(STAGE1BIN): $(BIN) $(STAGE1SRC)
 	$(AS) --32 -o $(STAGE1BIN).o $(STAGE1SRC) $(BOOT_ASFLAGS)
@@ -132,6 +129,7 @@ clean:
 	$(RM) $(STAGE1BIN).o
 	$(RM) $(STAGE1BIN)
 	$(RM) $(STDLIB_PATH)
+	$(RM) std/stdstub.c.o
 
 $(ROOT):
 	mkdir -p $(ROOT)

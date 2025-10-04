@@ -84,10 +84,7 @@ uint32_t umax(uint32_t a, uint32_t b);
 /* Locates the first occurrence of c in str within n characters. */
 char *strnchr(const char *str, char c, uint32_t n);
 
-// returns _v with _n-th bit = _x
-#define BIT_SET(_v, _n, _x) __extension__({\
-        __typeof__(_v) __v = (_v);\
-        (__v ^ ((-(_x) ^ __v) & (1 << (_n))));\
-        })
+// returns V with N-th bit = X
+#define BIT_SET(V, N, X) (V ^ ((-(X) ^ V) & (1 << (N))))
 
 #endif

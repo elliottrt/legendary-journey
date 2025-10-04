@@ -56,8 +56,6 @@
 
 #define KEYBOARD_RELEASE 0x80
 
-#define KEYBOARD_BUFFER_SIZE 256
-
 #define KEY_PRESSED(s) (!((s) & KEYBOARD_RELEASE))
 #define KEY_RELEASED(s) (!!((s) & KEYBOARD_RELEASE))
 #define KEY_SCANCODE(s) ((s) & 0x7F)
@@ -69,7 +67,6 @@ struct keyboard {
     uint8_t chars[128];
 };
 
-extern uint8_t keyboard_us[2][128];
 extern struct keyboard keyboard;
 
 #define kbdkey(_s) (keyboard.keys[(_s)])

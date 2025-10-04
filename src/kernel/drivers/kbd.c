@@ -42,34 +42,38 @@ static void kbdhandler(struct registers *regs) {
     UNUSED(regs);
 
     uint16_t scancode = (uint16_t) inb(0x60);
+    uint8_t key_code = KEY_SCANCODE(scancode);
+    bool key_pressed = KEY_PRESSED(scancode);
 
-    if (KEY_SCANCODE(scancode) == KEY_LALT ||
-        KEY_SCANCODE(scancode) == KEY_RALT) {
-        keyboard.mods = BIT_SET(keyboard.mods, HIBIT(KEY_MOD_ALT), KEY_PRESSED(scancode));
-    } else if (
-        KEY_SCANCODE(scancode) == KEY_LCTRL ||
-        KEY_SCANCODE(scancode) == KEY_RCTRL) {
-        keyboard.mods = BIT_SET(keyboard.mods, HIBIT(KEY_MOD_CTRL), KEY_PRESSED(scancode));
-    } else if (
-        KEY_SCANCODE(scancode) == KEY_LSHIFT ||
-        KEY_SCANCODE(scancode) == KEY_RSHIFT) {
-        keyboard.mods = BIT_SET(keyboard.mods, HIBIT(KEY_MOD_SHIFT), KEY_PRESSED(scancode));
-    } else if (KEY_SCANCODE(scancode) == KEY_CAPS_LOCK) {
-        keyboard.mods = BIT_SET(keyboard.mods, HIBIT(KEY_MOD_CAPS_LOCK), KEY_PRESSED(scancode));
-    } else if (KEY_SCANCODE(scancode) == KEY_NUM_LOCK) {
-        keyboard.mods = BIT_SET(keyboard.mods, HIBIT(KEY_MOD_NUM_LOCK), KEY_PRESSED(scancode));
-    } else if (KEY_SCANCODE(scancode) == KEY_SCROLL_LOCK) {
-        keyboard.mods = BIT_SET(keyboard.mods, HIBIT(KEY_MOD_SCROLL_LOCK), KEY_PRESSED(scancode));
+    if (key_code == KEY_LALT || key_code == KEY_RALT) {
+        keyboard.mods = BIT_SET(keyboard.mods, HIBIT(KEY_MOD_ALT), key_pressed);
+
+    } else if (key_code == KEY_LCTRL || key_code == KEY_RCTRL) {
+        keyboard.mods = BIT_SET(keyboard.mods, HIBIT(KEY_MOD_CTRL), key_pressed);
+
+    } else if (key_code == KEY_LSHIFT || key_code == KEY_RSHIFT) {
+        keyboard.mods = BIT_SET(keyboard.mods, HIBIT(KEY_MOD_SHIFT), key_pressed);
+
+    } else if (key_code == KEY_CAPS_LOCK) {
+        keyboard.mods = BIT_SET(keyboard.mods, HIBIT(KEY_MOD_CAPS_LOCK), key_pressed);
+
+    } else if (key_code == KEY_NUM_LOCK) {
+        keyboard.mods = BIT_SET(keyboard.mods, HIBIT(KEY_MOD_NUM_LOCK), key_pressed);
+
+    } else if (key_code == KEY_SCROLL_LOCK) {
+        keyboard.mods = BIT_SET(keyboard.mods, HIBIT(KEY_MOD_SCROLL_LOCK), key_pressed);
     }
 
-    char keychar = getkeychar(scancode);
+    char key_char = getkeychar(scancode);
 
-    keyboard.keys[KEY_SCANCODE(scancode)] = KEY_PRESSED(scancode);
-    keyboard.chars[(int) keychar] = KEY_PRESSED(scancode);
+    // note: if key_code == key_char then it is special char
 
-    // TODO: putting in keychar means we lose information about the scancode itself. maybe switch to putting in scancode instead? it's only a 2byte, could easily make key_input_buf bigger.
-    if (KEY_PRESSED(scancode) && keychar != 0) {
-        ringbuf_put(&key_input_buf, &keychar, sizeof(keychar));
+    keyboard.keys[key_code] = key_pressed;
+    keyboard.chars[(int) key_char] = key_pressed;
+
+    // TODO: this loses information about the keyboard state when the key was pressed. note that the high bit is unused, could store something there - like 0 for ascii char, 1 for non-ascii
+    if (key_pressed && key_char != 0) {
+        ringbuf_put(&key_input_buf, &key_char, sizeof(key_char));
     }
 }
 
@@ -98,13 +102,10 @@ char kbd_getc(void) {
 char kbd_getc_blocking(void) {
     char ch = KEY_NULL;
 
-    while (ch == KEY_NULL) {
+    while ((ch = kbd_getc()) == KEY_NULL) {
         // halt until an interrupt, then try to get a key
         // which would be populated by a keyboard interrupt
-
         halt();
-
-        ch = kbd_getc();
     }
 
     return ch;

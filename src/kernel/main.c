@@ -47,6 +47,7 @@ void main(void) {
 	// TODO: allocate pages dynamically, so that each program gets only what it needs
 
 	// TODO: consider making user code relocatable with -fPIC for more address space control
+	// TODO: shouldn't it be simple to copy the kernel page table before adding user space, then set that table while running the user program? would allow swapping between user programs and having multiple loaded in memory at once.
 	
 	// TODO: floating point support, see https://wiki.osdev.org/FPU
 
@@ -57,12 +58,12 @@ void main(void) {
 	// TODO: write user programs
 	// TODO: port txed to this
 
-	rm_debug(rm_global_ctx);
+	// TODO: interrupts for kernel function calls instead of standard library dynamic linking. use some interrupt number and calling conventions to have a function like https://man7.org/linux/man-pages/man2/syscall.2.html
 
-	while (1) {
+	do {
+		//rm_debug(rm_global_ctx);
 		shell();
-		rm_debug(rm_global_ctx);
-	}
+	} while (1);
 
 	printf("initialization complete, halting.\n");
 	STOP();

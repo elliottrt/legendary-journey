@@ -31,7 +31,7 @@ uint8_t keyboard_us[2][128] = {
 struct keyboard keyboard = {0};
 struct ringbuf key_input_buf = {0};
 
-char getkeychar(uint16_t scancode)
+unsigned char getkeychar(uint16_t scancode)
 {
     uint32_t shift = KEY_MOD(keyboard.mods, KEY_MOD_SHIFT) ? 1 : 0;
     return KEY_SCANCODE(scancode) < 128 ? keyboard_us[shift][KEY_SCANCODE(scancode)] : 0;
@@ -64,15 +64,15 @@ static void kbdhandler(struct registers *regs) {
         keyboard.mods = BIT_SET(keyboard.mods, HIBIT(KEY_MOD_SCROLL_LOCK), key_pressed);
     }
 
-    char key_char = getkeychar(scancode);
-
-    // note: if key_code == key_char then it is special char
+    unsigned char key_char = getkeychar(scancode);
 
     keyboard.keys[key_code] = key_pressed;
     keyboard.chars[(int) key_char] = key_pressed;
 
-    // TODO: this loses information about the keyboard state when the key was pressed. note that the high bit is unused, could store something there - like 0 for ascii char, 1 for non-ascii
+    // note: if key_code == key_char then it is special char
+    // we use the high bit to indicate if it is ascii
     if (key_pressed && key_char != 0) {
+        if (key_code == key_char) key_char |= 0x80;
         ringbuf_put(&key_input_buf, &key_char, sizeof(key_char));
     }
 }

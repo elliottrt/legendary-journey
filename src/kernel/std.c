@@ -133,6 +133,10 @@ char *strnchr(const char *str, char c, uint32_t n) {
 	return NULL;
 }
 
+bool isascii(unsigned char ch) {
+	return (ch & 0x80) == 0;
+}
+
 bool isdigit(int ch) {
 	return ch >= '0' && ch <= '9';
 }
@@ -141,12 +145,12 @@ bool isxdigit(int ch) {
 	return (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F');
 }
 
-bool isascii(int ch) {
+bool isalpha(int ch) {
 	return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
 }
 
 bool isalnum(int ch) {
-	return isascii(ch) || isdigit(ch);
+	return isalpha(ch) || isdigit(ch);
 }
 
 bool islower(int ch) {

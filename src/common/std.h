@@ -63,9 +63,10 @@ int strncmp(const char *str1, const char *str2, uint32_t n);
 /* Copies up to n characters of str2 to str1. */
 char *strncpy(char *dst, const char *src, uint32_t n);
 
+bool isascii(unsigned char ch);
 bool isdigit(int ch);
 bool isxdigit(int ch);
-bool isascii(int ch);
+bool isalpha(int ch);
 bool isalnum(int ch);
 bool islower(int ch);
 bool isupper(int ch);

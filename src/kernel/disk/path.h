@@ -19,7 +19,7 @@ int path_concat(const char *a, const char *b, char *dest, size_t dest_size);
 int path_copy(const char *source, char *dest, size_t dest_size);
 
 // simplifies a path and places the result in dest
-// it may or may not be save to have path == dest
+// it may or may not be safe to have path == dest
 // returns:
 //		size of the path in dest including null terminator on success,
 //		<0 on failure (sets errno)

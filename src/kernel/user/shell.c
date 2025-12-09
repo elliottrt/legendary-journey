@@ -123,8 +123,7 @@ int shell(void) {
 		} break;
 		default: {
 			// otherwise just print it
-			// TODO: should use isprint instead
-			if (isascii(ch)) {
+			if (isprint(ch)) {
 				cmd[cmd_idx++] = ch;
 				putc(ch);
 			}

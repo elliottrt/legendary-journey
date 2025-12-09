@@ -170,6 +170,12 @@ bool isspace(int ch) {
 			ch == '\v';
 }
 
+bool isprint(int ch) {
+	// implemented according to the table here: https://cppreference.com/w/c/string/byte/isprint.html
+
+	return 32 <= ch && ch <= 126;
+}
+
 int32_t min(int32_t a, int32_t b) {
 	return a > b ? b : a;
 }

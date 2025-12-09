@@ -59,6 +59,7 @@ dkms.conf
 # Other
 .DS_Store
 .vscode
+.cache
 *.img
 *.sublime-workspace
 *.sublime-project
@@ -67,3 +68,4 @@ old
 mkfat
 root
 fatgen103.pages
+compile_commands.json

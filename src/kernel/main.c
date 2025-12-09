@@ -1,21 +1,17 @@
-#include "common/types.h"
 #include "common/mmu.h"
 #include "common/ata.h"
 #include "common/fat.h"
 #include "common/file.h"
 #include "common/x86.h"
-#include "common/elf.h"
-#include "common/std.h"
-#include "kernel/graphics/printf.h"
 #include "kernel/cpu/idt.h"
 #include "kernel/cpu/isr.h"
 #include "kernel/cpu/irq.h"
 #include "kernel/cpu/gdt.h"
 #include "kernel/drivers/timer.h"
 #include "kernel/drivers/kbd.h"
+#include "kernel/graphics/printf.h"
 #include "kernel/memory/virtmem.h"
 #include "kernel/memory/kalloc.h"
-#include "kernel/memory/malloc.h"
 #include "kernel/user/shell.h"
 
 void main(void) {
@@ -48,7 +44,7 @@ void main(void) {
 
 	// TODO: consider making user code relocatable with -fPIC for more address space control
 	// TODO: shouldn't it be simple to copy the kernel page table before adding user space, then set that table while running the user program? would allow swapping between user programs and having multiple loaded in memory at once.
-	
+
 	// TODO: floating point support, see https://wiki.osdev.org/FPU
 
 	// TODO: add more system functions - keyboard, stuff in std.h

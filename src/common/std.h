@@ -71,6 +71,7 @@ bool isalnum(int ch);
 bool islower(int ch);
 bool isupper(int ch);
 bool isspace(int ch);
+bool isprint(int ch);
 
 /* non-standard but useful */
 

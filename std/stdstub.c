@@ -55,7 +55,7 @@ int fclose(FILE *fp) {
 	UNUSED(fp);
 
 	return -1;
-} 
+}
 
 size_t fread(void *buffer, size_t size, size_t count, FILE *fp) {
 	UNUSED(buffer);
@@ -119,4 +119,57 @@ void *malloc(size_t size) {
 
 void free(void *ptr) {
 	UNUSED(ptr);
+}
+
+int memcmp(const void *buf1, const void *buf2, uint32_t n) {
+	UNUSED(buf1);
+	UNUSED(buf2);
+	UNUSED(n);
+
+	return 0;
+}
+
+void *memcpy(void *dst, const void *src, uint32_t n) {
+	UNUSED(dst);
+	UNUSED(src);
+	UNUSED(n);
+
+	return NULL;
+}
+
+void *memset(void *dst, uint8_t c, uint32_t n) {
+	UNUSED(dst);
+	UNUSED(c);
+	UNUSED(n);
+
+	return NULL;
+}
+
+void *memmove(void *dst, const void *src, uint32_t n) {
+	UNUSED(dst);
+	UNUSED(src);
+	UNUSED(n);
+
+	return NULL;
+}
+
+const char *strerror(int _errno) {
+	UNUSED(_errno);
+
+	return NULL;
+}
+
+// string.h functions
+
+uint32_t strlen(const char *str) {
+	UNUSED(str);
+
+	return 0;
+}
+
+int strcmp(const char *str1, const char *str2) {
+	UNUSED(str1);
+	UNUSED(str2);
+
+	return 0;
 }

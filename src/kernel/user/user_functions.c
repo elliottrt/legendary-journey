@@ -13,7 +13,7 @@ struct user_function_def {
 };
 
 static struct program_data *user_data;
-char temp_path[PATH_MAX];
+static char temp_path[PATH_MAX];
 
 // convenience macro for this. it may be used a lot
 #define LOAD_PATH(P) path_load(user_data->dir, P, temp_path, sizeof(temp_path))
@@ -78,7 +78,7 @@ static void *fopen(const char *path, int flags) {
 
 static int fclose(void *fp) {
 	return fileclose(fp) ? 0 : -1;
-} 
+}
 
 static size_t fread(void *buffer, size_t size, size_t count, void *fp) {
 	int read_result = fileread(fp, buffer, size * count);
@@ -128,8 +128,8 @@ static uint32_t fsize(void *fp) {
 	return filesize(fp);
 }
 
-// TODO: add more system functions
-// TODO: memset, memcpy, etc. (and other stdlib functions)
+// TODO: stat and/or fstat
+// TODO: order these for binary search
 #define SYS_FUNC_LIST \
 	X(getcwd) \
 	X(setcwd) \
@@ -150,7 +150,14 @@ static uint32_t fsize(void *fp) {
 	X(ftell) \
 	X(frewind) \
 	X(malloc) \
-	X(free)
+	X(free) \
+	X(memcmp) \
+	X(memcpy) \
+	X(memset) \
+	X(memmove) \
+	X(strerror) \
+	X(strlen) \
+	X(strcmp)
 
 struct user_function_def __user_functions[] = {
 #define X(N) {#N, (uintptr_t) N},

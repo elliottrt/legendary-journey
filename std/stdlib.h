@@ -20,6 +20,7 @@ typedef unsigned long long uint64_t;
 typedef int32_t ssize_t;
 typedef uint32_t size_t;
 typedef uint32_t uintptr_t;
+typedef int32_t ptrdiff_t;
 
 _Static_assert(sizeof(int8_t) == 1, "int8_t must be 1 byte");
 _Static_assert(sizeof(uint8_t) == 1, "uint8_t must be 1 byte");
@@ -40,6 +41,8 @@ typedef unsigned int bool;
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
+
+#define offsetof(st, m) ((size_t) &((st*)0)->m)
 
 // program current directory interface
 
@@ -95,5 +98,25 @@ extern uint32_t fsize(FILE *fp);
 extern void *malloc(size_t size);
 
 extern void free(void *ptr);
+
+// stdlib.h functions
+
+extern int memcmp(const void *buf1, const void *buf2, uint32_t n);
+
+/* Copies n bytes of src to dest. */
+extern void *memcpy(void *dst, const void *src, uint32_t n);
+
+/* Sets n bytes of dst to a value c. */
+extern void *memset(void *dst, uint8_t c, uint32_t n);
+
+extern void *memmove(void *dst, const void *src, uint32_t n);
+
+extern const char *strerror(int _errno);
+
+// string.h functions
+
+extern uint32_t strlen(const char *str);
+
+extern int strcmp(const char *str1, const char *str2);
 
 #endif
